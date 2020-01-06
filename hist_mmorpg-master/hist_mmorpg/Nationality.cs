@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-
+using System.Runtime.Serialization;
 namespace hist_mmorpg
 {
     /// <summary>
@@ -47,5 +47,6 @@ namespace hist_mmorpg
         public Nationality()
         {
         }
+			
     }
 }

@@ -5,6 +5,8 @@ using System.Text;
 using QuickGraph;
 using RiakClient;
 using RiakClient.Models;
+using ProtoBuf;
+using Newtonsoft.Json.Serialization;
 namespace hist_mmorpg
 {
     public static class DatabaseWrite
@@ -15,8 +17,11 @@ namespace hist_mmorpg
         /// Writes all game objects to the database
         /// </summary>
         /// <param name="gameID">ID of game (used for database bucket)</param>
-        public static void DatabaseWriteAll(string gameID, Client c = null)
+        public static void DatabaseWriteAll(string gameID)
         {
+			// ========= test
+			DatabaseWrite.DatabaseWrite_Test(gameID);
+
             // ========= write CLOCK
             DatabaseWrite.DatabaseWrite_Clock(gameID, Globals_Game.clock);
 
@@ -26,6 +31,8 @@ namespace hist_mmorpg
             DatabaseWrite.DatabaseWrite_Dictionary(gameID, "battleProbabilities", Globals_Server.battleProbabilities);
             DatabaseWrite.DatabaseWrite_Dictionary(gameID, "gameTypes", Globals_Server.gameTypes);
             DatabaseWrite.DatabaseWrite_Dictionary(gameID, "ownershipChallenges", Globals_Game.ownershipChallenges);
+
+			Console.WriteLine ("Finished writing dictionaries");
             // convert jEntryPriorities prior to writing
             Dictionary<string, byte> jEntryPriorities_serialised = DatabaseWrite.JentryPriorities_serialise(Globals_Game.jEntryPriorities);
             DatabaseWrite.DatabaseWrite_Dictionary(gameID, "jEntryPriorities", jEntryPriorities_serialised);
@@ -34,6 +41,7 @@ namespace hist_mmorpg
             DatabaseWrite.DatabaseWrite_Journal(gameID, "serverScheduledEvents", Globals_Game.scheduledEvents);
             DatabaseWrite.DatabaseWrite_Journal(gameID, "serverPastEvents", Globals_Game.pastEvents);
 
+			Console.WriteLine ("Finished writing journals");
             // ========= write GLOBALS_GAME/CLIENT/SERVER CHARACTER VARIABLES
 
             // Globals_Game.sysAdmin
@@ -71,7 +79,7 @@ namespace hist_mmorpg
             {
                 DatabaseWrite.DatabaseWrite_String(gameID, "heraldTwo", Globals_Game.heraldTwo.charID);
             }
-
+			Console.WriteLine ("Finished writing important people");
             // ========= write GLOBALS_GAME/CLIENT/SERVER newID VARIABLES
             // newCharID
             DatabaseWrite.DatabaseWrite_newID(gameID, "newCharID", Globals_Game.newCharID);
@@ -95,7 +103,7 @@ namespace hist_mmorpg
             DatabaseWrite.DatabaseWrite_newID(gameID, "newGameID", Globals_Server.newGameID);
             // newOwnChallengeID
             DatabaseWrite.DatabaseWrite_newID(gameID, "newOwnChallengeID", Globals_Game.newOwnChallengeID);
-
+			Console.WriteLine ("Finished writing new IDs");
             // ========= write GLOBALS_GAME/CLIENT/SERVER BOOL VARIABLES
             // Globals_Game.loadFromDatabase
             DatabaseWrite.DatabaseWrite_Bool(gameID, "loadFromDatabase", Globals_Game.loadFromDatabase);
@@ -105,7 +113,7 @@ namespace hist_mmorpg
             DatabaseWrite.DatabaseWrite_Bool(gameID, "writeToDatabase", Globals_Game.writeToDatabase);
             // Globals_Game.statureCapInForce
             DatabaseWrite.DatabaseWrite_Bool(gameID, "statureCapInForce", Globals_Game.statureCapInForce);
-
+			Console.WriteLine ("Finished writing bools");
             // ========= write TRAITS
             // clear existing key list
             if (Globals_Game.traitKeys.Count > 0)
@@ -132,7 +140,7 @@ namespace hist_mmorpg
             {
                 Globals_Game.baseLangKeys.Clear();
             }
-
+			Console.WriteLine ("Finished writing traits");
             // write each object in baseLanguageMasterList, whilst also repopulating key list
             foreach (KeyValuePair<string, BaseLanguage> pair in Globals_Game.baseLanguageMasterList)
             {
@@ -172,7 +180,7 @@ namespace hist_mmorpg
             {
                 Globals_Game.nationalityKeys.Clear();
             }
-
+			Console.WriteLine ("Finished writing languages");
             // write each object in nationalityMasterList, whilst also repopulating key list
             foreach (KeyValuePair<string, Nationality> pair in Globals_Game.nationalityMasterList)
             {
@@ -185,7 +193,7 @@ namespace hist_mmorpg
 
             // write key list to database
             DatabaseWrite.DatabaseWrite_KeyList(gameID, "nationalityKeys", Globals_Game.nationalityKeys);
-
+			Console.WriteLine ("Finished writing nationalities");
             // ========= write RANKS
             // clear existing key list
             if (Globals_Game.rankKeys.Count > 0)
@@ -205,7 +213,7 @@ namespace hist_mmorpg
 
             // write key list to database
             DatabaseWrite.DatabaseWrite_KeyList(gameID, "rankKeys", Globals_Game.rankKeys);
-
+			Console.WriteLine ("Finished writing ranks");
             // ========= write POSITIONS
             // clear existing key list
             if (Globals_Game.positionKeys.Count > 0)
@@ -225,7 +233,7 @@ namespace hist_mmorpg
 
             // write key list to database
             DatabaseWrite.DatabaseWrite_KeyList(gameID, "positionKeys", Globals_Game.positionKeys);
-
+			Console.WriteLine ("Finished writing positions");
             // ========= write NPCs
             // clear existing key list
             if (Globals_Game.npcKeys.Count > 0)
@@ -245,7 +253,7 @@ namespace hist_mmorpg
 
             // write key list to database
             DatabaseWrite.DatabaseWrite_KeyList(gameID, "npcKeys", Globals_Game.npcKeys);
-
+			Console.WriteLine ("Finished writing npcs");
             // ========= write PCs
             // clear existing key list
             if (Globals_Game.pcKeys.Count > 0)
@@ -265,7 +273,7 @@ namespace hist_mmorpg
 
             // write key list to database
             DatabaseWrite.DatabaseWrite_KeyList(gameID, "pcKeys", Globals_Game.pcKeys);
-
+			Console.WriteLine ("Finished writing PCs");
             // ========= write KINGDOMS
             // clear existing key list
             if (Globals_Game.kingKeys.Count > 0)
@@ -285,7 +293,7 @@ namespace hist_mmorpg
 
             // write key list to database
             DatabaseWrite.DatabaseWrite_KeyList(gameID, "kingKeys", Globals_Game.kingKeys);
-
+			Console.WriteLine ("Finished writing kingdoms");
             // ========= write PROVINCES
             // clear existing key list
             if (Globals_Game.provKeys.Count > 0)
@@ -305,7 +313,7 @@ namespace hist_mmorpg
 
             // write key list to database
             DatabaseWrite.DatabaseWrite_KeyList(gameID, "provKeys", Globals_Game.provKeys);
-
+			Console.WriteLine ("Finished writing provinces");
             // ========= write TERRAINS
             // clear existing key list
             if (Globals_Game.terrKeys.Count > 0)
@@ -325,7 +333,7 @@ namespace hist_mmorpg
 
             // write key list to database
             DatabaseWrite.DatabaseWrite_KeyList(gameID, "terrKeys", Globals_Game.terrKeys);
-
+			Console.WriteLine ("Finished writing terrains");
             // ========= write VICTORYDATA OBJECTS
             // clear existing key list
             if (Globals_Game.victoryDataKeys.Count > 0)
@@ -345,7 +353,7 @@ namespace hist_mmorpg
 
             // write key list to database
             DatabaseWrite.DatabaseWrite_KeyList(gameID, "victoryDataKeys", Globals_Game.victoryDataKeys);
-
+			Console.WriteLine ("Finished writing victory data");
             // ========= write FIEFS
             // clear existing key list
             if (Globals_Game.fiefKeys.Count > 0)
@@ -365,7 +373,7 @@ namespace hist_mmorpg
 
             // write key list to database
             DatabaseWrite.DatabaseWrite_KeyList(gameID, "fiefKeys", Globals_Game.fiefKeys);
-
+			Console.WriteLine ("Finished writing fiefs");
             // ========= write ARMIES
             // clear existing key list
             if (Globals_Game.armyKeys.Count > 0)
@@ -385,7 +393,7 @@ namespace hist_mmorpg
 
             // write key list to database
             DatabaseWrite.DatabaseWrite_KeyList(gameID, "armyKeys", Globals_Game.armyKeys);
-
+			Console.WriteLine ("Finished writing armies");
             // ========= write SIEGES
             // clear existing key list
             if (Globals_Game.siegeKeys.Count > 0)
@@ -405,48 +413,87 @@ namespace hist_mmorpg
 
             // write key list to database
             DatabaseWrite.DatabaseWrite_KeyList(gameID, "siegeKeys", Globals_Game.siegeKeys);
+			Console.WriteLine ("Finished writing sieges");
+            // write clients
+            foreach (KeyValuePair<string, Client> pair in Globals_Server.Clients)
+            {
+                bool success = DatabaseWrite_Client(gameID, pair.Value);
+                if (success)
+                {
+                    Globals_Server.client_keys.Add(pair.Key);
+                }
+            }
 
+            DatabaseWrite_KeyList(gameID, "clientKeys", Globals_Server.client_keys);
+			Console.WriteLine ("Finished writing clients");
             // ========= write MAP (edges collection)
             DatabaseWrite.DatabaseWrite_MapEdges(gameID, map: Globals_Game.gameMap);
 
-            foreach (KeyValuePair<string, Client> pair in Globals_Server.clients)
+            foreach (KeyValuePair<string, Client> pair in Globals_Server.Clients)
             {
-                DatabaseWrite.DatabaseWrite_Journal(gameID, pair.Value.user+"_journal", pair.Value.myPastEvents);
+                DatabaseWrite.DatabaseWrite_Journal(gameID, pair.Value.username+"_journal", pair.Value.myPastEvents);
                 // Globals_Client.myPlayerCharacter
                 if (pair.Value.myPlayerCharacter != null)
                 {
-                    DatabaseWrite.DatabaseWrite_String(gameID, pair.Value.user+"_playerChar", pair.Value.myPlayerCharacter.charID);
+                    DatabaseWrite.DatabaseWrite_String(gameID, pair.Value.username+"_playerChar", pair.Value.myPlayerCharacter.charID);
                 }
 
                 // Globals_Client.showMessages
-                DatabaseWrite.DatabaseWrite_Bool(gameID, pair.Value.user+"_showMessages", pair.Value.showMessages);
+                DatabaseWrite.DatabaseWrite_Bool(gameID, pair.Value.username+"_showMessages", pair.Value.showMessages);
                 // Globals_Client.showDebugMessages
-                DatabaseWrite.DatabaseWrite_Bool(gameID, pair.Value.user+"_showDebugMessages", pair.Value.showDebugMessages);
+                DatabaseWrite.DatabaseWrite_Bool(gameID, pair.Value.username+"_showDebugMessages", pair.Value.showDebugMessages);
             }
+			Console.WriteLine ("Finished writing map");
 
         }
+		public class TestObject {
+			public string a{ get; set;}
+			public string b{ get; set; }
 
-        /// <summary>
-        /// Writes a key list (List object) to the database
-        /// </summary>
-        /// <returns>bool indicating success</returns>
-        /// <param name="gameID">Game (bucket) to write to</param>
-        /// <param name="k">key of key list</param>
-        /// <param name="kl">key list to write</param>
-        public static bool DatabaseWrite_KeyList<T>(string gameID, string k, List<T> kl)
-        {
+			public TestObject(string a, string b) {
+				this.a=a;
+				this.b=b;
+			}
+		}
+		public static bool DatabaseWrite_Test(string gameID) {
+			if (!Globals_Server.rClient.Ping ().IsSuccess) {
+				Console.WriteLine ("NOW PING FAILS");
+			}
+			Console.WriteLine ("Writing test to : " + gameID);
+			var o = new RiakObject (gameID, "test",new TestObject("hello","world"));
+			RiakResult result = Globals_Server.rClient.Put (o);
+			if (!result.IsSuccess) {
+				Console.WriteLine (result.ErrorMessage);
+				Environment.Exit (1);
+			} else {
+				Console.WriteLine ("apparent success: " + result.ResultCode.ToString ());
+			}
+			return true;
 
-            RiakClient.Models.RiakObject rList = new RiakObject(gameID, k, kl);
-            var putListResult = Globals_Server.rClient.Put(rList);
 
-            if (!putListResult.IsSuccess)
-            {
-                Globals_Server.logError("Write failed: Key list " + rList.Key + " to bucket " + rList.Bucket);
-            }
+		}
 
-            return putListResult.IsSuccess;
-        }
+		/// <summary>
+		/// Writes a key list (List object) to the database
+		/// </summary>
+		/// <returns>bool indicating success</returns>
+		/// <param name="gameID">Game (bucket) to write to</param>
+		/// <par	am name="k">key of key list</param>
+		/// <param name="kl">key list to write</param>
+		public static bool DatabaseWrite_KeyList<T>(string gameID, string k, List<T> kl)
+		{
+			Console.WriteLine ("Writing key list " + k + " to bucket " + gameID);
+			RiakObject rList = new RiakObject(gameID, k);
+			var putListResult = Globals_Server.rClient.Put(rList);
 
+			if (!putListResult.IsSuccess)
+			{
+				Globals_Server.logError("Write failed: Key list " + rList.Key + " to bucket " + rList.Bucket);
+			}
+
+			return putListResult.IsSuccess;
+		}
+		
         /// <summary>
         /// Writes a GameClock object to the database
         /// </summary>
@@ -457,11 +504,11 @@ namespace hist_mmorpg
         {
             var rClock = new RiakObject(gameID, "gameClock", gc);
             var putClockResult = Globals_Server.rClient.Put(rClock);
-
             if (!putClockResult.IsSuccess)
             {
-                Globals_Server.logError("Write failed: GameClock to bucket " + rClock.Bucket);
+				Globals_Server.logError("Write failed: GameClock to bucket " + rClock.Bucket + ": " +putClockResult.ErrorMessage);
             }
+
 
             return putClockResult.IsSuccess;
         }
@@ -526,13 +573,14 @@ namespace hist_mmorpg
             return putJournalResult.IsSuccess;
         }
 
-        public static bool DatabaseWrite_User(string gameID, string key, string pc)
+        public static bool DatabaseWrite_Client(string gameID, Client client)
         {
-            var rString = new RiakObject(gameID, key, pc);
+            Client_Serialized clientSer = new Client_Serialized(client);
+            var rString = new RiakObject(gameID, client.username, clientSer);
             var putStringResult = Globals_Server.rClient.Put(rString);
             if (!putStringResult.IsSuccess)
             {
-                Globals_Server.logError("Write failed: String variable " + key + " to bucket " + rString.Bucket);
+                Globals_Server.logError("Write failed: String variable " + clientSer.user + " to bucket " + rString.Bucket);
             }
 
             return putStringResult.IsSuccess;

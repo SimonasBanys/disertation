@@ -275,7 +275,7 @@ namespace hist_mmorpg
         }
 
     }
-
+    // Journal entries could be much better represented, as there are a fixed number of types and so the description can be stored on the client side
     /// <summary>
     /// Class containing details of a Journal entry
     /// </summary>
@@ -285,10 +285,6 @@ namespace hist_mmorpg
         /// Holds JournalEntry ID
         /// </summary>
         public uint jEntryID { get; set; }
-        /// <summary>
-        /// Holds PlayerCharacter who owns entry
-        /// </summary>
-        public PlayerCharacter playerChar { get; set; }
         /// <summary>
         /// Holds event year
         /// </summary>
@@ -310,14 +306,17 @@ namespace hist_mmorpg
         /// </summary>
         public String location { get; set; }
         /// <summary>
-        /// Holds description of event
-        /// </summary>
-        public String description { get; set; }
-        /// <summary>
         /// Indicates whether entry has been viewed
         /// </summary>
         public bool viewed { get; set; }
-
+        /// <summary>
+        /// Indicates whether entry has been replied to (e.g. for Proposals)
+        /// </summary>
+        public bool replied { get; set; }
+        /// <summary>
+        /// Holds ProtoMessage containing details of event. More flexible than strings.
+        /// </summary>
+        public ProtoMessage entryDetails { get; set; }
         /// <summary>
         /// Constructor for JournalEntry
         /// </summary>
@@ -327,9 +326,91 @@ namespace hist_mmorpg
         /// <param name="pers">String[] holding main objects (IDs) associated with event and thier role</param>
         /// <param name="typ">String holding type of event</param>
         /// <param name="loc">String holding location of event (fiefID)</param>
-        /// <param name="descr">String holding description of event</param>
-        public JournalEntry(uint id, uint yr, byte seas, String[] pers, String typ, String loc = null, String descr = null)
+        /// <param name="messageIdentifier">Enum representing description of event</param>
+        public JournalEntry(uint id, uint yr, byte seas, String[] pers, String typ, ProtoMessage details, String loc = null)
         {
+            // VALIDATION
+
+            // SEAS
+            // check between 0-3
+            if (!Utility_Methods.ValidateSeason(seas))
+            {
+                throw new InvalidDataException("JournalEntry season must be a byte between 0-3");
+            }
+            this.entryDetails = details;
+            // PERS
+            if (pers.Length > 0)
+            {
+                for (int i = 0; i < pers.Length; i++)
+                {
+                    // split using'|'
+                    string[] persSplit = pers[i].Split('|');
+                    if (persSplit.Length > 1)
+                    {
+                        // character ID: trim and ensure 1st is uppercase
+                        if (!persSplit[0].Contains("all"))
+                        {
+                            persSplit[0] = Utility_Methods.FirstCharToUpper(persSplit[0].Trim());
+                        }
+                        // trim role
+                        persSplit[1] = persSplit[1].Trim();
+                        // put back together
+                        pers[i] = persSplit[0] + "|" + persSplit[1];
+                    }
+
+                    if (!Utility_Methods.ValidateJentryPersonae(pers[i]))
+                    {
+                        throw new InvalidDataException("Each JournalEntry personae must consist of 2 sections of letters, divided by '|', the 1st of which must be a valid character ID");
+                    }
+                }
+            }
+
+            // TYPE
+            if (String.IsNullOrWhiteSpace(typ))
+            {
+                throw new InvalidDataException("JournalEntry type must be a string > 0 characters in length");
+            }
+
+            // LOC
+            if (!String.IsNullOrWhiteSpace(loc))
+            {
+                // trim and ensure is uppercase
+                loc = loc.Trim().ToUpper();
+
+                if (!Utility_Methods.ValidatePlaceID(loc))
+                {
+                    throw new InvalidDataException("JournalEntry location id must be 5 characters long, start with a letter, and end in at least 2 numbers");
+                }
+            }
+
+            this.jEntryID = id;
+            this.year = yr;
+            this.season = seas;
+            this.personae = pers;
+            this.type = typ;
+            if (!String.IsNullOrWhiteSpace(loc))
+            {
+                this.location = loc;
+            }
+
+            this.viewed = false;
+        }
+
+        /// <summary>
+        /// Create a new JournalEntry- used for more complex messages that would be more appropriate to be reconstructed on the client side
+        /// </summary>
+        /// <param name="m"></param>
+        /// <param name="id"></param>
+        /// <param name="yr"></param>
+        /// <param name="seas"></param>
+        /// <param name="pers"></param>
+        /// <param name="typ"></param>
+        /// <param name="loc"></param>
+        /// <param name="desc"></param>
+        public JournalEntry(ProtoMessage m,uint id, uint yr, byte seas, String[] pers, String typ,  String loc = null, string desc = null )
+        {
+
+            this.entryDetails = m;
             // VALIDATION
 
             // SEAS
@@ -393,13 +474,9 @@ namespace hist_mmorpg
             {
                 this.location = loc;
             }
-            if (!String.IsNullOrWhiteSpace(descr))
-            {
-                this.description = descr;
-            }
             this.viewed = false;
-        }
 
+        }
         /// <summary>
         /// Returns a string containing the details of a JournalEntry
         /// </summary>
@@ -469,12 +546,6 @@ namespace hist_mmorpg
                 entryText += "Location: " + thisPlace.name + " (" + this.location + ")\r\n\r\n";
             }
 
-            // description
-            if (!String.IsNullOrWhiteSpace(this.description))
-            {
-                entryText += "Description:\r\n" + this.description + "\r\n\r\n";
-            }
-
             return entryText;
         }
 
@@ -518,45 +589,51 @@ namespace hist_mmorpg
 
             return priority;
         }
-
         /// <summary>
-        /// Check to see if the JournalEntry is of interest to the player
+        /// Returms an array of all PlayerCharacters who may be interested in event
+        /// (Refactored for efficiency)
         /// </summary>
-        /// <returns>bool indicating whether the JournalEntry is of interest</returns>
-        public bool CheckEventForInterest(PlayerCharacter playerChar)
+        /// <returns></returns>
+        public PlayerCharacter[] CheckEventForInterest()
         {
-            bool isOfInterest = false;
-
+            List<PlayerCharacter> interestedParties = new List<PlayerCharacter>();
             for (int i = 0; i < this.personae.Length; i++)
             {
                 // get personae ID
                 string thisPersonae = this.personae[i];
                 string[] thisPersonaeSplit = thisPersonae.Split('|');
-
-                if (thisPersonaeSplit[0].Equals(playerChar.charID)
-                    || (thisPersonaeSplit[0].Equals("all")))
+                // Detect if personae is a player character
+                if (Globals_Game.pcMasterList.ContainsKey(thisPersonaeSplit[0]))
                 {
-                    isOfInterest = true;
-                    break;
+                    // Do not add same person twice
+                    if (!interestedParties.Contains(Globals_Game.pcMasterList[thisPersonaeSplit[0]]))
+                    {
+                        interestedParties.Add(Globals_Game.pcMasterList[thisPersonaeSplit[0]]);
+                    }
+                }
+                // Return all player characters if event effects all
+                else if (thisPersonaeSplit[0].Equals("all"))
+                {
+                    interestedParties = Globals_Game.pcMasterList.Values.ToList();
+                    return Globals_Game.pcMasterList.Values.ToArray();
                 }
             }
-
-            return isOfInterest;
+            return interestedParties.ToArray();
         }
 
         /// <summary>
-        /// Check to see if the JournalEntry requires that the proposal reply controls be enabled
+        /// Check to see if the JournalEntry is a valid proposal
         /// </summary>
         /// <returns>bool indicating whether the controls be enabled</returns>
-        public bool CheckForProposalControlsEnabled(PlayerCharacter playerChar)
+        public bool CheckForProposal(PlayerCharacter playerChar)
         {
-            bool controlsEnabled = false;
+            bool isValidProposal = false;
 
             // check if is a marriage proposal
             if (this.type.Equals("proposalMade"))
             {
                 // check if have already replied
-                if (!this.description.Contains("**"))
+                if (!this.replied)
                 {
                     // check if player made or received proposal
                     for (int i = 0; i < this.personae.Length; i++)
@@ -567,7 +644,7 @@ namespace hist_mmorpg
                         {
                             if (thisPersonaeSplit[1].Equals("headOfFamilyBride"))
                             {
-                                controlsEnabled = true;
+                                isValidProposal = true;
                                 break;
                             }
                         }
@@ -575,9 +652,10 @@ namespace hist_mmorpg
                 }
             }
 
-            return controlsEnabled;
+            return isValidProposal;
         }
 
+        // TODO I suspect there may be issues with this if any of the characters die. Test.
         /// <summary>
         /// Allows a character to reply to a marriage proposal
         /// </summary>
@@ -586,7 +664,7 @@ namespace hist_mmorpg
         public bool ReplyToProposal(bool proposalAccepted)
         {
             bool success = true;
-
+            string[] replyFields = new string[4];
             // get interested parties
             PlayerCharacter headOfFamilyBride = null;
             PlayerCharacter headOfFamilyGroom = null;
@@ -655,40 +733,42 @@ namespace hist_mmorpg
             }
 
             // description
-            string description = "On this day of Our Lord the proposed marriage between ";
-            description += groom.firstName + " " + groom.familyName + " and ";
-            description += bride.firstName + " " + bride.familyName + " has been ";
+            replyFields[0] = groom.firstName + " " + groom.familyName;
+            replyFields[1] = bride.firstName + " " + bride.familyName;
+
             if (proposalAccepted)
             {
-                description += "ACCEPTED";
+                replyFields[2] = "ACCEPTED";
             }
             else
             {
-                description += "REJECTED";
+                replyFields[2] = "REJECTED";
             }
-            description += " by " + headOfFamilyBride.firstName + " " + headOfFamilyBride.familyName + ".";
-            if (proposalAccepted)
-            {
-                description += " Let the bells ring out in celebration!";
-            }
+            replyFields[3] = headOfFamilyBride.firstName + " " + headOfFamilyBride.familyName;
 
+            ProtoMessage proposalReply = new ProtoMessage();
+            proposalReply.MessageFields = replyFields;
+            proposalReply.ResponseType = DisplayMessages.JournalProposalReply;
             // create and send a proposal reply (journal entry)
-            JournalEntry myProposalReply = new JournalEntry(replyID, year, season, myReplyPersonae, type, descr: description);
+            JournalEntry myProposalReply = new JournalEntry(replyID, year, season, myReplyPersonae, type, proposalReply, null);
             success = Globals_Game.AddPastEvent(myProposalReply);
 
             if (success)
             {
+                string[] newFields = new string[this.entryDetails.MessageFields.Length + 2];
+                Array.Copy(this.entryDetails.MessageFields, newFields, this.entryDetails.MessageFields.Length);
+                newFields[newFields.Length - 1] = Globals_Game.clock.seasons[season] + ", " + year;
+                this.entryDetails.MessageFields = newFields;
+                this.replied = true;
                 // mark proposal as replied
-                this.description += "\r\n\r\n** You ";
                 if (proposalAccepted)
                 {
-                    this.description += "ACCEPTED ";
+                    this.entryDetails.MessageFields[this.entryDetails.MessageFields.Length - 2] = "ACCEPTED";
                 }
                 else
                 {
-                    this.description += "REJECTED ";
+                    this.entryDetails.MessageFields[this.entryDetails.MessageFields.Length - 2] = "REJECTED";
                 }
-                this.description += "this proposal in " + Globals_Game.clock.seasons[season] + ", " + year;
 
                 // if accepted, process engagement
                 if (proposalAccepted)
@@ -772,7 +852,7 @@ namespace hist_mmorpg
             string type = "marriage";
 
             // create and add a marriage entry to the scheduledEvents journal
-            JournalEntry marriageEntry = new JournalEntry(replyID, year, season, marriagePersonae, type);
+            JournalEntry marriageEntry = new JournalEntry(replyID, year, season, marriagePersonae, type,null);
             success = Globals_Game.AddScheduledEvent(marriageEntry);
 
             // show bride and groom as engaged
@@ -848,14 +928,17 @@ namespace hist_mmorpg
             // type
             string type = "marriage";
 
+            string[] fields = new string[3];
+            fields[0] = groom.firstName + " " + groom.familyName;
+            fields[1] = bride.firstName + " " + groom.familyName;
+            fields[2] = bride.familyName;
             // description
-            string description = "On this day of Our Lord there took place a marriage between ";
-            description += groom.firstName + " " + groom.familyName + " and ";
-            description += bride.firstName + " " + groom.familyName + " (nee " + bride.familyName + ").";
-            description += " Let the bells ring out in celebration!";
 
+            ProtoMessage marriage = new ProtoMessage();
+            marriage.MessageFields=fields;
+            marriage.ResponseType=DisplayMessages.JournalMarriage;
             // create and add a marriage entry to the pastEvents journal
-            JournalEntry marriageEntry = new JournalEntry(marriageID, year, season, marriagePersonae, type, descr: description);
+            JournalEntry marriageEntry = new JournalEntry(marriageID, year, season, marriagePersonae, type,marriage,null);
             success = Globals_Game.AddPastEvent(marriageEntry);
 
             if (success)
@@ -895,6 +978,130 @@ namespace hist_mmorpg
             }
 
             return success;
+        }
+
+        /// <summary>
+        /// Respond to ransom demands
+        /// </summary>
+        /// <param name="paid">Whether or not ransom is to be paid</param>
+        /// <returns>Bool indicating success</returns>
+        public bool RansomResponse(bool paid, out ProtoMessage error)
+        {
+            error = null;
+            // Check if type is ransom
+            if (this.type.Equals("ransom"))
+            {
+                // Check if already replied
+                if (replied)
+                {
+                    // Already replied
+                    error = new ProtoMessage();
+                    error.ResponseType = DisplayMessages.RansomRepliedAlready;
+                    return false;
+                }
+                Character captive=null;
+                PlayerCharacter captor;
+                PlayerCharacter captiveHeadOfHousehold;
+                // Confirm captive is still alive and being held
+                foreach(string persona in personae) {
+                    string[] split = persona.Split(new char[]{'|'});
+                    if (split[1].Equals("Captive"))
+                    {
+                        captive = Globals_Game.getCharFromID(split[0]);
+                    }
+                }
+                if (captive == null)
+                {
+                    // Captive does not exist- error
+                    error = new ProtoMessage();
+                    error.ResponseType = DisplayMessages.ErrorGenericCharacterUnidentified;
+                    Globals_Server.logError("Captive unidentified in JEntry: " + this.jEntryID);
+                    return false;
+                }
+                else if (!captive.isAlive)
+                {
+                    // Captive is dead
+                    error = new ProtoMessage();
+                    error.ResponseType = DisplayMessages.RansomCaptiveDead;
+                    return false;
+                }
+                captor = Globals_Game.getCharFromID(captive.captorID) as PlayerCharacter;
+                if (captor == null)
+                {
+                    // Captive does not have a captor
+                    error = new ProtoMessage();
+                    error.ResponseType = DisplayMessages.NotCaptive;
+                    return false;
+                }
+                captiveHeadOfHousehold = captive.GetPlayerCharacter();
+                if (captiveHeadOfHousehold == null)
+                {
+                    // Captive is not an employee, family member or player character
+                    Globals_Server.logError("Captive has no PlayerCharacter: " + captive.charID);
+                    error = new ProtoMessage();
+                    error.ResponseType = DisplayMessages.ErrorGenericCharacterUnidentified;
+                    return false;
+                }
+                if(paid) {
+                    // Get ransom amount
+                    uint ransom = 0;
+                    if (!UInt32.TryParse(entryDetails.MessageFields[1], out ransom))
+                    {
+                        // Error parsing to int
+                        Globals_Server.logError("Could not parse ransom to uint in JEntry: " + jEntryID);
+                        error = new ProtoMessage();
+                        error.ResponseType = DisplayMessages.ErrorGenericMessageInvalid;
+                        return false;
+                    }
+                    else
+                    {
+                        // Check captive's head of household has the funds to release
+                        if (captiveHeadOfHousehold.GetHomeFief().GetAvailableTreasury(false) >= ransom)
+                        {
+                            if (!captiveHeadOfHousehold.GetHomeFief().TreasuryTransfer(captor.GetHomeFief(), (Int32)ransom, out error))
+                            {
+                                return false;
+                            }
+                            else
+                            {
+                                // Release captive
+                                captor.ReleaseCaptive(captive);
+                                replied = true;
+                                Globals_Game.UpdatePlayer(captor.playerID, DisplayMessages.RansomPaid, new string[] { captive.firstName + " " + captive.familyName });
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            // Insufficient funds
+                            error = new ProtoMessage();
+                            error.ResponseType = DisplayMessages.ErrorGenericInsufficientFunds;
+                            return false;
+                        }
+                    }
+                }
+                // If not paying ransom, inform captor
+                else
+                {
+                    // Create journal entry and update captor
+                    string[] newPersonae = new string[]{captive.charID+"|Captive",captor.charID+"|Captor",captiveHeadOfHousehold.charID+"|HeadOfCaptiveFamily"};
+                    ProtoMessage deniedMessage = new ProtoMessage();
+                    deniedMessage.ResponseType = DisplayMessages.RansonDenied;
+                    deniedMessage.MessageFields=new string[]{captive.firstName+ " "+captive.familyName,captor.firstName+" " +captor.familyName, captiveHeadOfHousehold.firstName+ " " +captiveHeadOfHousehold.familyName};
+                    Globals_Game.UpdatePlayer(captor.playerID, deniedMessage);
+                    JournalEntry ransomDenied= new JournalEntry(Globals_Game.GetNextJournalEntryID(),Globals_Game.clock.currentYear,Globals_Game.clock.currentSeason,newPersonae,"ransomDenied",deniedMessage);
+                    Globals_Game.AddPastEvent(ransomDenied);
+                    replied = true;
+                    return true;
+                }
+            }
+            else
+            {
+                // Not a ransom
+                error = new ProtoMessage();
+                error.ResponseType = DisplayMessages.EntryNotRansom;
+                return false;
+            }
         }
 
     }

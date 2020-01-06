@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using System.Windows.Forms;
 using QuickGraph;
+using System.Diagnostics;
 //TODO Modify to use CSV file
 namespace hist_mmorpg
 {
@@ -59,6 +57,19 @@ namespace hist_mmorpg
             Globals_Server.battleProbabilities.Add("battle", bChance);
             double[] pChance = new double[] { 10, 20, 30, 40, 50, 60 };
             Globals_Server.battleProbabilities.Add("pillage", pChance);
+
+            // populate Globals_Server.troopTypeAdvantages
+            Globals_Server.troopTypeAdvantages.Add(new Tuple<uint, uint>(0, 5), 3);
+            Globals_Server.troopTypeAdvantages.Add(new Tuple<uint, uint>(0, 6), 3);
+            Globals_Server.troopTypeAdvantages.Add(new Tuple<uint, uint>(1, 5), 3);
+            Globals_Server.troopTypeAdvantages.Add(new Tuple<uint, uint>(1, 6), 3);
+            Globals_Server.troopTypeAdvantages.Add(new Tuple<uint, uint>(2, 3), 3);
+            Globals_Server.troopTypeAdvantages.Add(new Tuple<uint, uint>(2, 4), 3);
+            Globals_Server.troopTypeAdvantages.Add(new Tuple<uint, uint>(3, 5), 3);
+            Globals_Server.troopTypeAdvantages.Add(new Tuple<uint, uint>(3, 6), 3);
+            Globals_Server.troopTypeAdvantages.Add(new Tuple<uint, uint>(4, 0), 3);
+            Globals_Server.troopTypeAdvantages.Add(new Tuple<uint, uint>(4, 1), 3);
+            Globals_Server.troopTypeAdvantages.Add(new Tuple<uint, uint>(5, 2), 3);
 
             // populate Globals_Game.jEntryPriorities
             // marriage
@@ -395,12 +406,8 @@ namespace hist_mmorpg
                         else
                         {
                             inputFileError = true;
-                            //TODO error handling
-                            /*
-                            if (Globals_Client.showDebugMessages)
-                            {
-                                MessageBox.Show("Unable to create Trait object: " + lineParts[1]);
-                            }*/
+
+                            Globals_Server.logError("Unable to create Trait object: " + lineParts[1]);
                         }
                     }
 
@@ -618,7 +625,8 @@ namespace hist_mmorpg
                     JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                     if (importErrorEntry != null)
                     {
-                        importErrorEntry.description = "Line " + lineNum + ": " + ide.Message;
+                        Trace.WriteLine("Line " + lineNum + ": " + ide.Message);
+                        importErrorEntry.entryDetails.Message= "Line " + lineNum + ": " + ide.Message;
                         Globals_Game.AddPastEvent(importErrorEntry);
                     }
                     //TODO error handling
@@ -1328,7 +1336,7 @@ namespace hist_mmorpg
                     finCurr, finPrev, Convert.ToDouble(fiefData[42]), Convert.ToDouble(fiefData[43]),
                     Convert.ToChar(fiefData[44]), fiefData[45], fiefData[46], characters, barredChars,
                     barredNats, Convert.ToDouble(fiefData[47]), Convert.ToInt32(fiefData[48]), armies,
-                    Convert.ToBoolean(fiefData[49]), new Dictionary<string, string[]>(), Convert.ToBoolean(fiefData[50]),
+                    Convert.ToBoolean(fiefData[49]), new Dictionary<string, ProtoDetachment>(), Convert.ToBoolean(fiefData[50]),
                     Convert.ToByte(fiefData[51]), tiHo: tiHo, own: own, ancOwn: ancOwn, bail: bail, sge: sge);
             }
             // catch exception that could result from incorrect conversion of string to numeric 
@@ -1338,7 +1346,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + fe.Message;
+                    importErrorEntry.entryDetails.Message= "Line " + lineNum + ": " + fe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 //TODO error handling
@@ -1355,7 +1363,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + aoore.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + aoore.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 //TODO error handling
@@ -1372,7 +1380,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + ide.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + ide.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + ide.Message);
@@ -1384,7 +1392,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + oe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + oe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + oe.Message);
@@ -1438,7 +1446,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + fe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + fe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + fe.Message);
@@ -1450,7 +1458,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + aoore.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + aoore.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + aoore.Message);
@@ -1462,7 +1470,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + ide.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + ide.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + ide.Message);
@@ -1474,7 +1482,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + oe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + oe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + oe.Message);
@@ -1524,7 +1532,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + fe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + fe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + fe.Message);
@@ -1536,7 +1544,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + aoore.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + aoore.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + aoore.Message);
@@ -1548,7 +1556,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + ide.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + ide.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + ide.Message);
@@ -1560,7 +1568,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + oe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + oe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + oe.Message);
@@ -1798,7 +1806,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + fe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + fe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + fe.Message);
@@ -1810,7 +1818,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + aoore.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + aoore.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + aoore.Message);
@@ -1822,7 +1830,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + ide.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + ide.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + ide.Message);
@@ -1834,7 +1842,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + oe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + oe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + oe.Message);
@@ -1979,7 +1987,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + fe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + fe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + fe.Message);
@@ -1991,7 +1999,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + aoore.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + aoore.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + aoore.Message);
@@ -2003,7 +2011,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + ide.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + ide.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + ide.Message);
@@ -2015,7 +2023,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + oe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + oe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + oe.Message);
@@ -2038,7 +2046,7 @@ namespace hist_mmorpg
             {
                 // create empty lists for variable length collections
                 // (effects)
-                Dictionary<string, double> effects = new Dictionary<string, double>();
+                Dictionary<Globals_Game.Stats, double> effects = new Dictionary<Globals_Game.Stats, double>();
 
                 // check to see if any data present for variable length collections
                 if (traitData.Length > 3)
@@ -2069,7 +2077,15 @@ namespace hist_mmorpg
                         {
                             for (int i = effStart + 1; i < effEnd; i = i + 2)
                             {
-                                effects.Add(traitData[i], Convert.ToDouble(traitData[i + 1]));
+                                Globals_Game.Stats stat;
+                                if (Enum.TryParse<Globals_Game.Stats>(traitData[i], true, out stat))
+                                {
+                                    effects.Add(stat, Convert.ToDouble(traitData[i + 1]));
+                                }
+                                else
+                                {
+                                    Globals_Server.logError("Trait name unrecognised: " + traitData[i]);
+                                }
                             }
                         }
                     }
@@ -2088,7 +2104,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + fe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + fe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + fe.Message);
@@ -2100,7 +2116,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + aoore.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + aoore.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + aoore.Message);
@@ -2112,7 +2128,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + ide.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + ide.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + ide.Message);
@@ -2124,7 +2140,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + oe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + oe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + oe.Message);
@@ -2183,7 +2199,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + fe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + fe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + fe.Message);
@@ -2195,7 +2211,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + aoore.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + aoore.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + aoore.Message);
@@ -2207,7 +2223,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + ide.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + ide.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + ide.Message);
@@ -2219,7 +2235,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + oe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + oe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + oe.Message);
@@ -2255,7 +2271,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + fe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + fe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + fe.Message);
@@ -2267,7 +2283,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + aoore.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + aoore.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + aoore.Message);
@@ -2279,7 +2295,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + ide.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + ide.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + ide.Message);
@@ -2291,7 +2307,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + oe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + oe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + oe.Message);
@@ -2327,7 +2343,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + fe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + fe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + fe.Message);
@@ -2339,7 +2355,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + aoore.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + aoore.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + aoore.Message);
@@ -2351,7 +2367,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + ide.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + ide.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + ide.Message);
@@ -2363,7 +2379,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + oe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + oe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + oe.Message);
@@ -2399,7 +2415,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + fe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + fe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + fe.Message);
@@ -2411,7 +2427,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + aoore.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + aoore.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + aoore.Message);
@@ -2423,7 +2439,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + ide.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + ide.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + ide.Message);
@@ -2435,7 +2451,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + oe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + oe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + oe.Message);
@@ -2510,7 +2526,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + fe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + fe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + fe.Message);
@@ -2522,7 +2538,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + aoore.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + aoore.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + aoore.Message);
@@ -2534,7 +2550,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + ide.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + ide.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + ide.Message);
@@ -2546,7 +2562,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + oe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + oe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + oe.Message);
@@ -2621,7 +2637,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + fe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + fe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + fe.Message);
@@ -2633,7 +2649,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + aoore.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + aoore.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + aoore.Message);
@@ -2645,7 +2661,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + ide.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + ide.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + ide.Message);
@@ -2657,7 +2673,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + oe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + oe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + oe.Message);
@@ -2733,7 +2749,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + fe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + fe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + fe.Message);
@@ -2745,7 +2761,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + aoore.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + aoore.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + aoore.Message);
@@ -2757,7 +2773,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + ide.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + ide.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + ide.Message);
@@ -2769,7 +2785,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + oe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + oe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + oe.Message);
@@ -2805,7 +2821,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + fe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + fe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + fe.Message);
@@ -2817,7 +2833,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + aoore.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + aoore.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + aoore.Message);
@@ -2829,7 +2845,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + ide.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + ide.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + ide.Message);
@@ -2841,7 +2857,7 @@ namespace hist_mmorpg
                 JournalEntry importErrorEntry = Utility_Methods.CreateSysAdminJentry();
                 if (importErrorEntry != null)
                 {
-                    importErrorEntry.description = "Line " + lineNum + ": " + oe.Message;
+                    importErrorEntry.entryDetails.Message = "Line " + lineNum + ": " + oe.Message;
                     Globals_Game.AddPastEvent(importErrorEntry);
                 }
                 Globals_Server.logError("Line " + lineNum + ": " + oe.Message);

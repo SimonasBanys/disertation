@@ -8,6 +8,47 @@ using System.IO;
 namespace hist_mmorpg
 {
     /// <summary>
+    /// enum representing all valid actions in the gane
+    /// </summary>
+    public enum Actions
+    {
+        Update = 0, LogIn, UseChar, GetPlayers, ViewChar, ViewArmy, GetNPCList, HireNPC, FireNPC, TravelTo, MoveCharacter, ViewFief, ViewMyFiefs, AppointBailiff, RemoveBailiff, BarCharacters, BarNationalities, UnbarCharacters, UnbarNationalities, GrantFiefTitle, AdjustExpenditure, TransferFunds,
+        TransferFundsToPlayer, EnterExitKeep, ListCharsInMeetingPlace, TakeThisRoute, Camp, AddRemoveEntourage, ProposeMarriage, AcceptRejectProposal, RejectProposal, AppointHeir, TryForChild, RecruitTroops, MaintainArmy, AppointLeader, DropOffTroops,
+        ListDetachments, ListArmies, PickUpTroops, PillageFief, BesiegeFief, AdjustCombatValues, ExamineArmiesInFief, Attack, ViewJournalEntries, ViewJournalEntry, SiegeRoundReduction, SiegeRoundStorm, SiegeRoundNegotiate, SiegeList, ViewSiege, EndSiege, DisbandArmy, SpyFief, SpyCharacter, SpyArmy, Kidnap, ViewCaptives, ViewCaptive, RansomCaptive, ReleaseCaptive, ExecuteCaptive, RespondRansom, SeasonUpdate
+    }
+    /// <summary>
+    /// enum representing all strings that may be sent to a client,
+    ///  mapped to string from enum on client side
+    /// </summary>
+    public enum DisplayMessages
+    {
+        /// <summary>
+        /// Default message; used only when nothing to display
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// Indicates action was successful
+        /// </summary>
+        Success, Error, Armies, Fiefs, Characters, JournalEntries, ArmyMaintainInsufficientFunds, ArmyMaintainCost, ArmyMaintainConfirm, ArmyMaintainedAlready, JournalProposal, JournalProposalReply, JournalMarriage, ChallengeKingSuccess, ChallengeKingFail, ChallengeProvinceSuccess, ChallengeProvinceFail, newEvent,
+        SwitchPlayerErrorNoID, SwitchPlayerErrorIDInvalid, ChallengeErrorExists, SiegeNegotiateSuccess, SiegeNegotiateFail, SiegeStormSuccess, SiegeStormFail, SiegeEndDefault, SiegeErrorDays, SiegeRaised, SiegeReduction, ArmyMove,
+        ArmyAttritionDebug, ArmyDetachmentArrayWrongLength, ArmyDetachmentNotEnoughTroops, ArmyDetachmentNotSelected, ArmyRetreat, ArmyDisband, ErrorGenericNotEnoughDays, ErrorGenericPoorOrganisation, ErrorGenericUnidentifiedRecipient, ArmyNoLeader, ArmyBesieged,
+        ArmyAttackSelf, ArmyPickupsDenied, ArmyPickupsNotEnoughDays, BattleBringSuccess, BattleBringFail, BattleResults, ErrorGenericNotInSameFief, BirthAlreadyPregnant, BirthSiegeSeparation, BirthNotMarried, CharacterMarriageDeath, CharacterDeath, CharacterDeathNoHeir, CharacterEnterArmy,
+        CharacterAlreadyArmy, CharacterNationalityBarred, CharacterBarred, CharacterRoyalGiftPlayer, CharacterRoyalGiftSelf, CharacterNotMale, CharacterNotOfAge, CharacterLeaderLocation, CharacterLeadingArmy,
+        /// <summary>
+        /// Character does not have enough days to make this journey, so their destination has been added to a Go-To list
+        /// </summary>
+        CharacterDaysJourney, CharacterSpousePregnant, CharacterSpouseNotPregnant, CharacterSpouseNeverPregnant,
+        CharacterBirthOK, CharacterBirthChildDead, CharacterBirthMumDead, CharacterBirthAllDead, RankTitleTransfer, CharacterCombatInjury, CharacterProposalMan, CharacterProposalUnderage, CharacterProposalEngaged, CharacterProposalMarried, CharacterProposalFamily, CharacterProposalIncest, CharacterProposalAlready, CharacterRemovedFromEntourage, CharacterCamp,
+        CharacterCampAttrition, CharacterBailiffDuty,
+        /// <summary>
+        /// Character must end siege before moving
+        /// </summary>
+        CharacterMoveEndSiege, MoveCancelled, CharacterInvalidMovement, ErrorGenericFiefUnidentified, CharacterHireNotEmployable, CharacterFireNotEmployee, CharacterOfferLow, CharacterOfferHigh, CharacterOfferOk, CharacterOfferAlmost, CharacterOfferHaggle, CharacterBarredKeep, CharacterRecruitOwn, CharacterRecruitAlready, CharacterLoyaltyLanguage, ErrorGenericInsufficientFunds, CharacterRecruitSiege, CharacterRecruitRebellion, RecruitCancelled,
+        CharacterTransferTitle, CharacterTitleOwner, CharacterTitleHighest, CharacterTitleKing, CharacterTitleAncestral, CharacterHeir, PillageInitiateSiege, PillageRetreat, PillageDays, PillageOwnFief, PillageUnderSiege, PillageSiegeAlready, PillageAlready, PillageArmyDefeat, PillageSiegeRebellion, FiefExpenditureAdjustment, FiefExpenditureAdjusted, FiefStatus, FiefOwnershipHome,
+        FiefOwnershipNewHome, FiefOwnershipNoFiefs, FiefChangeOwnership, FiefQuellRebellionFail, FiefEjectCharacter, FiefNoCaptives, ProvinceAlreadyOwn, KingdomAlreadyKing, KingdomOwnershipChallenge, ProvinceOwnershipChallenge, ErrorGenericCharacterUnidentified, ErrorGenericUnauthorised, ErrorGenericMessageInvalid, ErrorGenericTooFarFromFief, FiefNoBailiff, FiefCouldNotBar, FiefCouldNotUnbar,
+        ErrorGenericBarOwnNationality, ErrorGenericPositiveInteger, GenericReceivedFunds, ErrorGenericNoHomeFief, CharacterRecruitInsufficientFunds, CharacterRecruitOk, SiegeNotBesieger, JournalEntryUnrecognised, JournalEntryNotProposal, ErrorGenericArmyUnidentified, ErrorGenericSiegeUnidentified, ErrorSpyDead, ErrorSpyCaptive, ErrorSpyOwn, SpyChance, SpySuccess, SpyFail, SpySuccessDetected, SpyFailDetected, SpyFailDead, SpyCancelled, EnemySpySuccess, EnemySpyFail, EnemySpyKilled, CharacterHeldCaptive, RansomReceived, RansomPaid, RansonDenied, RansomRepliedAlready, RansomCaptiveDead, RansomAlready, NotCaptive, EntryNotRansom, KidnapOwnCharacter, KidnapDead, KidnapNoPlayer, KidnapSuccess, KidnapSuccessDetected, KidnapFailDetected, KidnapFailDead, KidnapFail, EnemyKidnapSuccess, EnemyKidnapSuccessDetected, EnemyKidnapFail, EnemyKidnapKilled, CharacterExecuted, CharacterReleased, LogInSuccess, LogInFail, YouDied, YouDiedNoHeir, CharacterIsDead, Timeout
+    }
+    /// <summary>
     /// Class storing any required game-wide static variables and related methods
     /// </summary>
     public static class Globals_Game
@@ -15,7 +56,7 @@ namespace hist_mmorpg
         /// <summary>
         /// Dictionary mapping users to player characters
         /// </summary>
-        public static Dictionary<string, PlayerCharacter> userChars = new Dictionary<string, PlayerCharacter>();
+        public static Dictionary<string, PlayerCharacter> ownedPlayerCharacters = new Dictionary<string, PlayerCharacter>();
         /// <summary>
         /// Holds current challenges for ownership of provinces or kingdoms
         /// </summary>
@@ -240,6 +281,58 @@ namespace hist_mmorpg
         /// 1 = individual position game
         /// 2 = team historical game
         /// </summary>
+        
+        /// <summary>
+        /// Enum representing character stats, which affect the success of certain actions and are affected by traits
+        /// </summary>
+        public enum Stats : byte
+        {
+            /// <summary>
+            /// Affects how effecive character is in leading battle
+            /// </summary>
+            BATTLE,
+            /// <summary>
+            /// Affects character's effectiveness during a siege
+            /// </summary>
+            SIEGE,
+            /// <summary>
+            /// Affects price at which NPCs can be hired at
+            /// </summary>
+            NPCHIRE,
+            /// <summary>
+            /// Affects how many expenses will be paid to family
+            /// </summary>
+            FAMEXPENSE,
+            /// <summary>
+            /// Affects fief expenses
+            /// </summary>
+            FIEFEXPENSE,
+            /// <summary>
+            /// Affects fief loyalty
+            /// </summary>
+            FIEFLOY,
+            /// <summary>
+            /// Affects character's likelihood of dying
+            /// </summary>
+            DEATH,
+            /// <summary>
+            /// Affects how many days certain actions will take
+            /// </summary>
+            TIME,
+            /// <summary>
+            /// Affects how likely a character is to produce offspring
+            /// </summary>
+            VIRILITY,
+            /// <summary>
+            /// Affects how likely a character is to notice and prevent acts of subterfuge
+            /// </summary>
+            PERCEPTION,
+            /// <summary>
+            /// Affects how likely a character is to succeed in committing subterfuge
+            /// </summary>
+            STEALTH
+        }
+
         public static uint gameType = 0;
         /// <summary>
         /// Holds duration (number of turns) for the current game
@@ -265,16 +358,20 @@ namespace hist_mmorpg
         /// Holds bool indicating whether or not a cap on characters' stature modifier is in force
         /// </summary>
         public static bool statureCapInForce = true;
-
+        /// <summary>
+        /// Holds the current Game
+        /// </summary>
+        public static Game game;
         /// <summary>
         /// Gets the game's end date (year)
         /// </summary>
         /// <returns>uint containing end year</returns>
+
         public static uint GetGameEndDate()
         {
             return Globals_Game.startYear + Globals_Game.duration;
         }
-        
+
         /// <summary>
         /// Gets the current scores for all players
         /// </summary>
@@ -312,7 +409,7 @@ namespace hist_mmorpg
 
             foreach (KeyValuePair<string, Fief> fiefEntry in Globals_Game.fiefMasterList)
             {
-                totMoney += fiefEntry.Value.treasury;
+                totMoney += fiefEntry.Value.Treasury;
             }
 
             return totMoney;
@@ -414,7 +511,30 @@ namespace hist_mmorpg
 
             return newID;
         }
-
+        /// <summary>
+        /// Returns relevant character from ID (PlayerCharacter or NonPlayerCharacter)
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public static Character getCharFromID(String id)
+        {
+            if (id == null)
+            {
+                return null;
+            }
+            Character c = null;
+            PlayerCharacter pcTemp = null;
+            NonPlayerCharacter npcTemp = null;
+            if (Globals_Game.pcMasterList.TryGetValue(id, out pcTemp))
+            {
+                c = pcTemp as Character;
+            }
+            else if (Globals_Game.npcMasterList.TryGetValue(id, out npcTemp))
+            {
+                c = npcTemp as Character;
+            }
+            return c;
+        }
         /// <summary>
         /// Adds a new JournalEntry to the scheduledEvents Journal
         /// </summary>
@@ -431,7 +551,7 @@ namespace hist_mmorpg
         }
 
         /// <summary>
-        /// Adds a new JournalEntry to the pastEvents Journal
+        /// Adds a new JournalEntry to the pastEvents Journal, and to the Journals of interested players
         /// </summary>
         /// <returns>bool indicating success</returns>
         /// <param name="min">The JournalEntry to be added</param>
@@ -442,7 +562,23 @@ namespace hist_mmorpg
             success = Globals_Game.pastEvents.AddNewEntry(jEvent);
             if (success)
             {
-                Globals_Game.NotifyObservers("newEvent|" + jEvent.jEntryID);
+                PlayerCharacter[] interestedPlayers = jEvent.CheckEventForInterest();
+                foreach (PlayerCharacter pc in interestedPlayers)
+                {
+                    // If PlayerCharacter is active (assigned to a client)
+                    if (pc.playerID!=null && Globals_Server.Clients.ContainsKey(pc.playerID))
+                    {
+                        // call observer's update method to perform the required actions
+                        // based on the string passed
+                        // Ensure not adding same entry twice in the event that the player has more than one interest in event
+                        if (!Globals_Server.Clients[pc.playerID].myPastEvents.entries.ContainsValue(jEvent))
+                        {
+                            Globals_Server.Clients[pc.playerID].myPastEvents.AddNewEntry(jEvent);
+                        }
+                    }
+                }
+                Globals_Game.NotifyObservers(DisplayMessages.newEvent,interestedPlayers);
+
             }
 
             return success;
@@ -486,7 +622,7 @@ namespace hist_mmorpg
         /// </summary>
         /// <returns>bool indicating success</returns>
         /// <param name="challenge">OwnershipChallenge to be added</param>
-        public static bool AddOwnershipChallenge(OwnershipChallenge challenge)
+        public static bool AddOwnershipChallenge(OwnershipChallenge challenge,out ProtoMessage error)
         {
             bool success = true;
             string toDisplay = "";
@@ -494,19 +630,26 @@ namespace hist_mmorpg
             if (Globals_Game.CheckForExistingChallenge(challenge.placeID))
             {
                 success = false;
+                error = new ProtoMessage();
+                error.ResponseType = DisplayMessages.ChallengeErrorExists;
+                error.MessageFields = new String[] { challenge.GetPlace().name };
+                //LEGACY
+                /*
                 PlayerCharacter player = challenge.GetChallenger();
                 if (player != null)
                 {
+                    
                     toDisplay = "There is already a challenge for the ownership of " + challenge.GetPlace().name + ". Only one challenge is permissable at a time.";
-                    UpdatePlayer(player.playerID, toDisplay);
+                    UpdatePlayer(player.playerID, DisplayMessages.ChallengeErrorExists, new String[] {challenge.GetPlace().name});
                 }
+                 */
             }
 
             else
             {
                 Globals_Game.ownershipChallenges.Add(challenge.id, challenge);
+                error = null;
             }
-
             return success;
         }
 
@@ -604,7 +747,8 @@ namespace hist_mmorpg
                         // work out success threshold
                         successThreshold = totalParts / 2.0;
                     }
-
+                    String[] fields = null;
+                    DisplayMessages ResponseType = DisplayMessages.None ;
                     // check to see if ownership condition has been met
                     // ownership condition MET
                     if (challengerTally > successThreshold)
@@ -618,6 +762,8 @@ namespace hist_mmorpg
                             // province
                             if (challenge.Value.placeType.Equals("province"))
                             {
+                                fields = new String[4];
+                                ResponseType = DisplayMessages.ChallengeProvinceSuccess;
                                 // process success
                                 (contestedPlace as Province).TransferOwnership(challenger);
                                 createJournalEntry = true;
@@ -632,14 +778,18 @@ namespace hist_mmorpg
                                 entryType = "ownershipChallenge_success";
 
                                 // journal entry description
-                                description = "On this day of Our Lord a challenge for the ownership of " + contestedPlace.name + " (" + contestedPlace.id + ")";
-                                description += " was SUCCESSFUL.  " + challenger.firstName + " " + challenger.familyName + " succeeds ";
-                                description += currentOwner.firstName + " " + currentOwner.familyName + " as owner.";
+                                fields[0] = contestedPlace.name;
+                                fields[1] = contestedPlace.id;
+                                fields[2] = challenger.firstName+ " " + challenger.familyName;
+                                fields[3] = currentOwner.firstName + " " + currentOwner.familyName;
+
                             }
 
                             // kingdom
                             else if (challenge.Value.placeType.Equals("kingdom"))
                             {
+                                fields = new string[4];
+                                ResponseType = DisplayMessages.ChallengeKingSuccess;
                                 // process success
                                 (contestedPlace as Kingdom).TransferOwnership(challenger);
                                 createJournalEntry = true;
@@ -654,9 +804,10 @@ namespace hist_mmorpg
                                 entryType = "depose_success";
 
                                 // journal entry description
-                                description = "On this day of Our Lord a challenge for the crown of " + contestedPlace.name + " (" + contestedPlace.id + ")";
-                                description += " was SUCCESSFUL.  His highness " + challenger.firstName + " " + challenger.familyName + " succeeds ";
-                                description += currentOwner.firstName + " " + currentOwner.familyName + " as King of " + contestedPlace.name + ".  Long may he reign.";
+                                fields[0] = contestedPlace.name;
+                                fields[1] = contestedPlace.id;
+                                fields[2] = challenger.firstName + " " + challenger.familyName;
+                                fields[3] = currentOwner.firstName + " " + currentOwner.familyName;
                             }
 
                             // mark challenge for removal
@@ -676,6 +827,8 @@ namespace hist_mmorpg
                         // province
                         if (challenge.Value.placeType.Equals("province"))
                         {
+                            fields = new string[4];
+                            ResponseType = DisplayMessages.ChallengeProvinceFail;
                             createJournalEntry = true;
 
                             // journal entry personae
@@ -687,13 +840,16 @@ namespace hist_mmorpg
                             entryType = "ownershipChallenge_failure";
 
                             // journal entry description
-                            description = "On this day of Our Lord a challenge for the ownership of " + contestedPlace.name + " (" + contestedPlace.id + ")";
-                            description += " was UNSUCCESSFUL.  " + challenger.firstName + " " + challenger.familyName + " was unable to rest ownership from ";
-                            description += currentOwner.firstName + " " + currentOwner.familyName + ".";
+                            fields[0] = contestedPlace.name;
+                            fields[1] = contestedPlace.id;
+                            fields[2] = challenger.firstName + " " + challenger.familyName;
+                            fields[3] = currentOwner.firstName + " " + currentOwner.familyName;
                         }
 
                         else if (challenge.Value.placeType.Equals("kingdom"))
                         {
+                            fields = new string[4];
+                            ResponseType = DisplayMessages.ChallengeKingFail;
                             createJournalEntry = true;
 
                             // journal entry personae
@@ -706,9 +862,10 @@ namespace hist_mmorpg
                             entryType = "depose_failure";
 
                             // journal entry description
-                            description = "On this day of Our Lord a challenge for the crown of " + contestedPlace.name + " (" + contestedPlace.id + ")";
-                            description += " was UNSUCCESSFUL.  The pretender " + challenger.firstName + " " + challenger.familyName + " was unable to press his claim and ";
-                            description += "His Highness " + currentOwner.firstName + " " + currentOwner.familyName + " remains King of " + contestedPlace.name + "; long may he reign.";
+                            fields[0] = contestedPlace.name;
+                            fields[1] = contestedPlace.id;
+                            fields[2] = challenger.firstName + " " + challenger.familyName;
+                            fields[3] = currentOwner.firstName + " " + currentOwner.familyName;
                         }
                     }
 
@@ -718,7 +875,10 @@ namespace hist_mmorpg
                         // entry ID
                         uint entryID = Globals_Game.GetNextJournalEntryID();
 
-                        JournalEntry myEntry = new JournalEntry(entryID, year, season, entryPersonae, entryType, descr: description, loc: entryLoc);
+                        ProtoMessage processChallenge = new ProtoMessage();
+                        processChallenge.ResponseType = ResponseType;
+                        processChallenge.MessageFields = fields;
+                        JournalEntry myEntry = new JournalEntry(entryID, year, season, entryPersonae, entryType, processChallenge, loc: entryLoc );
                         Globals_Game.AddPastEvent(myEntry);
                     }
                 }
@@ -1082,27 +1242,60 @@ namespace hist_mmorpg
             return forRemoval;
 
         }
+        
         /// <summary>
         /// Sends an update to a particular user
         /// </summary>
         /// <param name="player"></param>
         /// <param name="message"></param>
-        public static void UpdatePlayer(string player, string message)
+        public static void UpdatePlayer(string player, DisplayMessages message, string[] fields = null, string type = null)
         {
-            if(string.IsNullOrWhiteSpace(player)||(string.IsNullOrWhiteSpace(message))) {
+            if(string.IsNullOrWhiteSpace(player)||(message == null)) {
                 return;
             }
-            // if a user is currently signed in send the message direct to client
-            if (Globals_Server.clients.ContainsKey(player))
+            if (string.IsNullOrWhiteSpace(type))
             {
-                Globals_Server.clients[player].Update(message);
+                // if a user is currently signed in send the message direct to client
+                if (Globals_Server.Clients.ContainsKey(player))
+                {
+                    Globals_Server.Clients[player].Update(message, fields);
+                }
+                // if user is away store message in database to view when user next logs in
+                else
+                {
+                    //TODO user message log
+                }
             }
-            // if user is away store message in database to view when user next logs in
-            else
+            // Detect whether to send debug message
+            else if (type.Equals("DEBUG"))
             {
-                //TODO user message log
+                if (Globals_Server.Clients.ContainsKey(player))
+                {
+                    if (Globals_Server.Clients[player].showDebugMessages)
+                    {
+                        Globals_Server.Clients[player].Update(message, fields);
+                    }
+                }
+
             }
         }
+        /// <summary>
+        /// Send an update to a particular user (for use when update is particularly complex)
+        /// </summary>
+        /// <param name="player">Player to send message to</param>
+        /// <param name="message">Message to be sent</param>
+        public static void UpdatePlayer(string player, ProtoMessage message)
+        {
+            if (string.IsNullOrWhiteSpace(player)) return;
+            Client c = null;
+            Globals_Server.Clients.TryGetValue(player, out c);
+            if (c != null)
+            {
+                c.Update(message.ResponseType, message.MessageFields);
+
+            }
+        }
+
         /// <summary>
         /// Adds an observer (Client object) to the list of registered observers
         /// </summary>
@@ -1111,6 +1304,12 @@ namespace hist_mmorpg
         {
             // add new observer to list
             registeredObservers.Add(obs);
+        }
+
+        public static void RegisterObserver(global::ProtoMessage.Client obs)
+        {
+            Client foraddClient = new Client(obs.username, obs.myPlayerCharacter.playerID);
+            registeredObservers.Add(foraddClient);
         }
 
         /// <summary>
@@ -1128,16 +1327,41 @@ namespace hist_mmorpg
         /// Notifies all observers (Form1 objects) in the list of registered observers
         /// that a change has occured to the data
         /// </summary>
-        /// <param name="info">String indicating the nature of the change</param>
-        public static void NotifyObservers(String info)
+        /// <param name="info">Enum representing the type of notification</param>
+        public static void NotifyObservers(DisplayMessages ResponseType, PlayerCharacter[] interestedPlayers)
         {
-            // iterate through list of observers
-            foreach (Client obs in registeredObservers)
+
+            foreach (PlayerCharacter pc in interestedPlayers)
             {
-                // call observer's update method to perform the required actions
-                // based on the string passed
-                obs.Update(info);
+                Client c=null;
+                // Check PlayerCharacter is being played
+                if (!string.IsNullOrWhiteSpace(pc.playerID))
+                {
+                    Globals_Server.Clients.TryGetValue(pc.playerID, out c);
+                }
+                // If PlayerCharacter belongs to a client and client iscurrently playing
+                if (c!=null && registeredObservers.Contains(c))
+                {
+                    // call observer's update method to perform the required actions
+                    // based on the string passed
+                    c.Update(ResponseType);
+                }
+                else
+                {
+                    // TODO append to client's events in database
+                }
             }
+        }
+
+
+        public static bool IsObserver(Client c)
+        {
+            return (registeredObservers.Contains(c));
+        }
+
+        public static bool IsObserver(string c)
+        {
+            return (registeredObservers.Exists(i=>i.username.Equals(c)));
         }
     }
 

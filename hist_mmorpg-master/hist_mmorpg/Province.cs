@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-
+using System.Runtime.Serialization;
 namespace hist_mmorpg
 {
     /// <summary>
     /// Class storing data on province
     /// </summary>
-    public class Province : Place
+    [Serializable()]
+    public class Province : Place, ISerializable
     {
         /// <summary>
         /// Holds province tax rate
@@ -64,23 +65,23 @@ namespace hist_mmorpg
         /// Processes functions involved in lodging a new ownership challenge
         /// </summary>
         /// <param name="challenger">PlayerCharacter challenging for ownership</param>
-        public void LodgeOwnershipChallenge(PlayerCharacter challenger)
+        public ProtoMessage LodgeOwnershipChallenge(PlayerCharacter challenger)
         {
+            ProtoMessage result = new ProtoMessage();
             bool proceed = true;
 
             // ensure aren't current owner
             if (challenger == this.owner)
             {
                 proceed = false;
-                string toDisplay = "You already own " + this.name + "!";
-                Globals_Game.UpdatePlayer(challenger.playerID, toDisplay);
+                result.ResponseType = DisplayMessages.ProvinceAlreadyOwn;
             }
 
             else
             {
                 // create and send new OwnershipChallenge
                 OwnershipChallenge newChallenge = new OwnershipChallenge(Globals_Game.GetNextOwnChallengeID(), challenger.charID, "province", this.id);
-                proceed = Globals_Game.AddOwnershipChallenge(newChallenge);
+                proceed = Globals_Game.AddOwnershipChallenge(newChallenge,out result);
             }
 
             if (proceed)
@@ -109,14 +110,20 @@ namespace hist_mmorpg
                 string entryType = "ownershipChallenge_new";
 
                 // journal entry description
-                string description = "On this day of Our Lord a challenge for the ownership of " + this.name + " (" + this.id + ")";
-                description += " has COMMENCED.  " + challenger.firstName + " " + challenger.familyName + " seeks to rest ownership from ";
-                description += "the current owner, " + currentOwner.firstName + " " + currentOwner.familyName + ".";
+                string[] fields = new string[4];
+                fields[0] = this.name;
+                fields[1] = this.id;
+                fields[2] = challenger.firstName + " " + challenger.familyName;
+                fields[3] = currentOwner.firstName + " " + currentOwner.familyName;
 
+                ProtoMessage ownershipChallenge = new ProtoMessage();
+                ownershipChallenge.MessageFields = fields;
+                ownershipChallenge.ResponseType = DisplayMessages.ProvinceOwnershipChallenge;
                 // create and send a proposal (journal entry)
-                JournalEntry myEntry = new JournalEntry(entryID, year, season, entryPersonae, entryType, descr: description, loc: entryLoc);
+                JournalEntry myEntry = new JournalEntry(entryID, year, season, entryPersonae, entryType,ownershipChallenge, loc: entryLoc);
                 Globals_Game.AddPastEvent(myEntry);
             }
+            return result;
         }
 
         /// <summary>
@@ -129,14 +136,10 @@ namespace hist_mmorpg
             if (tx > 100)
             {
                 tx = 100;
-                string toDisplay = "The maximum tax rate is 100%.  Rate adjusted.";
-                Globals_Game.UpdatePlayer(this.owner.playerID, toDisplay);
             }
             else if (tx < 0)
             {
                 tx = 0;
-                string toDisplay = "The minimum tax rate is 0%.  Rate adjusted.";
-                Globals_Game.UpdatePlayer(this.owner.playerID, toDisplay);
             }
 
             this.taxRate = tx;
@@ -204,6 +207,19 @@ namespace hist_mmorpg
 
             // update province owner property
             this.owner = newOwner;
+        }
+
+        //temp for serializing to Client side Fief object
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+            info.AddValue("king", this.kingdom.id, typeof(string));
+        }
+
+        public Province(SerializationInfo info, StreamingContext context): base(info,context)
+        {
+            var tmpKing = info.GetString("king");
+            this.kingdom = Globals_Game.kingdomMasterList[tmpKing];
         }
 
     }

@@ -13,9 +13,9 @@ namespace hist_mmorpg
         /// <param name="f">The fief being pillaged</param>
         /// <param name="a">The pillaging army</param>
         /// <param name="circumstance">The circumstance under which the fief is being pillaged</param>
-        public static void ProcessPillage(Fief f, Army a, string circumstance = "pillage")
+        public static ProtoPillageResult ProcessPillage(Fief f, Army a, string circumstance = "pillage")
         {
-            string pillageResults = "";
+            ProtoPillageResult pillageResult = new ProtoPillageResult();
             double thisLoss = 0;
             double moneyPillagedTotal = 0;
             double moneyPillagedOwner = 0;
@@ -26,6 +26,7 @@ namespace hist_mmorpg
             // get pillaging army owner (receives a proportion of total spoils)
             PlayerCharacter armyOwner = a.GetOwner();
 
+            pillageResult.fiefID = f.id;
             // get garrison leader (to add to journal entry)
             Character defenderLeader = null;
             if (f.bailiff != null)
@@ -45,8 +46,7 @@ namespace hist_mmorpg
 
             // update army days
             armyLeader.AdjustDays(daysTaken);
-
-            pillageResults += "- Days taken: " + daysTaken + "\r\n";
+            pillageResult.daysTaken = daysTaken;
 
             // % population loss
             thisLoss = (0.007 * pillageMultiplier);
@@ -60,7 +60,7 @@ namespace hist_mmorpg
                 thisLoss = 20;
             }
             // apply population loss
-            pillageResults += "- Population loss: " + Convert.ToUInt32((f.population * (thisLoss / 100))) + "\r\n";
+            pillageResult.populationLoss = Convert.ToInt32((f.population * (thisLoss / 100)));
             f.population -= Convert.ToInt32((f.population * (thisLoss / 100)));
 
             // % treasury loss
@@ -77,10 +77,10 @@ namespace hist_mmorpg
                     thisLoss = 80;
                 }
                 // apply treasury loss
-                pillageResults += "- Treasury loss: " + Convert.ToInt32((f.treasury * (thisLoss / 100))) + "\r\n";
-                if (f.treasury > 0)
+                if (f.Treasury > 0)
                 {
-                    f.treasury -= Convert.ToInt32((f.treasury * (thisLoss / 100)));
+                    pillageResult.treasuryLoss = Convert.ToInt32((f.Treasury * (thisLoss / 100)));
+                    f.AdjustTreasury(- Convert.ToInt32((f.Treasury * (thisLoss / 100))));
                 }
             }
 
@@ -96,7 +96,8 @@ namespace hist_mmorpg
                 thisLoss = 20;
             }
             // apply loyalty loss
-            pillageResults += "- Loyalty loss: " + (f.loyalty * (thisLoss / 100)) + "\r\n";
+            pillageResult.loyaltyLoss = (f.loyalty * (thisLoss / 100));
+
             f.loyalty -= (f.loyalty * (thisLoss / 100));
 
             // % fields loss
@@ -111,7 +112,7 @@ namespace hist_mmorpg
                 thisLoss = 20;
             }
             // apply fields loss
-            pillageResults += "- Fields loss: " + (f.fields * (thisLoss / 100)) + "\r\n";
+            pillageResult.fieldsLoss = (f.fields * (thisLoss / 100));
             f.fields -= (f.fields * (thisLoss / 100));
 
             // % industry loss
@@ -126,7 +127,7 @@ namespace hist_mmorpg
                 thisLoss = 20;
             }
             // apply industry loss
-            pillageResults += "- Industry loss: " + (f.industry * (thisLoss / 100)) + "\r\n";
+            pillageResult.industryLoss = (f.industry * (thisLoss / Convert.ToDouble(100)));
             f.industry -= (f.industry * (thisLoss / 100));
 
             // money pillaged (based on GDP)
@@ -143,7 +144,7 @@ namespace hist_mmorpg
             // calculate base amount pillaged based on fief GDP
             double baseMoneyPillaged = (f.keyStatsCurrent[1] * (thisLoss / 100));
             moneyPillagedTotal = baseMoneyPillaged;
-            pillageResults += "- Base Money Pillaged: " + Convert.ToInt32(moneyPillagedTotal) + "\r\n";
+            pillageResult.baseMoneyPillaged = baseMoneyPillaged;
 
             // factor in no. days spent pillaging (get extra 5% per day > 7)
             int daysOver7 = Convert.ToInt32(daysTaken) - 7;
@@ -153,7 +154,8 @@ namespace hist_mmorpg
                 {
                     moneyPillagedTotal += (baseMoneyPillaged * 0.05);
                 }
-                pillageResults += "  - with bonus for extra " + daysOver7 + " days taken: " + Convert.ToInt32(moneyPillagedTotal) + "\r\n";
+                pillageResult.bonusMoneyPillaged = moneyPillagedTotal - baseMoneyPillaged;
+                pillageResult.daysTaken = daysOver7;
             }
 
             // check for jackpot
@@ -163,26 +165,28 @@ namespace hist_mmorpg
             {
                 // generate random int to multiply amount pillaged
                 int myRandomMultiplier = Globals_Game.myRand.Next(3, 11);
+                pillageResult.jackpot = moneyPillagedTotal * myRandomMultiplier - moneyPillagedTotal;
                 moneyPillagedTotal = moneyPillagedTotal * myRandomMultiplier;
-                pillageResults += "  - with bonus for jackpot: " + Convert.ToInt32(moneyPillagedTotal) + "\r\n";
             }
 
             // check proportion of money pillaged goes to army owner (based on stature)
             double proportionForOwner = 0.05 * armyOwner.CalculateStature();
             moneyPillagedOwner = (moneyPillagedTotal * proportionForOwner);
-            pillageResults += "- Money pillaged by attacking player: " + Convert.ToInt32(moneyPillagedOwner) + "\r\n";
+            pillageResult.moneyPillagedOwner = moneyPillagedOwner;
 
             // apply to army owner's home fief treasury
-            armyOwner.GetHomeFief().treasury += Convert.ToInt32(moneyPillagedOwner);
+            armyOwner.GetHomeFief().AdjustTreasury(Convert.ToInt32(moneyPillagedOwner));
 
             // apply loss of stature to army owner if fief has same language
             if (armyOwner.language.id == f.language.id)
             {
                 armyOwner.AdjustStatureModifier(-0.3);
+                pillageResult.statureModifier = (-0.3);
             }
             else if (armyOwner.language.baseLanguage.id == f.language.baseLanguage.id)
             {
                 armyOwner.AdjustStatureModifier(-0.2);
+                pillageResult.statureModifier = (-0.2);
             }
 
             // set isPillaged for fief
@@ -224,66 +228,38 @@ namespace hist_mmorpg
                 type += "rebellionQuelled";
             }
 
-            // use popup text as description
-            string pillageDescription = "";
-
             if (circumstance.Equals("pillage"))
             {
-                pillageDescription += "On this day of Our Lord the fief of ";
+                pillageResult.isPillage = true;
             }
             else if (circumstance.Equals("quellRebellion"))
             {
-                pillageDescription += "On this day of Our Lord the rebellion in the fief of ";
+                pillageResult.isPillage = false;
             }
-            pillageDescription += f.name + " owned by " + f.owner.firstName + " " + f.owner.familyName;
+            pillageResult.fiefName = f.name;
+            pillageResult.fiefOwner=f.owner.firstName + " " + f.owner.familyName;
 
             if ((circumstance.Equals("pillage")) && (defenderLeader != null))
             {
                 if (f.owner != defenderLeader)
                 {
-                    pillageDescription += " and defended by " + defenderLeader.firstName + " " + defenderLeader.familyName + ",";
+                    pillageResult.defenderLeader=defenderLeader.firstName + " " + defenderLeader.familyName;
                 }
             }
-
-            if (circumstance.Equals("pillage"))
-            {
-                pillageDescription += " was pillaged by the forces of ";
-            }
-            else if (circumstance.Equals("quellRebellion"))
-            {
-                pillageDescription += " was quelled by the forces of ";
-            }
-            pillageDescription += armyOwner.firstName + " " + armyOwner.familyName;
+            
+            pillageResult.armyOwner = armyOwner.firstName + " " + armyOwner.familyName;
             if (armyLeader != null)
             {
-                if (armyOwner != armyLeader)
-                {
-                    pillageDescription += ", led by " + armyLeader.firstName + " " + armyLeader.familyName;
-                }
+                pillageResult.armyLeader = armyLeader.firstName + " " + armyLeader.familyName;
             }
-            pillageDescription += ".\r\n\r\nResults:\r\n";
-            pillageDescription += pillageResults;
 
             // put together new journal entry
-            JournalEntry pillageEntry = new JournalEntry(entryID, Globals_Game.clock.currentYear, Globals_Game.clock.currentSeason, pillagePersonae, type, loc: pillageLocation, descr: pillageDescription);
+            JournalEntry pillageEntry = new JournalEntry(pillageResult, entryID, Globals_Game.clock.currentYear, Globals_Game.clock.currentSeason, pillagePersonae, type, loc: pillageLocation);
 
             // add new journal entry to pastEvents
             Globals_Game.AddPastEvent(pillageEntry);
 
-            // set label
-            string messageLabel = "";
-
-            if (circumstance.Equals("pillage"))
-            {
-                messageLabel += "PILLAGE ";
-            }
-            else if (circumstance.Equals("quellRebellion"))
-            {
-                messageLabel += "QUELL REBELLION ";
-            }
-            //TODO message handling
-            Globals_Game.UpdatePlayer(armyOwner.playerID,messageLabel + ":" + pillageDescription);
-            Globals_Game.UpdatePlayer(f.owner.playerID, messageLabel + ":" + pillageDescription);
+            return pillageResult;
         }
 
         /// <summary>
@@ -291,8 +267,9 @@ namespace hist_mmorpg
         /// </summary>
         /// <param name="a">The pillaging army</param>
         /// <param name="f">The fief being pillaged</param>
-        public static void PillageFief(Army a, Fief f)
+        public static ProtoMessage PillageFief(Army a, Fief f)
         {
+            ProtoMessage result = new ProtoMessage();
             bool pillageCancelled = false;
             bool bailiffPresent = false;
             Army fiefArmy = null;
@@ -318,13 +295,16 @@ namespace hist_mmorpg
                 fiefArmy = f.CreateDefendingArmy();
 
                 // give battle and get result
-                pillageCancelled = Battle.GiveBattle(fiefArmy, a, circumstance: "pillage");
+                ProtoBattle battleResults;
+                pillageCancelled = Battle.GiveBattle(fiefArmy, a, out battleResults, circumstance: "pillage");
 
                 if (pillageCancelled)
                 {
                     string toDisplay = "The pillaging force has been forced to retreat by the fief's defenders!";
-                    Globals_Game.UpdatePlayer(f.owner.playerID, toDisplay);
-                    Globals_Game.UpdatePlayer(a.owner, toDisplay);
+                    result.ResponseType = DisplayMessages.PillageRetreat;
+                    // Let owner know that pillage attempt has been thwarted
+                    Globals_Game.UpdatePlayer(f.owner.playerID, DisplayMessages.PillageRetreat);
+                    return result;
                 }
 
                 else
@@ -332,11 +312,11 @@ namespace hist_mmorpg
                     // check still have enough days left
                     if (a.days < 7)
                     {
-                        string toDisplay = "After giving battle, the pillaging army no longer has\r\nsufficient days for this operation.  Pillage cancelled.";
-                        Globals_Game.UpdatePlayer(f.owner.playerID, toDisplay);
-                        Globals_Game.UpdatePlayer(a.owner, toDisplay);
-                        
+                        // Inform fief owner pillage attempt thwarted
+                        Globals_Game.UpdatePlayer(f.owner.playerID, DisplayMessages.PillageDays);
+                        result.ResponseType = DisplayMessages.PillageDays;
                         pillageCancelled = true;
+                        return result;
                     }
                 }
 
@@ -345,9 +325,11 @@ namespace hist_mmorpg
             if (!pillageCancelled)
             {
                 // process pillage
-                Pillage_Siege.ProcessPillage(f, a);
+                return Pillage_Siege.ProcessPillage(f, a);
             }
-
+            result.ResponseType = DisplayMessages.Success;
+            result.Message = "The pillage was successful";
+            return result;
         }
 
 
@@ -358,8 +340,9 @@ namespace hist_mmorpg
         /// <param name="f">The fief being pillaged/besieged</param>
         /// <param name="a">The pillaging/besieging army</param>
         /// <param name="circumstance">The circumstance - pillage or siege</param>
-        public static bool ChecksBeforePillageSiege(Army a, Fief f, string circumstance = "pillage")
+        public static bool ChecksBeforePillageSiege(Army a, Fief f, out ProtoMessage result, string circumstance = "pillage")
         {
+            result = null;
             bool proceed = true;
             string operation = "";
 
@@ -372,13 +355,15 @@ namespace hist_mmorpg
                     proceed = false;
                     if (circumstance.Equals("pillage"))
                     {
-                        string toDisplay = "You cannot pillage your own fief!  Pillage cancelled.";
-                        Globals_Game.UpdatePlayer(a.owner, toDisplay);
+                        result = new ProtoMessage();
+                        result.ResponseType = DisplayMessages.PillageOwnFief;
+                        result.MessageFields = new string[] { "pillage" };
                     }
                     else if (circumstance.Equals("siege"))
                     {
-                        string toDisplay = "You cannot besiege your own fief!  Siege cancelled.";
-                        Globals_Game.UpdatePlayer(a.owner, toDisplay);
+                        result = new ProtoMessage();
+                        result.ResponseType = DisplayMessages.PillageOwnFief;
+                        result.MessageFields = new string[] { "siege" };
                     }
                 }
             }
@@ -392,13 +377,13 @@ namespace hist_mmorpg
                     proceed = false;
                     if (circumstance.Equals("pillage"))
                     {
-                        string toDisplay = "You cannot pillage a fief that is under siege.  Pillage cancelled.";
-                        Globals_Game.UpdatePlayer(a.owner, toDisplay);
+                        result = new ProtoMessage();
+                        result.ResponseType = DisplayMessages.PillageUnderSiege;
                     }
                     else if (circumstance.Equals("siege"))
                     {
-                        string toDisplay = "This fief is already under siege.  Siege cancelled.";
-                        Globals_Game.UpdatePlayer(a.owner, toDisplay);
+                        result = new ProtoMessage();
+                        result.ResponseType = DisplayMessages.PillageSiegeAlready;
                     }
                 }
             }
@@ -413,8 +398,8 @@ namespace hist_mmorpg
                     if ((f.isPillaged) && (proceed))
                     {
                         proceed = false;
-                        string toDisplay = "This fief has already been pillaged during\r\nthe current season.  Pillage cancelled.";
-                        Globals_Game.UpdatePlayer(a.owner, toDisplay);
+                        result = new ProtoMessage();
+                        result.ResponseType = DisplayMessages.PillageAlready;
                     }
                 }
             }
@@ -436,8 +421,8 @@ namespace hist_mmorpg
                 {
                     operation = "Siege";
                 }
-                string toDisplay = "This army has no leader.  " + operation + " cancelled.";
-                Globals_Game.UpdatePlayer(a.owner, toDisplay);
+                result = new ProtoMessage();
+                result.ResponseType = DisplayMessages.ArmyNoLeader;
             }
 
             // check has min days required
@@ -455,8 +440,8 @@ namespace hist_mmorpg
                     {
                         operation = "Pillage";
                     }
-                    string toDisplay = "This army has too few days remaining for\r\na this operation.  " + operation + " cancelled.";
-                    Globals_Game.UpdatePlayer(a.owner, toDisplay);
+                    result = new ProtoMessage();
+                    result.ResponseType = DisplayMessages.ErrorGenericNotEnoughDays;
                 }
             }
             else if (circumstance.Equals("siege"))
@@ -465,8 +450,8 @@ namespace hist_mmorpg
                 if ((a.days < 1) && (proceed))
                 {
                     proceed = false;
-                    string toDisplay = "This army has too few days remaining for\r\na siege operation.  Siege cancelled.";
-                    Globals_Game.UpdatePlayer(a.owner, toDisplay);
+                    result = new ProtoMessage();
+                    result.ResponseType = DisplayMessages.ErrorGenericNotEnoughDays;
                 }
             }
 
@@ -501,9 +486,9 @@ namespace hist_mmorpg
                                 {
                                     operation = "Quell rebellion";
                                 }
-                                string toDisplay = "There is at least one defending army (" + armyInFief.armyID + ") that must be defeated\r\nbefore you can conduct this operation.  " + operation + " cancelled.";
-                                Globals_Game.UpdatePlayer(a.owner, toDisplay);
-
+                                result = new ProtoMessage();
+                                result.ResponseType = DisplayMessages.PillageArmyDefeat;
+                                result.MessageFields = new string[] { armyInFief.armyID };
                                 break;
                             }
                         }
@@ -516,8 +501,8 @@ namespace hist_mmorpg
                     if (f.status.Equals('R'))
                     {
                         proceed = false;
-                        string toDisplay = "You cannot lay siege to a keep if the fief is in rebellion.";
-                        Globals_Game.UpdatePlayer(a.owner,toDisplay);
+                        result = new ProtoMessage();
+                        result.ResponseType = DisplayMessages.PillageSiegeRebellion;
                     }
                 }
             }
@@ -630,23 +615,26 @@ namespace hist_mmorpg
             string siegeLocation = mySiege.GetFief().id;
 
             // description
-            string siegeDescription = "On this day of Our Lord the forces of ";
-            siegeDescription += mySiege.GetBesiegingPlayer().firstName + " " + mySiege.GetBesiegingPlayer().familyName;
-            siegeDescription += ", led by " + attacker.GetLeader().firstName + " " + attacker.GetLeader().familyName;
-            siegeDescription += " laid siege to the keep of " + mySiege.GetFief().name;
-            siegeDescription += ", owned by " + mySiege.GetDefendingPlayer().firstName + " " + mySiege.GetDefendingPlayer().familyName;
+            string[] fields = new string[6];
+            fields[0]= mySiege.GetBesiegingPlayer().firstName + " " + mySiege.GetBesiegingPlayer().familyName;
+            fields[1] =  attacker.GetLeader().firstName + " " + attacker.GetLeader().familyName;
+            fields[2]=  mySiege.GetFief().name;
+            fields[3]= mySiege.GetDefendingPlayer().firstName + " " + mySiege.GetDefendingPlayer().familyName;
+            fields[4]=fields[5]="";
             if (defenderLeader != null)
             {
-                siegeDescription += ". The defending garrison is led by " + defenderLeader.firstName + " " + defenderLeader.familyName;
+                fields[4] = "The defending garrison is led by " + defenderLeader.firstName + " " + defenderLeader.familyName+".";
             }
             if (addDefendLeader != null)
             {
-                siegeDescription += ". Additional defending forces are led by " + addDefendLeader.firstName + " " + addDefendLeader.familyName;
+                fields[5] = "Additional defending forces are led by " + addDefendLeader.firstName + " " + addDefendLeader.familyName+".";
             }
-            siegeDescription += ".";
 
+            ProtoMessage siege = new ProtoMessage();
+            siege.MessageFields = fields;
+            siege.ResponseType = DisplayMessages.PillageInitiateSiege;
             // put together new journal entry
-            JournalEntry siegeResult = new JournalEntry(entryID, Globals_Game.clock.currentYear, Globals_Game.clock.currentSeason, siegePersonae, "siege", loc: siegeLocation, descr: siegeDescription);
+            JournalEntry siegeResult = new JournalEntry(entryID, Globals_Game.clock.currentYear, Globals_Game.clock.currentSeason, siegePersonae, "siege",siege, loc: siegeLocation);
 
             // add new journal entry to pastEvents
             Globals_Game.AddPastEvent(siegeResult);
