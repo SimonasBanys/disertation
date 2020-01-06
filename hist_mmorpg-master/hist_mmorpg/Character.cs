@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.IO;
-using System.Text;
-using System.Windows.Forms;
 using System.Linq;
-
 namespace hist_mmorpg
 {
     /// <summary>
     /// Class storing data on character (PC and NPC)
     /// </summary>
-    public abstract class Character
+    public abstract class Character : IEquatable<Character>
     {
 
         /// <summary>
@@ -20,7 +18,7 @@ namespace hist_mmorpg
         /// <summary>
         /// Holds character's first name
         /// </summary>
-        public String firstName { get; set; }
+		public String firstName { get; set; }
         /// <summary>
         /// Holds character's family name
         /// </summary>
@@ -121,7 +119,23 @@ namespace hist_mmorpg
         /// Holds ailments effecting character's health
         /// </summary>
         public Dictionary<string, Ailment> ailments = new Dictionary<string, Ailment>();
+        /// <summary>
+        /// Holds the characterID of captor, if being held captive
+        /// </summary>
+        public string captorID { get; set; }
+        /// <summary>
+        /// Holds the journal entry id of any ransom sent
+        /// </summary>
+        public string ransomDemand { get; set; }
 
+#if DEBUG
+        /// <summary>
+        /// Fix the success chance- use -1 to calculate success based on traits
+        /// </summary>
+        public double fixedSuccessChance { get;set; }
+#endif
+        /**************LOCKS**************/
+        protected object entourageLock = new Object();
         /// <summary>
         /// Constructor for Character
         /// </summary>
@@ -368,6 +382,10 @@ namespace hist_mmorpg
             this.inKeep = inK;
             this.isPregnant = preg;
 			this.location = loc;
+            if (loc != null)
+            {
+                loc.charactersInFief.Add(this);
+            }
             this.spouse = sp;
             this.father = fath;
             this.mother = moth;
@@ -379,6 +397,10 @@ namespace hist_mmorpg
                 this.ailments = ails;
             }
             this.fiancee = fia;
+#if DEBUG
+            // Default = trait-influenced success chance
+            fixedSuccessChance = -1;
+#endif
         }
 
 		/// <summary>
@@ -431,6 +453,8 @@ namespace hist_mmorpg
                 this.armyID = charToUse.armyID;
                 this.ailments = charToUse.ailments;
                 this.fiancee = charToUse.fiancee;
+                this.captorID = charToUse.captorID;
+                this.ransomDemand = charToUse.ransom;
 			}
 		}
 
@@ -675,6 +699,7 @@ namespace hist_mmorpg
 
             return highestPlaces;
         }
+
        
         /// <summary>
         /// Calculates character's base or current stature
@@ -693,27 +718,28 @@ namespace hist_mmorpg
             }
 
             // factor in age
-            if (this.CalcAge() <= 10)
+            int age = this.CalcAge();
+            if (age <= 10)
             {
                 stature += 0;
             }
-            else if ((this.CalcAge() > 10) && (this.CalcAge() < 21))
+            else if ((age > 10) && (age < 21))
             {
                 stature += 0.5;
             }
-            else if (this.CalcAge() < 31)
+            else if (age < 31)
             {
                 stature += 1;
             }
-            else if (this.CalcAge() < 41)
+            else if (age < 41)
             {
                 stature += 2;
             }
-            else if (this.CalcAge() < 51)
+            else if (age < 51)
             {
                 stature += 3;
             }
-            else if (this.CalcAge() < 61)
+            else if (age < 61)
             {
                 stature += 4;
             }
@@ -780,49 +806,49 @@ namespace hist_mmorpg
 
             double charHealth = 0;
             double ageModifier = 0;
-
+            int age = this.CalcAge();
             // calculate health age modifier, based on age
-            if (this.CalcAge() < 1)
+            if (age < 1)
             {
                 ageModifier = 0.25;
             }
-            else if (this.CalcAge() < 5)
+            else if (age < 5)
             {
                 ageModifier = 0.5;
             }
-            else if (this.CalcAge() < 10)
+            else if (age < 10)
             {
                 ageModifier = 0.8;
             }
-            else if (this.CalcAge() < 20)
+            else if (age < 20)
             {
                 ageModifier = 0.9;
             }
-            else if (this.CalcAge() < 35)
+            else if (age < 35)
             {
                 ageModifier = 1;
             }
-            else if (this.CalcAge() < 40)
+            else if (age < 40)
             {
                 ageModifier = 0.95;
             }
-            else if (this.CalcAge() < 45)
+            else if (age < 45)
             {
                 ageModifier = 0.9;
             }
-            else if (this.CalcAge() < 50)
+            else if (age < 50)
             {
                 ageModifier = 0.85;
             }
-            else if (this.CalcAge() < 55)
+            else if (age < 55)
             {
                 ageModifier = 0.75;
             }
-            else if (this.CalcAge() < 60)
+            else if (age < 60)
             {
                 ageModifier = 0.65;
             }
-            else if (this.CalcAge() < 70)
+            else if (age < 70)
             {
                 ageModifier = 0.55;
             }
@@ -866,7 +892,7 @@ namespace hist_mmorpg
         public Boolean CheckForDeath(bool isBirth = false, bool isMother = false, bool isStillborn = false)
         {
             // Check if chance of death effected by character traits
-            double deathTraitsModifier = this.CalcTraitEffect("death");
+            double deathTraitsModifier = this.CalcTraitEffect(Globals_Game.Stats.DEATH);
 
             // calculate base chance of death
             // chance = 2.8% (2.5% for women) per health level below 10
@@ -1006,15 +1032,12 @@ namespace hist_mmorpg
                 string type = "marriageCancelled";
 
                 // description
-                string description = "On this day of Our Lord the imminent marriage between ";
-                description += groom.firstName + " " + groom.familyName + " and ";
-                description += bride.firstName + " " + bride.familyName;
-                description += " has been CANCELLED due to the sad and untimely death of ";
-                description += this.firstName + " " + this.familyName;
-                description += ". Let the bells fall silent.";
-
+                string[] fields = new string[] { groom.firstName + " " + groom.familyName, bride.firstName + " " + bride.familyName, this.firstName + " " + this.familyName };
                 // create and add a marriageCancelled entry to Globals_Game.pastEvents
-                JournalEntry newEntry = new JournalEntry(newEntryID, year, season, newEntryPersonae, type, descr: description);
+                ProtoMessage cancelMarriage = new ProtoMessage();
+                cancelMarriage.ResponseType = DisplayMessages.CharacterMarriageDeath;
+                cancelMarriage.MessageFields = fields;
+                JournalEntry newEntry = new JournalEntry(newEntryID, year, season, newEntryPersonae, type, cancelMarriage);
                 success = Globals_Game.AddPastEvent(newEntry);
 
                 // delete marriage entry in Globals_Game.scheduledEvents
@@ -1067,6 +1090,25 @@ namespace hist_mmorpg
             this.myTitles.Clear();
         }
 
+        public PlayerCharacter GetPlayerCharacter()
+        {
+            if (this is PlayerCharacter)
+            {
+                return this as PlayerCharacter;
+            }
+            else if (this.GetHeadOfFamily() != null)
+            {
+                return this.GetHeadOfFamily();
+            }
+            else if (!string.IsNullOrWhiteSpace((this as NonPlayerCharacter).employer))
+            {
+                return (this as NonPlayerCharacter).GetEmployer();
+            }
+            else
+            {
+                return null;
+            }
+        }
         /// <summary>
         /// Performs necessary actions upon the death of a character
         /// </summary>
@@ -1115,9 +1157,18 @@ namespace hist_mmorpg
                 }
             }
 
-            // ============== 1. set isAlive = false
+            // ============== 1. set isAlive = false and if was a captive, release
             this.isAlive = false;
-
+            if (this.captorID != null)
+            {
+                this.location.gaol.Remove(this);
+                PlayerCharacter captor = Globals_Game.getCharFromID(this.captorID) as PlayerCharacter;
+                if (captor != null)
+                {
+                    captor.myCaptives.Remove(this);
+                }
+                this.captorID = null;
+            }
             // ============== 2. remove from FIEF
             this.location.charactersInFief.Remove(this);
 
@@ -1291,6 +1342,8 @@ namespace hist_mmorpg
                 if (thisHeir != null)
                 {
                     this.ProcessInheritance((this as PlayerCharacter), inheritor: thisHeir);
+                    Globals_Game.UpdatePlayer((this as PlayerCharacter).playerID,DisplayMessages.YouDied,new string[] {thisHeir.firstName + " " +thisHeir.familyName});
+
                 }
 
                 // if no heir, king inherits
@@ -1298,6 +1351,13 @@ namespace hist_mmorpg
                 {
                     // process inheritance
                     this.TransferPropertyToKing((this as PlayerCharacter), (this as PlayerCharacter).GetKing());
+                    // Release captives
+                    for (int i = (this as PlayerCharacter).myCaptives.Count - 1; i >= 0; i--)
+                    {
+                        Character captive = (this as PlayerCharacter).myCaptives.ElementAt(i);
+                        (this as PlayerCharacter).ReleaseCaptive(captive);
+                    }
+                    Globals_Game.UpdatePlayer((this as PlayerCharacter).playerID, DisplayMessages.YouDiedNoHeir);
                 }
             }
 
@@ -1319,8 +1379,8 @@ namespace hist_mmorpg
                 string interestedPlayerEntry = "";
                 string deceasedCharacterEntry = "";
                 string type = "";
-                string description = "On this day of Our Lord ";
-                description += this.firstName + " " + this.familyName;
+                string[] fields = new string[4];
+                fields[0]= this.firstName + " " + this.familyName;
 
                 // family member/heir
                 if (role.Contains("family"))
@@ -1344,8 +1404,8 @@ namespace hist_mmorpg
                     }
 
                     // description
-                    description += ", " + (this as NonPlayerCharacter).GetFunction(headOfFamily) + " of ";
-                    description += headOfFamily.firstName + " " + headOfFamily.familyName;
+                    fields[1] = (this as NonPlayerCharacter).GetFunction(headOfFamily) + " of "
+                    + headOfFamily.firstName + " " + headOfFamily.familyName;
                 }
 
                 // employee
@@ -1359,8 +1419,7 @@ namespace hist_mmorpg
                     type = "deathOfEmployee";
 
                     // description
-                    description += ", employee of ";
-                    description += employer.firstName + " " + employer.familyName;
+                    fields[1] =  " employee of " + employer.firstName + " " + employer.familyName;
                 }
 
                 // player or non-played PC
@@ -1385,7 +1444,7 @@ namespace hist_mmorpg
                     }
 
                     // description
-                    description += ", head of the " + this.familyName + " family";
+                    fields[1] =" head of the " + this.familyName + " family";
                 }
 
                 // personae
@@ -1401,17 +1460,34 @@ namespace hist_mmorpg
                 string[] deathPersonae = tempPersonae.ToArray();
 
                 // description
-                description += ", passed away due to ";
                 switch (circumstance)
                 {
                     case "injury":
-                        description += "injuries sustained on the field of battle.";
+                        fields[2] = "injuries sustained on the field of battle";
                         break;
                     case "childbirth":
-                        description += "complications arising from childbirth.";
+                        fields[2] = "complications arising from childbirth";
+                        break;
+                    case "spy":
+                        fields[2] = "injuries sustained while obtaining information";
+                        break;
+                    case "execute":
+                        fields[2] = "execution at the hands of ";
+                        if (isMale)
+                        {
+                            fields[2] += "his ";
+                        }
+                        else
+                        {
+                            fields[2] += "her ";
+                        }
+                        fields[2] += "captors";
+                        break;
+                    case "kidnap":
+                        fields[2] = "a botched kidnap attempt";
                         break;
                     default:
-                        description += "natural causes.";
+                        fields[2]= "natural causes";
                         break;
                 }
 
@@ -1421,23 +1497,46 @@ namespace hist_mmorpg
                     // have an heir
                     if (thisHeir != null)
                     {
-                        description += " He is succeeded by his " + thisHeir.GetFunction(this as PlayerCharacter);
-                        description += " " + thisHeir.firstName + " " + thisHeir.familyName + ".";
+                        fields[3] = thisHeir.GetFunction(this as PlayerCharacter)+ ", " + thisHeir.firstName + " " + thisHeir.familyName;
                     }
-
-                    // no heir
-                    else
-                    {
-                        description += " As he left no heirs, this once great family is no more.";
-                    }
+                    
                 }
-                description += " Sympathies are extended to family and friends of the deceased.";
 
 
                 // create and add a death entry to Globals_Game.pastEvents
-                JournalEntry deathEntry = new JournalEntry(deathEntryID, year, season, deathPersonae, type, descr: description);
+                ProtoMessage death = new ProtoMessage();
+                death.MessageFields = fields;
+                if (thisHeir == null&& this is PlayerCharacter)
+                {
+                    death.ResponseType = DisplayMessages.CharacterDeathNoHeir;
+                }
+                else
+                {
+                    death.ResponseType = DisplayMessages.CharacterDeath;
+                }
+                
+                JournalEntry deathEntry = new JournalEntry(deathEntryID, year, season, deathPersonae, type, death);
                 success = Globals_Game.AddPastEvent(deathEntry);
+
+                // If currently controlled character dies, switch to player character
+                if (this.GetPlayerCharacter() != null)
+                {
+
+                    if (!String.IsNullOrWhiteSpace(this.GetPlayerCharacter().playerID))
+                    {
+                        Client c;
+                        Globals_Server.Clients.TryGetValue(this.GetPlayerCharacter().playerID, out c);
+                        if (c != null)
+                        {
+                            if (c.activeChar == this)
+                            {
+                                c.activeChar = this.GetPlayerCharacter();
+                            }
+                        }
+                    }
+                }
             }
+
 
         }
 
@@ -1520,7 +1619,7 @@ namespace hist_mmorpg
                 NonPlayerCharacter npc = deceased.myNPCs[i];
 
                 // remove from entourage
-                npc.inEntourage = false;
+                deceased.RemoveFromEntourage(npc);
 
                 // clear goTo queue
                 npc.goTo.Clear();
@@ -1698,6 +1797,10 @@ namespace hist_mmorpg
         /// <param name="deceased">Deceased PlayerCharacter</param>
         public void ProcessInheritance(PlayerCharacter deceased, NonPlayerCharacter inheritor = null)
         {
+            if (inheritor != null)
+            {
+                Globals_Server.logEvent(deceased.charID + " dies; " + inheritor.charID + " inherits");
+            }
             // ============== 1. CREATE NEW PC from NPC (inheritor)
 			// remove inheritor from deceased's myNPCs
 			if (deceased.myNPCs.Contains(inheritor))
@@ -1710,6 +1813,8 @@ namespace hist_mmorpg
 
 			// remove from npcMasterList and mark for addition to pcMasterList
             Globals_Game.npcMasterList.Remove(inheritor.charID);
+            Globals_Game.pcMasterList.Add(promotedNPC.charID,promotedNPC);
+            // TODO ask about whether NPC should be promoted next season
             Globals_Game.promotedNPCs.Add(promotedNPC);
 
             // ============== 2. change all FAMILYID & EMPLOYER of MYNPCS to promotedNPC's
@@ -1802,27 +1907,47 @@ namespace hist_mmorpg
                 }
             }
 
-			// ============== 8. change GLOBALS_CLIENT.MYPLAYERCHARACTER
+			// ============== 8. change references to player's PlayerCharacter
             string user = deceased.playerID;
+            
             if (user != null)
             {
-                if (Globals_Game.userChars.ContainsKey(user))
+                if (Globals_Game.ownedPlayerCharacters.ContainsKey(user))
                 {
-                    Globals_Game.userChars[deceased.playerID] = promotedNPC;
+                    Globals_Game.ownedPlayerCharacters[deceased.playerID] = promotedNPC;
                     promotedNPC.playerID = user;
+                    Globals_Server.Clients[user].myPlayerCharacter = promotedNPC;
                     //TODO notify user if logged in and write to database
+                    Globals_Server.logEvent("Debug: role is  : "+inheritor.GetFunction(deceased));
+                    Client player;
+                    Globals_Server.Clients.TryGetValue(user, out player);
+                    if (player != null)
+                    {
+                        player.myPlayerCharacter = promotedNPC;
+                        if (player.activeChar == deceased)
+                        {
+                            player.activeChar = promotedNPC;
+                        }
+                    }
                 }
                 else
                 {
-                    //TODO error logging
-                    string errorLog = "CHARACTER ERROR: " + user + " not contained in list of registered users";
+                    Globals_Server.logError(user + " not contained in list of registered users");
                 }
             }
-            else
-            {
-                //TODO user of character is null
-            }
 
+            // ======== 9. Transfer Captives
+            List<Character> toRemove = new List<Character>();
+            foreach (Character captive in deceased.myCaptives)
+            {
+                toRemove.Add(captive);
+                promotedNPC.myCaptives.Add(captive);
+                captive.captorID = promotedNPC.charID;
+            }
+            foreach (Character captive in toRemove)
+            {
+                deceased.myCaptives.Remove(captive);
+            }
         }
 
         /// <summary>
@@ -1893,8 +2018,9 @@ namespace hist_mmorpg
         /// Enables character to enter keep (if not barred)
         /// </summary>
         /// <returns>bool indicating success</returns>
-        public virtual bool EnterKeep()
+        public virtual bool EnterKeep(out ProtoMessage error)
         {
+            error = null;
             bool proceed = true;
             Army thisArmy = null;
             PlayerCharacter player = null;
@@ -1913,20 +2039,16 @@ namespace hist_mmorpg
                         proceed = false;
                         if (player!=null)
                         {
-                            string toDisplay = "Bailiff: You are not permitted to enter the keep with your army, My Lord.";
-                            Globals_Game.UpdatePlayer(player.playerID, toDisplay);
-                        }
+                            error = new ProtoMessage();
+                            error.ResponseType = DisplayMessages.CharacterEnterArmy;}
                     }
 
                     // only one friendly field army in keep at a time
                     else if (this.location.CheckFieldArmyInKeep())
                     {
                         proceed = false;
-                        if (player!=null)
-                        {
-                            string toDisplay = "Bailiff: There is already a friendly field army present in the keep, My Lord.\r\nOnly one is permitted.";
-                            Globals_Game.UpdatePlayer(player.playerID, toDisplay);
-                        }
+                        error = new ProtoMessage();
+                        error.ResponseType = DisplayMessages.CharacterAlreadyArmy;
                     }
                 }
             }
@@ -1948,8 +2070,9 @@ namespace hist_mmorpg
                         {
                             title = "Mon Seigneur";
                         }
-                        string toDisplay = "Bailiff: The perfidious " + this.nationality.name + " are barred from entering this keep, "+ title + "!";
-                        Globals_Game.UpdatePlayer(player.playerID, toDisplay);
+                        error = new ProtoMessage();
+                        error.ResponseType = DisplayMessages.CharacterNationalityBarred;
+                        error.MessageFields =  new string[]{this.nationality.name, title};
                     }
                 }
 
@@ -1959,11 +2082,8 @@ namespace hist_mmorpg
                     if (location.barredCharacters.Contains(this.charID))
                     {
                         proceed = false;
-                        if (player!=null)
-                        {
-                            string toDisplay = "Bailiff: Your person is barred from entering this keep, Good Sir!";
-                            Globals_Game.UpdatePlayer(player.playerID, toDisplay);
-                        }
+                        error = new ProtoMessage();
+                        error.ResponseType = DisplayMessages.CharacterBarred;
                     }
                 }
             }
@@ -2058,23 +2178,26 @@ namespace hist_mmorpg
             return incomeModif;
         }
 
+        // TODO change existing trait names to enum
         /// <summary>
         /// Calculates effect of a particular trait effect
         /// </summary>
         /// <returns>double containing trait effect modifier</returns>
         /// <param name="effect">string specifying which trait effect to calculate</param>
-        public double CalcTraitEffect(String effect)
+        public double CalcTraitEffect(Globals_Game.Stats effect)
         {
+            Globals_Game.Stats stat = effect;
+           // Enum.TryParse<Globals_Game.Stats>(effect, true, out stat);
             double traitEffectModifier = 0;
 
             // iterate through traits
             for (int i = 0; i < this.traits.Length; i++)
             {
                 // iterate through trait effects, looking for effect
-                foreach (KeyValuePair<string, double> entry in this.traits[i].Item1.effects)
+                foreach (KeyValuePair<Globals_Game.Stats, double> entry in this.traits[i].Item1.effects)
                 {
                     // if present, update total modifier
-                    if (entry.Key.Equals(effect))
+                    if (entry.Key.Equals(stat))
                     {
                         // get this particular modifer (based on character's trait level)
                         // and round up if necessary (i.e. to get the full effect)
@@ -2105,6 +2228,10 @@ namespace hist_mmorpg
                 if (Globals_Game.armyMasterList.ContainsKey(this.armyID))
                 {
                     thisArmy = Globals_Game.armyMasterList[this.armyID];
+                }
+                else
+                {
+                    Globals_Server.logError("Character " + this.charID + " leading army " + this.armyID + ", but army not found in army master list");
                 }
             }
 
@@ -2185,10 +2312,10 @@ namespace hist_mmorpg
         /// <param name="type">string identify type of grant</param>
         /// <param name="priorToList">bool indicating if check is prior to listing possible candidates</param>
         /// <param name="armyID">string containing the army ID (if choosing a leader)</param>
-        public bool ChecksBeforeGranting(PlayerCharacter granter, string type, bool priorToList, string armyID = null)
+        public bool ChecksBeforeGranting(PlayerCharacter granter, string type, bool priorToList, out ProtoMessage error, string armyID = null)
         {
+            error = null;
             bool proceed = true;
-            string toDisplay = "";
             // get army if appropriate
             Army armyToLead = null;
             if (!String.IsNullOrWhiteSpace(armyID))
@@ -2206,14 +2333,8 @@ namespace hist_mmorpg
                 if (!(this is PlayerCharacter))
                 {
                     proceed = false;
-                    if (!priorToList)
-                    {
-                        if (granter!=null)
-                        {
-                            toDisplay = "Only a PlayerCharacter can receive a royal gift.";
-                            Globals_Game.UpdatePlayer(granter.playerID, toDisplay);
-                        }
-                    }
+                    error = new ProtoMessage();
+                    error.ResponseType = DisplayMessages.CharacterRoyalGiftPlayer;
                 }
 
                 else
@@ -2222,14 +2343,8 @@ namespace hist_mmorpg
                     if (String.IsNullOrWhiteSpace((this as PlayerCharacter).playerID))
                     {
                         proceed = false;
-                        if (!priorToList)
-                        {
-                            if (granter!=null)
-                            {
-                                toDisplay = "Only a player can receive a royal gift.";
-                                Globals_Game.UpdatePlayer(granter.playerID, toDisplay);
-                            }
-                        }
+                        error = new ProtoMessage();
+                        error.ResponseType = DisplayMessages.CharacterRoyalGiftPlayer;
                     }
 
                     else
@@ -2238,14 +2353,8 @@ namespace hist_mmorpg
                         if ((this as PlayerCharacter) == granter)
                         {
                             proceed = false;
-                            if (!priorToList)
-                            {
-                                if (granter!=null)
-                                {
-                                    toDisplay = "You cannot grant a royal gift to yourself.";
-                                    Globals_Game.UpdatePlayer(granter.playerID, toDisplay);
-                                }
-                            }
+                            error = new ProtoMessage();
+                            error.ResponseType = DisplayMessages.CharacterRoyalGiftSelf;
                         }
                     }
                 }
@@ -2258,15 +2367,10 @@ namespace hist_mmorpg
                 // 1. check is male
                 if (!this.isMale)
                 {
+                    Console.WriteLine("Not male");
                     proceed = false;
-                    if (!priorToList)
-                    {
-                        if (granter!=null)
-                        {
-                            toDisplay = "The recieving character must be a male.";
-                            Globals_Game.UpdatePlayer(granter.playerID, toDisplay);
-                        }
-                    }
+                    error = new ProtoMessage();
+                    error.ResponseType = DisplayMessages.CharacterNotMale;
                 }
 
                 else
@@ -2274,119 +2378,61 @@ namespace hist_mmorpg
                     // 2. check is of age
                     if (this.CalcAge() < 14)
                     {
+                        Console.Write("too young");
                         proceed = false;
-                        if (!priorToList)
-                        {
-                            if (granter!=null)
-                            {
-                                toDisplay = "The recieving character must be of age (14).";
-                                Globals_Game.UpdatePlayer(granter.playerID, toDisplay);
-                            }
-                        }
+                        error = new ProtoMessage();
+                        error.ResponseType = DisplayMessages.CharacterNotOfAge;
                     }
 
                     // army leaders
                     else
                     {
-                        // 3. army leaders must be in same hex as army
-                        if ((type.Equals("leader")) && (!(this.location.id.Equals(armyToLead.location))))
-                        {
-                            proceed = false;
-                            if (!priorToList)
-                            {
-                                if (granter!=null)
-                                {
-                                    toDisplay = "Army leaders must be in the same hex as the army they are to lead.";
-                                    Globals_Game.UpdatePlayer(granter.playerID, toDisplay);
-                                }
-                            }
-                        }
 
-                        else
+                        // 3. army leaders must be in same hex as army
+                        if (type.Equals("leader"))
                         {
-                            // 4. check if army leader is already leader of this army
-                            if ((!String.IsNullOrWhiteSpace(this.armyID)) && (!String.IsNullOrWhiteSpace(armyID)))
+                            // Army must be defined
+                            if (armyToLead == null)
                             {
-                                if (this.armyID.Equals(armyID))
+                                Console.WriteLine("No Army");
+                                ProtoMessage noArmy = new ProtoMessage();
+                                noArmy.ResponseType = DisplayMessages.ErrorGenericArmyUnidentified;
+                                error = noArmy;
+                                return false;
+                            }
+                            if ((!(this.location.id.Equals(armyToLead.location))))
+                            {
+                                Console.WriteLine("Not same location");
+                                proceed = false;
+                                error = new ProtoMessage();
+                                error.ResponseType = DisplayMessages.CharacterLeaderLocation;
+                            }
+                            else
+                            {
+                                // 4. check if army leader is already leader of this army
+                                if ((!String.IsNullOrWhiteSpace(this.armyID)) && (!String.IsNullOrWhiteSpace(armyID)))
                                 {
-                                    proceed = false;
-                                    if (!priorToList)
+                                    if (this.armyID.Equals(armyID))
                                     {
-                                        if (granter!=null)
-                                        {
-                                            toDisplay = "This character is already leading the selected army.";
-                                            Globals_Game.UpdatePlayer(granter.playerID, toDisplay);
-                                        }
+                                        Console.WriteLine("Already leader");
+                                        proceed = false;
+                                        error = new ProtoMessage();
+                                        error.ResponseType = DisplayMessages.CharacterLeadingArmy;
                                     }
                                 }
-                            }
+                            }   
                         }
                     }
                 }
             }
-            //TODO confirm
+            //TODO confirm on client side: if character is leading army or is bailiff confirm becore appointing leader or bailiff
             // checks to be carried out at the time of selection (i.e. not prior to listing candidates)
             if (proceed)
             {
-                if (!priorToList)
-                {
-                    if ((type.Equals("leader")) || (type.Equals("bailiff")))
-                    {
-                        // 1. warn if is currently employed as army leader
-                        if (!String.IsNullOrWhiteSpace(this.armyID))
-                        {
-                            toDisplay = "This character is currently leading an army (" + this.armyID + ").\r\n\r\n";
-                            toDisplay += "Do you wish to proceed with the appointment?";
-                            DialogResult dialogResult = MessageBox.Show(toDisplay, "Proceed with appointment?", MessageBoxButtons.OKCancel);
-
-                            // if choose to cancel
-                            if (dialogResult == DialogResult.Cancel)
-                            {
-                                proceed = false;
-                              /*  if (hasClient)
-                                {
-                                    toDisplay = "Appointment cancelled.";
-                                    System.Windows.Forms.MessageBox.Show(toDisplay, "OPERATION CANCELLED");
-                                }*/
-                            }
-                        }
-                       
-                        //TODO confirm
-                        // 2. warn if is currently employed as bailiff
-                        if (proceed)
-                        {
-                            List<Fief> fiefsBailiff = this.GetFiefsBailiff();
-                            if (fiefsBailiff.Count > 0)
-                            {
-                                toDisplay = "This character is currently employed as a bailiff (";
-                                for (int i = 0; i < fiefsBailiff.Count; i++)
-                                {
-                                    toDisplay += fiefsBailiff[i].id;
-                                    if (i < fiefsBailiff.Count - 1)
-                                    {
-                                        toDisplay += ", ";
-                                    }
-                                }
-                                toDisplay += ").\r\n\r\n";
-                                toDisplay += "Do you wish to proceed with the appointment?";
-                                DialogResult dialogResult = MessageBox.Show(toDisplay, "Proceed with appointment?", MessageBoxButtons.OKCancel);
-
-                                // if choose to cancel
-                                if (dialogResult == DialogResult.Cancel)
-                                {
-                                    proceed = false;
-                                    /*if (hasClient)
-                                    {
-                                        toDisplay = "Appointment cancelled.";
-                                        Globals_Game.UpdatePlayer(c.user, toDisplay);
-                                    } */
-                                }
-                            }
-                        }
-                    }
-                }
+                error = new ProtoMessage();
+                error.ResponseType = DisplayMessages.Success;
             }
-
+       
             return proceed;
         }
 
@@ -2394,10 +2440,10 @@ namespace hist_mmorpg
         /// Allows the character to enter or exit the keep
         /// </summary>
         /// <returns>bool indicating success</returns>
-        public bool ExitEnterKeep()
+        public bool ExitEnterKeep(out ProtoMessage result)
         {
             bool success = false;
-
+            result = null;
             // if in keep
             if (this.inKeep)
             {
@@ -2409,7 +2455,7 @@ namespace hist_mmorpg
             else
             {
                 // attempt to enter keep
-                success = this.EnterKeep();
+                success = this.EnterKeep(out result);
             }
 
             return success;
@@ -2423,8 +2469,9 @@ namespace hist_mmorpg
         /// <param name="target">Target fief</param>
         /// <param name="cost">Travel cost (days)</param>
         /// <param name="siegeCheck">bool indicating whether to check whether the move would end a siege</param>
-        public bool ChecksBeforeMove(Fief target, double cost, bool siegeCheck = true)
+        public bool ChecksBeforeMove(Fief target, double cost, out ProtoMessage error, bool siegeCheck = true)
         {
+            error = null;
             bool proceedWithMove = true;
             PlayerCharacter player = null;
             if (this is PlayerCharacter)
@@ -2454,52 +2501,20 @@ namespace hist_mmorpg
                     string thisSiegeID = myArmy.CheckIfBesieger();
                     if (!String.IsNullOrWhiteSpace(thisSiegeID))
                     {
-                        bool proceed = true;
-                        // give player fair warning of consequences to siege
-                        if (player != null)
-                        {
-                            string toDisplay = "Your army is currently besieging this fief.  Moving will end the siege.";
-                            Globals_Game.UpdatePlayer(player.playerID, toDisplay);
-                            //WAIT FOR RESPONSE
-                            //TODO something like
-                         //   proceed = Globals_Server.requestConfirmation();
-                        }
-                        // if choose to cancel
-                        if (!proceed)
-                        {
-
-                            if (player != null)
-                            {
-                                string toDisplay = "Move cancelled";
-                                Globals_Game.UpdatePlayer(player.playerID, toDisplay);
-                            }
-
-                            proceedWithMove = false;
-                        }
-
-                        // if choose to proceed
-                        else
-                        {
-                            // end the siege
+                        // end the siege
                             Siege thisSiege = Globals_Game.siegeMasterList[thisSiegeID];
                             if (player != null)
                             {
-                                String toDisplay = "Siege (" + thisSiegeID + ") ended.";
-                                Globals_Game.UpdatePlayer(player.playerID, toDisplay);
-
+                                string[] fields = new string[3];
                                 // construct event description to be passed into siegeEnd
-                                string siegeDescription = "On this day of Our Lord the forces of ";
-                                siegeDescription += thisSiege.GetBesiegingPlayer().firstName + " " + thisSiege.GetBesiegingPlayer().familyName;
-                                siegeDescription += " have chosen to abandon the siege of " + thisSiege.GetFief().name;
-                                siegeDescription += ". " + thisSiege.GetDefendingPlayer().firstName + " " + thisSiege.GetDefendingPlayer().familyName;
-                                siegeDescription += " retains ownership of the fief.";
+                                fields[0]= thisSiege.GetBesiegingPlayer().firstName + " " + thisSiege.GetBesiegingPlayer().familyName;
+                                fields[1]= thisSiege.GetFief().name;
+                                fields[2] = thisSiege.GetDefendingPlayer().firstName + " " + thisSiege.GetDefendingPlayer().familyName;
 
                                 // end siege and set to null
-                                thisSiege.SiegeEnd(false, siegeDescription);
+                                thisSiege.SiegeEnd(false, DisplayMessages.SiegeEndDefault,fields);
                                 thisSiege = null;
                             }
-
-                        }
                     }
                 }
 
@@ -2516,8 +2531,8 @@ namespace hist_mmorpg
 
                         if (player != null)
                         {
-                            String toDisplay = "I'm afraid you've run out of days.\r\nYour journey will continue next season.";
-                            Globals_Game.UpdatePlayer(player.playerID, toDisplay);
+                            error = new ProtoMessage();
+                            error.ResponseType = DisplayMessages.CharacterDaysJourney;
                         }
 
                         proceedWithMove = false;
@@ -2536,9 +2551,10 @@ namespace hist_mmorpg
         /// <param name="target">Target fief</param>
         /// <param name="cost">Travel cost (days)</param>
         /// <param name="siegeCheck">bool indicating whether to check whether the move would end a siege</param>
-        public virtual bool MoveCharacter(Fief target, double cost, bool siegeCheck = true)
+        public virtual bool MoveCharacter(Fief target, double cost, out ProtoMessage error, bool siegeCheck = true)
         {
-            bool success = this.ChecksBeforeMove(target, cost, siegeCheck);
+            bool success = this.ChecksBeforeMove(target, cost, out error, siegeCheck);
+            if (!success) return false;
             //Holds the playercharacter moving or who initiated NPC move
             PlayerCharacter player = null;
             if (this is PlayerCharacter)
@@ -2556,66 +2572,38 @@ namespace hist_mmorpg
                     player = (this as NonPlayerCharacter).GetEmployer();
                 }
             }
-            if (success)
+            //TODO client side if goTo list not empty and target not first in goTo list confirm is ok to clear destination list
+            if (this.goTo.Count!=0 && target != this.goTo.Peek())
             {
-                if (player!=null)
+                this.goTo.Clear();
+            }
+            else {
+                // remove character from current fief's character list
+                this.location.RemoveCharacter(this);
+
+                // set location to target fief
+                this.location = target;
+
+                // add character to target fief's character list
+                this.location.AddCharacter(this);
+
+                // arrives outside keep
+                this.inKeep = false;
+
+                // deduct move cost from days left
+                if (this is PlayerCharacter)
                 {
-                    // check to see if character has fiefs in their goTo queue
-                    // (i.e. they have a pre-planned move)
-                    if (this.goTo.Count > 0)
-                    {
-                        // check to see if this fief is the next planned destination
-                        if (target != this.goTo.Peek())
-                        {
-                            // if not the next planned destination, give choice to continue or cancel
-                            DialogResult dialogResult = MessageBox.Show("This move will clear your stored destination list.  Click 'OK' to proceed.", "Proceed with move?", MessageBoxButtons.OKCancel);
-                            bool proceed = true;
-                            //TODO implement confirmation
-                           // proceed = Globals_Server.requestConfirmation();
-                            // if choose to cancel, return
-                            if (!proceed)
-                            {
-                                string toDisplay = "Move cancelled";
-                                Globals_Game.UpdatePlayer(player.playerID, toDisplay);
-                                success = false;
-                            }
-                            else
-                            {
-                                this.goTo.Clear();
-                            }
-                        }
-                    }
+                    (this as PlayerCharacter).AdjustDays(cost);
+                }
+                else
+                {
+                    this.AdjustDays(cost);
                 }
 
-                if (success)
+                // check if has accompanying army, if so move it
+                if (!String.IsNullOrWhiteSpace(this.armyID))
                 {
-                    // remove character from current fief's character list
-                    this.location.RemoveCharacter(this);
-
-                    // set location to target fief
-                    this.location = target;
-
-                    // add character to target fief's character list
-                    this.location.AddCharacter(this);
-
-                    // arrives outside keep
-                    this.inKeep = false;
-
-                    // deduct move cost from days left
-                    if (this is PlayerCharacter)
-                    {
-                        (this as PlayerCharacter).AdjustDays(cost);
-                    }
-                    else
-                    {
-                        this.AdjustDays(cost);
-                    }
-
-                    // check if has accompanying army, if so move it
-                    if (!String.IsNullOrWhiteSpace(this.armyID))
-                    {
-                        this.GetArmy().MoveArmy();
-                    }
+                    this.GetArmy().MoveArmy();
                 }
             }
 
@@ -2632,7 +2620,7 @@ namespace hist_mmorpg
             double myDays = 90;
 
             // check for time efficiency in traits
-            double timeTraitsMOd = this.CalcTraitEffect("time");
+            double timeTraitsMOd = this.CalcTraitEffect(Globals_Game.Stats.TIME);
             if (timeTraitsMOd != 0)
             {
                 // apply trait effects
@@ -2684,14 +2672,16 @@ namespace hist_mmorpg
                 this.AdjustDays(remainingDays);
             }
         }
-        //ASK if players should be alerted if one of their family members spouses becomes pregnant or just for player's wife
+
         /// <summary>
         /// Calculates whether character manages to get spouse pregnant
         /// </summary>
         /// <returns>bool indicating success</returns>
         /// <param name="wife">Character's spouse</param>
-        public bool GetSpousePregnant(Character wife)
+        public bool GetSpousePregnant(Character wife,out ProtoMessage birthMessage)
         {
+           
+            birthMessage = null;
             bool isPlayer = this is PlayerCharacter;
             PlayerCharacter player = null;
             if (isPlayer)
@@ -2796,7 +2786,7 @@ namespace hist_mmorpg
                     string[] birthPersonae = new string[] { wife.familyID + "|headOfFamily", wife.charID + "|mother", wife.spouse + "|father" };
 
                     // create entry
-                    JournalEntry birth = new JournalEntry(Globals_Game.GetNextJournalEntryID(), birthYear, birthSeason, birthPersonae, "birth");
+                    JournalEntry birth = new JournalEntry(Globals_Game.GetNextJournalEntryID(), birthYear, birthSeason, birthPersonae, "birth",null);
                     // add entry
                     Globals_Game.scheduledEvents.entries.Add(birth.jEntryID, birth);
 
@@ -2808,8 +2798,9 @@ namespace hist_mmorpg
                         // display message of celebration
                         if (player!=null)
                         {
-                            string toDisplay = "Let the bells ring out, milord.  " + wife.firstName + " " + wife.familyName + " is pregnant!";
-                            Globals_Game.UpdatePlayer(player.playerID, toDisplay);
+                            birthMessage = new ProtoMessage();
+                            birthMessage.ResponseType = DisplayMessages.CharacterSpousePregnant;
+                            birthMessage.MessageFields = new string[] { wife.firstName + " " + wife.familyName };
                         }
                     }
 
@@ -2826,8 +2817,9 @@ namespace hist_mmorpg
                     // display encouraging message
                     if (player!=null)
                     {
-                        string toDisplay = "I'm afraid " + wife.firstName + " " + wife.familyName + " is not pregnant.  Better luck next time, milord!";
-                        Globals_Game.UpdatePlayer(player.playerID,toDisplay);
+                        birthMessage = new ProtoMessage();
+                        birthMessage.ResponseType = DisplayMessages.CharacterSpouseNotPregnant;
+                        birthMessage.MessageFields = new string[] { wife.firstName + " " + wife.familyName };
                     }
                 }
 
@@ -2842,15 +2834,15 @@ namespace hist_mmorpg
                 // give the player the bad news
                 if (player!=null)
                 {
-                    string toDisplay = "Ahem ...\r\n\r\nUnfortunately, the fief physician advises that " + wife.firstName + " " + wife.familyName + " will never get pregnant with her current partner";
-                    Globals_Game.UpdatePlayer(player.playerID, toDisplay);
+                    birthMessage = new ProtoMessage();
+                    birthMessage.ResponseType = DisplayMessages.CharacterSpouseNeverPregnant;
+                    birthMessage.MessageFields = new string[] { wife.firstName + " " + wife.familyName };
                 }
             }
 
             return success;
         }
 
-        //TODO check thisHeadOfFamily is correct PlayerCharacter to notify
         /// <summary>
         /// Performs childbirth procedure
         /// </summary>
@@ -2895,74 +2887,48 @@ namespace hist_mmorpg
             string[] childbirthPersonae = new string[] { thisHeadOfFamily.charID + "|headOfFamily", this.charID + "|mother", daddy.charID + "|father", weeBairn.charID + "|child" };
 
             // description
-            description += "On this day of Our Lord " + this.firstName + " " + this.familyName;
-            description += ", wife of " + daddy.firstName + " " + daddy.familyName + ", went into labour.";
-
+            DisplayMessages ResponseType = DisplayMessages.None;
+            string[] fields = new string[5];
+            fields[0] = this.firstName + " " + this.familyName;
+            fields[1] = daddy.firstName + " " + daddy.familyName;
+            if (weeBairn.isMale)
+            {
+                fields[2] = "son";
+            }
+            else
+            {
+                fields[2] = "daughter";
+            }
+            fields[3] = thisHeadOfFamily.firstName + " " + thisHeadOfFamily.familyName;
             // mother and baby alive
             if ((!isStillborn) && (!mummyDied))
             {
-                description += " Both the mother and her newborn ";
-                if (weeBairn.isMale)
-                {
-                    description += "son";
-                }
-                else
-                {
-                    description += "daughter";
-                }
-                description += " are doing well and " + thisHeadOfFamily.firstName + " " + thisHeadOfFamily.familyName;
-                description += " is delighted to welcome a new member into his family.";
+                ResponseType = DisplayMessages.CharacterBirthOK;
             }
 
             // baby OK, mother dead
             if ((!isStillborn) && (mummyDied))
             {
-                description += " The baby ";
-                if (weeBairn.isMale)
-                {
-                    description += "boy";
-                }
-                else
-                {
-                    description += "girl";
-                }
-                description += " is doing well but sadly the mother died during childbirth. ";
-                description += thisHeadOfFamily.firstName + " " + thisHeadOfFamily.familyName;
-                description += " welcomes the new member into his family.";
+                ResponseType = DisplayMessages.CharacterBirthMumDead;
             }
 
             // mother OK, baby dead
             if ((isStillborn) && (!mummyDied))
             {
-                description += " The mother is doing well but sadly her newborn ";
-                if (weeBairn.isMale)
-                {
-                    description += "son";
-                }
-                else
-                {
-                    description += "daughter";
-                }
-                description += " died during childbirth.";
+                ResponseType = DisplayMessages.CharacterBirthChildDead;
             }
 
             // both mother and baby died
             if ((isStillborn) && (mummyDied))
             {
-                description += " Tragically, both the mother and her newborn ";
-                if (weeBairn.isMale)
-                {
-                    description += "son";
-                }
-                else
-                {
-                    description += "daughter";
-                }
-                description += " died of complications during the childbirth.";
+                ResponseType = DisplayMessages.CharacterBirthAllDead;
             }
 
             // put together new journal entry
-            JournalEntry childbirth = new JournalEntry(Globals_Game.GetNextJournalEntryID(), Globals_Game.clock.currentYear, Globals_Game.clock.currentSeason, childbirthPersonae, "birth", descr: description);
+            ProtoMessage birth = new ProtoMessage();
+            birth.ResponseType=ResponseType;
+            birth.MessageFields = null;
+            JournalEntry childbirth = new JournalEntry(Globals_Game.GetNextJournalEntryID(), Globals_Game.clock.currentYear, Globals_Game.clock.currentSeason, childbirthPersonae, "birth", birth);
 
             // add new journal entry to pastEvents
             Globals_Game.AddPastEvent(childbirth);
@@ -2978,7 +2944,7 @@ namespace hist_mmorpg
             if (!string.IsNullOrEmpty(thisHeadOfFamily.playerID))
             {
                 //TODO message handling
-                Globals_Game.UpdatePlayer(thisHeadOfFamily.playerID, description);
+                Globals_Game.UpdatePlayer(thisHeadOfFamily.playerID, ResponseType,fields);
             }
         }
 
@@ -3000,12 +2966,12 @@ namespace hist_mmorpg
             // if is siege, use 'siege' trait
             if (isSiegeStorm)
             {
-                combatTraitsMod = this.CalcTraitEffect("siege");
+                combatTraitsMod = this.CalcTraitEffect(Globals_Game.Stats.SIEGE);
             }
             // else use 'battle' trait
             else
             {
-                combatTraitsMod = this.CalcTraitEffect("battle");
+                combatTraitsMod = this.CalcTraitEffect(Globals_Game.Stats.BATTLE);
             }
 
             if (combatTraitsMod != 0)
@@ -3189,10 +3155,10 @@ namespace hist_mmorpg
             double fiefMgtRating = (this.management + this.CalculateStature()) / 2;
 
             // check for traits effecting fief loyalty
-            double fiefLoyTrait = this.CalcTraitEffect("fiefLoy");
+            double fiefLoyTrait = this.CalcTraitEffect(Globals_Game.Stats.FIEFLOY);
 
             // check for traits effecting fief expenses
-            double fiefExpTrait = this.CalcTraitEffect("fiefExpense");
+            double fiefExpTrait = this.CalcTraitEffect(Globals_Game.Stats.FIEFEXPENSE);
 
             // combine traits into single modifier. Note: fiefExpTrait is * by -1 because 
             // a negative effect on expenses is good, so needs to be normalised
@@ -3214,10 +3180,10 @@ namespace hist_mmorpg
             double armyLeaderRating = (this.management + this.CalculateStature() + this.combat) / 3;
 
             // check for traits effecting battle
-            double battleTraits = this.CalcTraitEffect("battle");
+            double battleTraits = this.CalcTraitEffect(Globals_Game.Stats.BATTLE);
 
             // check for traits effecting siege
-            double siegeTraits = this.CalcTraitEffect("siege");
+            double siegeTraits = this.CalcTraitEffect(Globals_Game.Stats.SIEGE);
 
             // combine traits into single modifier 
             double combatTraits = battleTraits + siegeTraits;
@@ -3331,31 +3297,32 @@ namespace hist_mmorpg
                 string injuryLocation = this.location.id;
 
                 // description
-                string injuryDescription = "On this day of our lord ";
-                injuryDescription += this.firstName + " " + this.familyName;
+                string[] fields = new string[4];
+                fields[0] = this.firstName + " " + this.familyName;
+                fields[1] = "";
                 if (concernedPlayer != null)
                 {
-                    injuryDescription += ", " + (this as NonPlayerCharacter).GetFunction(concernedPlayer) + " of ";
-                    injuryDescription += concernedPlayer.firstName + " " + concernedPlayer.familyName + ",";
+                    fields[1] = ", your " + (this as NonPlayerCharacter).GetFunction(concernedPlayer) + ", ";
                 }
-                injuryDescription += " received ";
                 if (healthLoss > 4)
                 {
-                    injuryDescription += "severe ";
+                   fields[2]=  "severe ";
                 }
                 else if (healthLoss < 2)
                 {
-                    injuryDescription += "light ";
+                    fields[2]= "light ";
                 }
                 else
                 {
-                    injuryDescription += "moderate ";
+                    fields[2] = "moderate ";
                 }
-                injuryDescription += "injuries on the field of battle in the fief of ";
-                injuryDescription += this.location.name + ".";
+                fields[3] =  this.location.name;
 
                 // create and send JOURNAL ENTRY
-                JournalEntry injuryEntry = new JournalEntry(entryID, Globals_Game.clock.currentYear, Globals_Game.clock.currentSeason, injuryPersonae, "injury", loc: injuryLocation, descr: injuryDescription);
+                ProtoMessage injury = new ProtoMessage();
+                injury.ResponseType = DisplayMessages.CharacterCombatInjury;
+                injury.MessageFields = fields;
+                JournalEntry injuryEntry = new JournalEntry(entryID, Globals_Game.clock.currentYear, Globals_Game.clock.currentSeason, injuryPersonae, "injury", injury, loc: injuryLocation);
 
                 // add new journal entry to pastEvents
                 Globals_Game.AddPastEvent(injuryEntry);
@@ -3367,7 +3334,7 @@ namespace hist_mmorpg
         /// <summary>
         /// Gets the fiefs in which the character is the bailiff
         /// </summary>
-        /// <returns>List<Fief> containing the fiefs</returns>
+        /// <returns>List containing the fiefs</returns>
         public List<Fief> GetFiefsBailiff()
         {
             List<Fief> myFiefs = new List<Fief>();
@@ -3436,13 +3403,14 @@ namespace hist_mmorpg
             return myArmies;
         }
 
-        //TODO who performs this action
+
         /// <summary>
         /// Preforms conditional checks prior to examining armies in a fief
         /// </summary>
         /// <returns>bool indicating whether to proceed with examination</returns>
-        public bool ChecksBefore_ExamineArmies()
+        public bool ChecksBefore_ExamineArmies(out ProtoMessage error)
         {
+            error = null;
             bool proceed = true;
             int reconDays = 0;
             PlayerCharacter player = null;
@@ -3465,8 +3433,8 @@ namespace hist_mmorpg
                 proceed = false;
                 if (player!=null)
                 {
-                    string toDisplay = this.firstName + " " + this.familyName + " doesn't have enough days for this operation.";
-                    Globals_Game.UpdatePlayer(player.playerID, toDisplay);
+                    error = new ProtoMessage();
+                    error.ResponseType = DisplayMessages.ErrorGenericNotEnoughDays;
                 }
             }
 
@@ -3486,8 +3454,8 @@ namespace hist_mmorpg
 
                     if (player!=null)
                     {
-                        string toDisplay = "Due to poor execution, " + this.firstName + " " + this.familyName + " has run out of time for this operation.";
-                        Globals_Game.UpdatePlayer(player.playerID, toDisplay);
+                        error = new ProtoMessage();
+                        error.ResponseType = DisplayMessages.ErrorGenericPoorOrganisation;
                     }
                 }
                 else
@@ -3497,7 +3465,7 @@ namespace hist_mmorpg
                     {
                         if ((this as NonPlayerCharacter).inEntourage)
                         {
-                            (this as NonPlayerCharacter).inEntourage = false;
+                            player.RemoveFromEntourage(this as NonPlayerCharacter);
                         }
                     }
 
@@ -3509,7 +3477,7 @@ namespace hist_mmorpg
 
             return proceed;
         }
-
+		//TODO replace with proto
         /// <summary>
         /// Retrieves information for Character display
         /// </summary>
@@ -3869,34 +3837,41 @@ namespace hist_mmorpg
 
 
                 // description
-                string description = "On this day of Our Lord a proposal has been made by ";
-                description += headOfFamilyGroom.firstName + " " + headOfFamilyGroom.familyName + " to ";
-                description += headOfFamilyBride.firstName + " " + headOfFamilyBride.familyName + " that ";
+                string[] fields = new string[5];
+                fields[0] = headOfFamilyGroom.firstName + " " + headOfFamilyGroom.familyName;
+                fields[1] = headOfFamilyBride.firstName + " " + headOfFamilyBride.familyName;
                 if (headOfFamilyGroomEntry.Equals(groomEntry))
                 {
-                    description += "he";
+                    fields[2]= "he";
                 }
                 else
                 {
-                    description += this.firstName + " " + this.familyName;
+                    fields[2] =  this.firstName + " " + this.familyName;
                 }
-                description += " be betrothed to " + bride.firstName + " " + bride.familyName;
+                fields[3] =  bride.firstName + " " + bride.familyName;
 
                 // create and send a proposal (journal entry)
-                JournalEntry myProposal = new JournalEntry(proposalID, year, season, myProposalPersonae, "proposalMade", descr: description);
+                ProtoMessage proposal = new ProtoMessage();
+                proposal.ResponseType = DisplayMessages.JournalProposal;
+                proposal.MessageFields = fields;
+                JournalEntry myProposal = new JournalEntry(proposalID, year, season, myProposalPersonae, "proposalMade",proposal);
                 success = Globals_Game.AddPastEvent(myProposal);
+                if (success) this.GetHeadOfFamily().activeProposals.Add(this.charID, bride.charID);
             }
 
             return success;
         }
 
+        //TODO prettify, if have time. A few if-elses goes a long way towards readability
         /// <summary>
         /// Implements conditional checks on the character and his proposed bride prior to a marriage proposal
         /// </summary>
         /// <returns>bool indicating whether proposal can proceed</returns>
         /// <param name="bride">The prospective bride</param>
-        public bool ChecksBeforeProposal(Character bride)
+        public bool ChecksBeforeProposal(Character bride,out ProtoMessage error)
         {
+            error = null;
+            string field  = "";
             PlayerCharacter player = null;
             if (this is PlayerCharacter)
             {
@@ -3907,13 +3882,13 @@ namespace hist_mmorpg
                 player = this.GetHeadOfFamily();
             }
             bool proceed = true;
-            string message = "";
+            DisplayMessages message = DisplayMessages.None;
 
             // ============= BRIDE
             // check is female
             if (bride.isMale)
             {
-                message = "You cannot propose to a man!";
+                message = DisplayMessages.CharacterProposalMan;
                 proceed = false;
             }
 
@@ -3922,7 +3897,8 @@ namespace hist_mmorpg
             {
                 if (bride.CalcAge() < 14)
                 {
-                    message = "The prospective bride has yet to come of age.";
+                    message = DisplayMessages.CharacterProposalUnderage;
+                    field = "bride";
                     proceed = false;
                 }
 
@@ -3931,7 +3907,8 @@ namespace hist_mmorpg
                     // check isn't engaged
                     if (!String.IsNullOrWhiteSpace(bride.fiancee))
                     {
-                        message = "The prospective bride is already engaged.";
+                        message = DisplayMessages.CharacterProposalEngaged;
+                        field = "bride";
                         proceed = false;
                     }
 
@@ -3940,15 +3917,18 @@ namespace hist_mmorpg
                         // check isn't married
                         if (!String.IsNullOrWhiteSpace(bride.spouse))
                         {
-                            message = "The prospective bride is already married.";
+                            message = DisplayMessages.CharacterProposalMarried;
+                            field = "bride";
                             proceed = false;
                         }
                         else
                         {
                             // check is family member of player
-                            if ((bride.GetHeadOfFamily() == null) || (String.IsNullOrWhiteSpace(bride.GetHeadOfFamily().playerID)))
+                            //if ((bride.GetHeadOfFamily() == null) || (String.IsNullOrWhiteSpace(bride.GetHeadOfFamily().playerID)))
+                            if ((bride.GetHeadOfFamily() == null))
                             {
-                                message = "The prospective bride is not of a suitable family.";
+                                message = DisplayMessages.CharacterProposalFamily;
+                                field = "bride";
                                 proceed = false;
                             }
                             else
@@ -3957,7 +3937,7 @@ namespace hist_mmorpg
                                 // check is male
                                 if (!this.isMale)
                                 {
-                                    message = "The proposer must be a man.";
+                                    message = DisplayMessages.CharacterNotMale;
                                     proceed = false;
                                 }
                                 else
@@ -3965,7 +3945,14 @@ namespace hist_mmorpg
                                     // check is of age
                                     if (this.CalcAge() < 14)
                                     {
-                                        message = "The prospective groom has yet to come of age.";
+                                        message = DisplayMessages.CharacterProposalUnderage;
+                                        field = "groom";
+                                        proceed = false;
+                                    }
+                                    // Ensure not already proposed to someone else
+                                    else if (this.GetHeadOfFamily().activeProposals.ContainsKey(this.charID))
+                                    {
+                                        message = DisplayMessages.CharacterProposalAlready;
                                         proceed = false;
                                     }
                                     else
@@ -3973,7 +3960,8 @@ namespace hist_mmorpg
                                         // check is unmarried
                                         if (!String.IsNullOrWhiteSpace(this.spouse))
                                         {
-                                            message = "The prospective groom is already married.";
+                                            message = DisplayMessages.CharacterProposalMarried;
+                                            field = "groom";
                                             proceed = false;
                                         }
                                         else
@@ -3981,7 +3969,8 @@ namespace hist_mmorpg
                                             // check isn't engaged
                                             if (!String.IsNullOrWhiteSpace(this.fiancee))
                                             {
-                                                message = "The prospective groom is already engaged.";
+                                                message = DisplayMessages.CharacterProposalEngaged;
+                                                field = "groom";
                                                 proceed = false;
                                             }
                                             else
@@ -3989,7 +3978,8 @@ namespace hist_mmorpg
                                                 // check is family member of player OR is player themself
                                                 if (String.IsNullOrWhiteSpace(this.familyID))
                                                 {
-                                                    message = "The prospective groom is not of a suitable family.";
+                                                    message = DisplayMessages.CharacterProposalFamily;
+                                                    field = "groom";
                                                     proceed = false;
                                                 }
                                                 else
@@ -3997,7 +3987,7 @@ namespace hist_mmorpg
                                                     // check isn't in family same family as bride
                                                     if (this.familyID.Equals(bride.familyID))
                                                     {
-                                                        message = "The prospective bride and groom are in the same family!";
+                                                        message = DisplayMessages.CharacterProposalIncest;
                                                         proceed = false;
                                                     }
                                                 }
@@ -4021,10 +4011,9 @@ namespace hist_mmorpg
 
             if (!proceed)
             {
-                if (player!=null)
-                {
-                    Globals_Game.UpdatePlayer(player.playerID, message);
-                }
+                error = new ProtoMessage();
+                error.ResponseType = message;
+                error.MessageFields = new string[] { field };
             }
 
             return proceed;
@@ -4034,8 +4023,9 @@ namespace hist_mmorpg
         /// Moves character one hex in a random direction
         /// </summary>
         /// <returns>bool indicating success</returns>
-        public bool RandomMoveNPC()
+        public bool RandomMoveNPC(out ProtoMessage error)
         {
+            error = null;
             bool success = false;
 
             // generate random int 0-6 to see if moves
@@ -4050,7 +4040,7 @@ namespace hist_mmorpg
                 double travelCost = this.location.getTravelCost(target);
 
                 // perform move
-                success = this.MoveCharacter(target, travelCost);
+                success = this.MoveCharacter(target, travelCost,out error);
             }
 
             return success;
@@ -4060,8 +4050,9 @@ namespace hist_mmorpg
         /// Moves character sequentially through fiefs stored in goTo queue
         /// </summary>
         /// <returns>bool indicating success</returns>
-       public bool CharacterMultiMove()
+       public bool CharacterMultiMove(out ProtoMessage error)
         {
+            error = null;
             bool success = false;
             double travelCost = 0;
             int steps = this.goTo.Count;
@@ -4071,7 +4062,7 @@ namespace hist_mmorpg
                 // get travel cost
                 travelCost = this.location.getTravelCost(this.goTo.Peek(), this.armyID);
                 // attempt to move character
-                success = this.MoveCharacter(this.goTo.Peek(), travelCost);
+                success = this.MoveCharacter(this.goTo.Peek(), travelCost,out error);
                 // if move successfull, remove fief from goTo queue
                 if (success)
                 {
@@ -4097,16 +4088,15 @@ namespace hist_mmorpg
 
         }
 
-        //TODO implement confirm
-        //TODO find which character to notify
        /// <summary>
        /// Allows the character to remain in their current location for the specified
        /// number of days, incrementing bailiffDaysInFief if appropriate
        /// </summary>
        /// <returns>bool indicating success</returns>
        /// <param name="campDays">Number of days to camp</param>
-       public bool CampWaitHere(byte campDays)
+       public bool CampWaitHere(byte campDays, out ProtoMessage campMessage)
        {
+           campMessage = null;
            bool proceed = true;
            // get army
            Army thisArmy = null;
@@ -4131,22 +4121,9 @@ namespace hist_mmorpg
                thisSiege = thisArmy.GetSiege();
            }
 
-           // check has enough days available
-           if (this.days < (Double)campDays)
+           if (campDays > this.days)
            {
-               campDays = Convert.ToByte(Math.Truncate(this.days));
-               DialogResult dialogResult = MessageBox.Show("You only have " + campDays + " available.  Click 'OK' to proceed.", "Proceed with camp?", MessageBoxButtons.OKCancel);
-
-               // if choose to cancel
-               if (dialogResult == DialogResult.Cancel)
-               {
-                   proceed = false;
-                   if (player!=null)
-                   {
-                       String toDisplay = "You decide not to camp after all.";
-                       Globals_Game.UpdatePlayer(player.playerID, toDisplay);
-                   }
-               }
+               campDays = Convert.ToByte(this.days);
            }
 
            if (proceed)
@@ -4168,8 +4145,7 @@ namespace hist_mmorpg
                    {
                        if (player!=null)
                        {
-                           string toDisplay = this.firstName + " " + this.familyName + " has been removed from your entourage.";
-                           Globals_Game.UpdatePlayer(player.playerID, toDisplay);
+                           Globals_Game.UpdatePlayer(player.playerID, DisplayMessages.CharacterRemovedFromEntourage, new string[] { this.firstName + " " + this.familyName });
                        }
                        player.RemoveFromEntourage((this as NonPlayerCharacter));
                    }
@@ -4198,8 +4174,9 @@ namespace hist_mmorpg
                    // inform player
                    if (player!=null)
                    {
-                       string toDisplay = this.firstName + " " + this.familyName + " remains in " + this.location.name + " for " + campDays + " days.";
-                       Globals_Game.UpdatePlayer(player.playerID, toDisplay);
+                       campMessage = new ProtoMessage();
+                       campMessage.ResponseType = DisplayMessages.CharacterCamp;
+                       campMessage.MessageFields=new string[] {this.firstName + " " + this.familyName,this.location.name,campDays.ToString()};
                    }
 
                    // check if character is army leader, if so check for army attrition
@@ -4219,6 +4196,7 @@ namespace hist_mmorpg
                            if (attritionModifer > 0)
                            {
                                totalAttrition += thisArmy.ApplyTroopLosses(attritionModifer);
+                               
                            }
                        }
 
@@ -4227,8 +4205,7 @@ namespace hist_mmorpg
                        {
                            if (player!=null)
                            {
-                               string toDisplay = "Army (" + thisArmy.armyID + ") lost " + totalAttrition + " troops due to attrition.";
-                               Globals_Game.UpdatePlayer(player.playerID, toDisplay);
+                               Globals_Game.UpdatePlayer(player.playerID, DisplayMessages.CharacterCampAttrition, new string[] {this.armyID,totalAttrition.ToString()});
                            }
                        }
                    }
@@ -4287,8 +4264,7 @@ namespace hist_mmorpg
                        {
                            if (player!=null)
                            {
-                               string toDisplay = myBailiff.firstName + " " + myBailiff.familyName + " has fulfilled his bailiff duties in " + this.location.name + ".";
-                               Globals_Game.UpdatePlayer(player.playerID, toDisplay);
+                               Globals_Game.UpdatePlayer(player.playerID, DisplayMessages.CharacterBailiffDuty,new string[]{myBailiff.firstName + " " + myBailiff.familyName,this.location.name});
                            }
                        }
                    }
@@ -4302,8 +4278,9 @@ namespace hist_mmorpg
        /// Allows the character to be moved along a specific route by using direction codes
        /// </summary>
        /// <param name="directions">string[] containing list of sequential directions to follow</param>
-       public void TakeThisRoute(string[] directions)
+       public void TakeThisRoute(string[] directions,out ProtoMessage error)
        {
+           error = null;
            bool proceed;
            Fief source = null;
            Fief target = null;
@@ -4327,7 +4304,7 @@ namespace hist_mmorpg
            {
                if ((this as NonPlayerCharacter).inEntourage)
                {
-                   (this as NonPlayerCharacter).inEntourage = false;
+                   player.RemoveFromEntourage(this as NonPlayerCharacter);
                }
            }
 
@@ -4356,11 +4333,8 @@ namespace hist_mmorpg
                // if no target acquired, display message and break
                else
                {
-                   if (player!=null)
-                   {
-                       string toDisplay = "Invalid movement instruction encountered.  Movement will halt at the last correct destination: " + source.name + " (" + source.id + ")";
-                       Globals_Game.UpdatePlayer(player.playerID, toDisplay);
-                   }
+                   error = new ProtoMessage();
+                   error.ResponseType = DisplayMessages.CharacterInvalidMovement;
                    break;
                }
 
@@ -4371,15 +4345,16 @@ namespace hist_mmorpg
            if (route.Count > 0)
            {
                this.goTo = route;
-               proceed = this.CharacterMultiMove();
+               proceed = this.CharacterMultiMove(out error);
            }
        }
        /// <summary>
        /// Moves the character to a specified fief using the shortest path
        /// </summary>
        /// <param name="fiefID">String containing the ID of the target fief</param>
-       public void MoveTo(string fiefID)
+       public void MoveTo(string fiefID, out ProtoMessage error)
        {
+           error = null;
            PlayerCharacter player = null;
            if (this is PlayerCharacter)
            {
@@ -4395,7 +4370,7 @@ namespace hist_mmorpg
                }
                if ((this as NonPlayerCharacter).inEntourage)
                {
-                   (this as NonPlayerCharacter).inEntourage = false;
+                   player.RemoveFromEntourage(this as NonPlayerCharacter);
                }
            }
 
@@ -4412,7 +4387,7 @@ namespace hist_mmorpg
                if (this.goTo.Count > 0)
                {
                    // perform move
-                   this.CharacterMultiMove();
+                   this.CharacterMultiMove(out error);
                }
 
            }
@@ -4420,20 +4395,633 @@ namespace hist_mmorpg
            // if target fief not found
            else
            {
-               if (player!=null)
-               {
-                   string toDisplay = "Target fief not identified.  Please ensure fiefID is valid.";
-                   Globals_Game.UpdatePlayer(player.playerID, toDisplay);
-               }
+               error = new ProtoMessage();
+               error.ResponseType = DisplayMessages.ErrorGenericFiefUnidentified;
            }
 
        }
+       
+       
+       /// <summary>
+       /// Spy on a fief to obtain information. Note: SpyCheck should be performed first
+       /// </summary>
+       /// <param name="fief">Fief to spy on</param>
+       /// <param name="result"> Full details of spy result, including information if successful and spy status</param>
+       /// <returns>boolean indicating spy success</returns>
+       public bool SpyOn(Fief fief, out ProtoMessage result)
+       {
 
+           // Booleans indicating result
+           bool isSuccessful=false;
+           bool wasDetected=false;
+           bool wasKilled=false;
+            
+           this.AdjustDays(10);
+           result = new ProtoMessage();
+           // TOOD Move to config
+           // Threshold under which this character will be detected
+           double detectedThreshold = 40;
+           // Threshold under which this character will be killed //TODO add capture
+           double killThreshold = 30;
+
+           // Get random success and escape chances 
+           double successChance= Utility_Methods.GetRandomDouble(85,15);
+           double escapeChance = Utility_Methods.GetRandomDouble(75, 25);
+
+           // Calculate total chance of success
+           double success = GetSpySuccessChance(fief);
+           // Check for success
+           if (success > successChance)
+           {
+               isSuccessful=true;
+           }
+           else
+           {
+               isSuccessful=false;
+           }
+           // Check whether detected or killed
+           if ((success + escapeChance) / 2 < detectedThreshold)
+           {
+               wasDetected = true;
+           }
+           if ((success + escapeChance) / 2 < killThreshold)
+           {
+               wasKilled = true;
+               this.ProcessDeath("spy");
+           }
+           PlayerCharacter owner = this.GetPlayerCharacter();
+           if (isSuccessful && wasDetected)
+           {
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.SpySuccessDetected, new string[]{this.firstName+ " "+this.familyName, fief.id});
+               Globals_Game.UpdatePlayer(fief.owner.playerID, DisplayMessages.EnemySpySuccess, new string[] { fief.id, owner.firstName + " "+ owner.familyName });
+               ProtoFief fiefDetails = new ProtoFief(fief);
+               fiefDetails.includeSpy(fief);
+                
+               result = fiefDetails;
+           }
+           else if (isSuccessful)
+           {
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.SpySuccess, new string[] { this.firstName + " " + this.familyName, fief.id});
+               ProtoFief fiefDetails = new ProtoFief(fief);
+               fiefDetails.includeSpy(fief);
+               result = fiefDetails;
+           }
+           else if (!isSuccessful && wasKilled)
+           {
+               Globals_Game.UpdatePlayer(fief.owner.playerID, DisplayMessages.EnemySpyKilled, new string[] { fief.id, owner.firstName + " " + owner.familyName });
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.SpyFailDead, new string[] { this.firstName + " " + this.familyName, fief.id });
+           }
+           else if (!isSuccessful && wasDetected)
+           {
+               Globals_Game.UpdatePlayer(fief.owner.playerID, DisplayMessages.EnemySpyFail, new string[] { fief.id, owner.firstName + " " + owner.familyName });
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.SpyFailDetected, new string[] { this.firstName + " " + this.familyName,fief.id });
+           }
+           else if (!isSuccessful)
+           {
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.SpyFail, new string[] { this.firstName + " " + this.familyName,fief.id });
+           }
+            result.ResponseType = DisplayMessages.Success;
+           return isSuccessful;
+       }
+
+
+        // TODO use values from config
+        /// <summary>
+        /// Get the success chance for spying on a target
+        /// </summary>
+        /// <param name="target">Target to spy on- currently Fief, Character or Army</param>
+        /// <returns>Chance of success</returns>
+        public double GetSpySuccessChance(object target)
+        {
+#if DEBUG
+            if (0<=fixedSuccessChance&&fixedSuccessChance <=100)
+            {
+                return fixedSuccessChance;
+            }
+#endif
+            Type t = target.GetType();
+            double baseChance;
+            Character perceptiveCharacter = null;
+
+            if (t.IsSubclassOf(typeof(Character)))
+            {
+                Character character = target as Character;
+                if (character == null)
+                {
+                    return -1;
+                }
+                baseChance = 40;
+                perceptiveCharacter = character;
+            }
+            else if (t == typeof(Fief))
+            {
+                Fief fief = target as Fief;
+                if (fief == null)
+                {
+                    return -1;
+                }
+                baseChance = 40;
+                if (fief.bailiff != null)
+                {
+                    perceptiveCharacter = fief.bailiff;
+                }
+            }
+            else if (t == typeof(Army))
+            {
+                Army army = target as Army;
+                if (army == null)
+                {
+                    return -1;
+                }
+
+                if (!string.IsNullOrWhiteSpace(army.leader))
+                {
+                    perceptiveCharacter = army.GetLeader();
+                }
+                baseChance = 30;
+            }
+            else
+            {
+                return -1;
+            }
+            double stealth = CalcTraitEffect(Globals_Game.Stats.STEALTH);
+            double enemyPerception = 0;
+            if (perceptiveCharacter != null)
+            {
+                enemyPerception = perceptiveCharacter.CalcTraitEffect(Globals_Game.Stats.PERCEPTION);
+            }
+            return baseChance + ((stealth - enemyPerception) * 100);
+        }
+
+        public bool SpyCheck(Character character, out ProtoMessage result)
+        {
+            result = null;
+            // Cannot spy on captive
+            if (!string.IsNullOrWhiteSpace(character.captorID))
+            {
+                result = new ProtoMessage(DisplayMessages.ErrorSpyCaptive);
+                return false;
+            }
+            // Cannot spy on own character
+            if (character.GetPlayerCharacter() == this.GetPlayerCharacter())
+            {
+                result = new ProtoMessage(DisplayMessages.ErrorSpyOwn);
+                return false;
+            }
+            // Ensure spy is in same location
+            if (!this.location.Equals(character.location))
+            {
+                result = new ProtoMessage(DisplayMessages.ErrorGenericNotInSameFief);
+                return false;
+            }
+            if (this.days < 10)
+            {
+                result= new ProtoMessage(DisplayMessages.ErrorGenericNotEnoughDays);
+                return false;
+            }
+            // Cannot spy on dead character
+            if (!character.isAlive)
+            {
+                result = new ProtoMessage(DisplayMessages.ErrorSpyDead);
+                return false;
+            }
+            return true;
+        }
+
+
+        public bool SpyCheck(Fief fief, out ProtoMessage result)
+        {
+            result = null;
+            // Ensure spy is in same location
+            if (!this.location.Equals(fief))
+            {
+                ProtoMessage error = new ProtoMessage();
+                error.ResponseType = DisplayMessages.ErrorGenericNotInSameFief;
+                result = error;
+                return false;
+            }
+            // Ensure not trying to spy on own army
+            if (fief.owner == this.GetPlayerCharacter())
+            {
+                ProtoMessage error = new ProtoMessage();
+                error.ResponseType = DisplayMessages.ErrorSpyOwn;
+                error.MessageFields = new string[] { "fief" };
+                result = error;
+                return false;
+            }
+            if (this.days < 10)
+            {
+                ProtoMessage error = new ProtoMessage();
+                error.ResponseType = DisplayMessages.ErrorGenericNotEnoughDays;
+                result = error;
+                return false;
+            }
+            return true;
+        }
+
+        public bool SpyCheck(Army army, out ProtoMessage result)
+        {
+            result = null;
+            // Ensure spy is in same location
+            if (this.location.id != (army.location))
+            {
+                ProtoMessage error = new ProtoMessage();
+                error.ResponseType = DisplayMessages.ErrorGenericNotInSameFief;
+                result = error;
+                return false;
+            }
+            // Ensure not trying to spy on own army
+            if (army.GetOwner() == this.GetPlayerCharacter())
+            {
+                ProtoMessage error = new ProtoMessage();
+                error.ResponseType = DisplayMessages.ErrorSpyOwn;
+                error.MessageFields = new string[] { "army" };
+                result = error;
+                return false;
+
+            }
+            if (this.days < 10)
+            {
+                ProtoMessage error = new ProtoMessage();
+                error.ResponseType = DisplayMessages.ErrorGenericNotEnoughDays;
+                result = error;
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Spy on a character to gain additional information. Note: SpyCheck should be performed first
+        /// </summary>
+        /// <param name="character">Character to spy on</param>
+        /// <param name="result">Returns protomessage containing the full spy result and any information gained</param>
+        /// <returns>Bool indicating spy success</returns>
+        public bool SpyOn(Character character, out ProtoMessage result)
+       {
+           // Booleans indicating result
+           bool isSuccessful = false;
+           bool wasDetected = false;
+           bool wasKilled = false;
+
+           // Threshold under which this character will be detected
+           double detectedThreshold = 40;
+           // Threshold under which this character will be killed //TODO add capture
+           double killThreshold = 30;
+
+           result = new ProtoMessage();
+           this.AdjustDays(10);
+           // Total chance of success
+           double success = GetSpySuccessChance(character);
+           
+           // Get random success and escape chances 
+           double successChance = Utility_Methods.GetRandomDouble(85, 15);
+           double escapeChance = Utility_Methods.GetRandomDouble(75, 25);
+            
+           if (success > successChance)
+           {
+               isSuccessful = true;
+           }
+           else
+           {
+               isSuccessful = false;
+           }
+           // Check whether detected or killed
+           if ((success + escapeChance) / 2 < detectedThreshold)
+           {
+               wasDetected = true;
+           }
+           if ((success + escapeChance) / 2 < killThreshold)
+           {
+               wasKilled = true;
+               this.ProcessDeath("spy");
+           }
+
+           /***Send results**/
+           PlayerCharacter owner = this.GetPlayerCharacter();
+           PlayerCharacter enemyOwner = character.GetPlayerCharacter();
+           if (isSuccessful && wasDetected)
+           {
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.SpySuccessDetected, new string[] { this.firstName + " " + this.familyName, character.firstName + " " + character.familyName });
+               if (enemyOwner != null)
+               {
+                   Globals_Game.UpdatePlayer(enemyOwner.playerID, DisplayMessages.EnemySpySuccess, new string[] { character.firstName + " " + character.familyName, owner.firstName + " " + owner.familyName });
+               }
+               if (character is NonPlayerCharacter)
+               {
+                   ProtoNPC charDetails = new ProtoNPC(character as NonPlayerCharacter);
+                   charDetails.includeSpy(character);
+                   result = charDetails;
+               }
+               else
+               {
+                   ProtoPlayerCharacter charDetails = new ProtoPlayerCharacter(character as PlayerCharacter);
+                   charDetails.includeSpy(character);
+                   result = charDetails;
+               }
+               
+           }
+           else if (isSuccessful)
+           {
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.SpySuccess, new string[] { this.firstName + " " + this.familyName,character.firstName + " " + character.familyName });
+               if (character is NonPlayerCharacter)
+               {
+                   ProtoNPC charDetails = new ProtoNPC(character as NonPlayerCharacter);
+                   charDetails.includeSpy(character);
+                   result = charDetails;
+               }
+               else
+               {
+                   ProtoPlayerCharacter charDetails = new ProtoPlayerCharacter(character as PlayerCharacter);
+                   charDetails.includeSpy(character);
+                   result = charDetails;
+               }
+           }
+           else if (!isSuccessful && wasKilled)
+           {
+               if (enemyOwner != null)
+               {
+                   Globals_Game.UpdatePlayer(enemyOwner.playerID, DisplayMessages.EnemySpyKilled, new string[] { character.firstName + " " + character.familyName, owner.firstName + " " + owner.familyName });
+               
+               }
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.SpyFailDead, new string[] { this.firstName + " " + this.familyName, character.firstName + " " + character.familyName});
+           }
+           else if (!isSuccessful && wasDetected)
+           {
+               if (enemyOwner != null)
+               {
+                   Globals_Game.UpdatePlayer(enemyOwner.playerID, DisplayMessages.EnemySpyFail, new string[] { character.firstName + " " + character.familyName, owner.firstName + " " + owner.familyName });
+               }
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.SpyFailDetected, new string[] { this.firstName + " " + this.familyName,character.firstName + " " + character.familyName });
+           }
+           else if (!isSuccessful)
+           {
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.SpyFail, new string[] { this.firstName +" "+ this.familyName,character.firstName  + " "+ character.familyName});
+           }
+
+            result.ResponseType = DisplayMessages.Success;
+           return isSuccessful;
+       }
+
+        /// <summary>
+        /// Spy on an army to obtain information. Note: SpyCheck should be performed first
+        /// </summary>
+        /// <param name="army">Army to spy on</param>
+        /// <param name="result">Result of spying, including additional information obtained</param>
+        /// <returns>Bool for success</returns>
+       public bool SpyOn(Army army, out ProtoMessage result)
+       {
+           // Booleans indicating result
+           bool isSuccessful = false;
+           bool wasDetected = false;
+           bool wasKilled = false;
+
+           // Threshold under which this character will be detected
+           double detectedThreshold = 40;
+           // Threshold under which this character will be killed //TODO add capture
+           double killThreshold = 30;
+
+           result = new ProtoMessage();
+           this.AdjustDays(10);
+            // Total chance of success
+            double success = GetSpySuccessChance(army);
+
+           // Get random success and escape chances 
+           double successChance = Utility_Methods.GetRandomDouble(85, 15);
+           double escapeChance = Utility_Methods.GetRandomDouble(75, 25);
+            
+           if (success > successChance)
+           {
+               isSuccessful = true;
+           }
+           else
+           {
+               isSuccessful = false;
+           }
+           // Check whether detected or killed
+           if ((success + escapeChance) / 2 < detectedThreshold)
+           {
+               wasDetected = true;
+           }
+           if ((success + escapeChance) / 2 < killThreshold)
+           {
+               wasKilled = true;
+               this.ProcessDeath("spy");
+           }
+
+           /***Send results**/
+           PlayerCharacter owner = this.GetPlayerCharacter();
+           PlayerCharacter enemyOwner = army.GetOwner();
+           string armyDetails = enemyOwner.firstName + " " + enemyOwner.familyName + " (" + army.armyID + ")";
+           string myArmyDetails = "your army (" + army.armyID + ")";
+           if (isSuccessful && wasDetected)
+           {
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.SpySuccessDetected, new string[] { this.firstName + " " + this.familyName, armyDetails });
+               Globals_Game.UpdatePlayer(enemyOwner.playerID, DisplayMessages.EnemySpySuccess, new string[] {myArmyDetails, owner.firstName + " " + owner.familyName });
+               ProtoArmy armyInfo = new ProtoArmy(army,this);
+               armyInfo.includeSpy(army);
+               result = armyInfo;
+           }
+           else if (isSuccessful)
+           {
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.SpySuccess, new string[] { this.firstName + " " + this.familyName, armyDetails });
+               ProtoArmy armyInfo = new ProtoArmy(army, this);
+               armyInfo.includeSpy(army);
+               result = armyInfo;
+           }
+           else if (!isSuccessful && wasKilled)
+           {
+               Globals_Game.UpdatePlayer(enemyOwner.playerID, DisplayMessages.EnemySpyKilled, new string[] { myArmyDetails, owner.firstName + " " + owner.familyName });
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.SpyFailDead, new string[] { this.firstName + " " + this.familyName, armyDetails});
+           }
+           else if (!isSuccessful && wasDetected)
+           {
+               Globals_Game.UpdatePlayer(enemyOwner.playerID, DisplayMessages.EnemySpyFail, new string[] { myArmyDetails, owner.firstName + " " + owner.familyName });
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.SpyFailDetected, new string[] { this.firstName + " " + this.familyName, armyDetails });
+           }
+           else if (!isSuccessful)
+           {
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.SpyFail, new string[] { this.firstName + " " + this.familyName, armyDetails });
+           }
+            result.ResponseType = DisplayMessages.Success;
+           return isSuccessful;
+       }
+
+        /// <summary>
+        /// Kidnap a character
+        /// </summary>
+        /// <param name="target">Character to kidnap</param>
+        /// <param name="result">Result of kidnapping attempt or any errors</param>
+        /// <returns>Success</returns>
+       public bool Kidnap(Character target, out ProtoMessage result)
+       {
+           // Cannot kidnap dead person
+           if (!target.isAlive) {
+               // error
+               result = new ProtoMessage();
+               result.ResponseType=DisplayMessages.KidnapDead;
+               return false;
+           }
+           // Cannot kidnap own character
+           if(target.GetPlayerCharacter()==this.GetPlayerCharacter()) {
+               // error
+               result=new ProtoMessage();
+               result.ResponseType=DisplayMessages.KidnapOwnCharacter;
+               return false;
+           }
+           // target must belong to a player
+           // TODO use commented line in final
+           //if(target.GetPlayerCharacter()==null||string.IsNullOrWhiteSpace(target.GetPlayerCharacter().playerID)) {
+           if (target.GetPlayerCharacter() == null)
+           {
+               // error
+               result=new ProtoMessage();
+               result.ResponseType = DisplayMessages.KidnapNoPlayer;
+               return false;
+           }
+           // Cannot already be a captive
+           if (!string.IsNullOrWhiteSpace(target.captorID))
+           {
+               result = new ProtoMessage();
+               result.ResponseType = DisplayMessages.CharacterHeldCaptive;
+               return false;
+           }
+           // Booleans indicating result
+           bool isSuccessful = false;
+           bool wasDetected = false;
+           bool wasKilled = false;
+
+           // Threshold under which this character will be detected
+           double detectedThreshold = 70;
+           double killThreshold = 30;
+
+           result = null;
+           this.AdjustDays(10);
+           // Get own stealth rating and enemy perception rating (if the army has a leader)
+           double stealth = this.CalcTraitEffect(Globals_Game.Stats.STEALTH);
+           double enemyPerception = 0;
+           enemyPerception = target.CalcTraitEffect(Globals_Game.Stats.PERCEPTION);
+
+           double baseKidnapChance = 30;
+           // Total chance of success
+           double success = ((stealth - enemyPerception) * 100) + baseKidnapChance;
+
+           // Get random success and escape chances 
+           double successChance = Utility_Methods.GetRandomDouble(85, 15);
+           double escapeChance = Utility_Methods.GetRandomDouble(75, 25);
+
+           double successModifier = 1;
+           // If target is a playercharacter, decrease success by 15%
+           if (target is PlayerCharacter)
+           {
+               successModifier -= 0.15;
+           }
+           // If target is a family member, decrease success by 10%
+           else if (target.GetHeadOfFamily() != null)
+           {
+               successModifier -= 0.10;
+           }
+           // If target is in an entourage, decrease by a further 20%
+           if (target.GetPlayerCharacter().myEntourage.Contains(target))
+           {
+               successModifier -= 0.20;
+           }
+           // If target is leading an army, decrease by 10%
+           if (!string.IsNullOrWhiteSpace(target.armyID))
+           {
+               successModifier -= 0.1;
+           }
+
+           success = success * successModifier;
+           Console.WriteLine("Kidnap success: " + success + ",SuccessChance: " + successChance + ",EscapeChance: " + escapeChance);
+           if (success > successChance)
+           {
+               isSuccessful = true;
+               // Add captive to home fief
+               this.GetPlayerCharacter().AddCaptive(target, this.GetPlayerCharacter().GetHomeFief());
+           }
+           else
+           {
+               isSuccessful = false;
+           }
+           // Check whether detected or killed
+           Console.WriteLine("Escape chance: " + escapeChance);
+           if ((success + escapeChance) / 2 < detectedThreshold)
+           {
+               Console.WriteLine("Detected");
+               wasDetected = true;
+           }
+           if ((success + escapeChance) / 2 < killThreshold)
+           {
+               Console.WriteLine("Killed");
+               wasKilled = true;
+               this.ProcessDeath("kidnap");
+           }
+
+           /***Send results**/
+           PlayerCharacter owner = this.GetPlayerCharacter();
+           PlayerCharacter enemyOwner = target.GetPlayerCharacter();
+           string targetName = target.firstName + " " + target.familyName;
+           string kidnapperName = this.firstName + " " + this.familyName;
+           string kidnapperOwner = owner.firstName + " " + owner.familyName;
+           if (isSuccessful && wasDetected)
+           {
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.KidnapSuccessDetected, new string[] {kidnapperName, targetName });
+               Globals_Game.UpdatePlayer(enemyOwner.playerID, DisplayMessages.EnemyKidnapSuccessDetected, new string[] { targetName,kidnapperOwner });
+           
+           }
+           else if (isSuccessful)
+           {
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.KidnapSuccess, new string[] { kidnapperName,targetName });
+           }
+           else if (!isSuccessful && wasKilled)
+           {
+               Globals_Game.UpdatePlayer(enemyOwner.playerID, DisplayMessages.EnemyKidnapKilled, new string[] { targetName,kidnapperOwner});
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.KidnapFailDead, new string[] {kidnapperName, targetName});
+           }
+           else if (!isSuccessful && wasDetected)
+           {
+               Globals_Game.UpdatePlayer(enemyOwner.playerID, DisplayMessages.EnemyKidnapFail, new string[] { targetName,kidnapperOwner});
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.KidnapFailDetected, new string[] { kidnapperName,targetName });
+           }
+           else if (!isSuccessful)
+           {
+               Globals_Game.UpdatePlayer(owner.playerID, DisplayMessages.KidnapFail, new string[] { kidnapperName,targetName});
+           }
+           return isSuccessful;
+
+       }
+        /// <summary>
+        /// Calculates how much this character can be ransomed for
+        /// </summary>
+        /// <returns>ransom amount</returns>
+       public uint CalculateRansom()
+       {
+           uint ransom = 0;
+           if (this is PlayerCharacter)
+           {
+               // calculate ransom (10% of total GDP)
+               ransom = Convert.ToUInt32(((this as PlayerCharacter).GetTotalGDP() * 0.1));
+           }
+           else
+           {
+               string thisFunction = (this as NonPlayerCharacter).GetFunction(this.GetPlayerCharacter());
+               ransom = Convert.ToUInt32((this as NonPlayerCharacter).CalcFamilyAllowance(thisFunction));
+           }
+           return ransom;
+       }
+
+        public bool Equals(Character other)
+        {
+            return charID.Equals(other.charID);
+        }
     }
+
+    
 
     /// <summary>
     /// Class storing data on PlayerCharacter
     /// </summary>
+    [ContractVerification(true)]
     public class PlayerCharacter : Character
     {
         /// <summary>
@@ -4476,6 +5064,19 @@ namespace hist_mmorpg
         /// Holds character's sieges (siegeIDs)
         /// </summary>
         public List<string> mySieges = new List<string>();
+        /// <summary>
+        /// Holds Characters in entourage
+        /// </summary>
+        public List<Character> myEntourage = new List<Character>();
+        /// <summary>
+        /// Dictionary holding active proposals from family members to other NPCs. Each family member can only propose to one person at a time
+        /// </summary>
+        public Dictionary<string, string> activeProposals = new Dictionary<string, string>();
+        /// <summary>
+        /// Holds a list of all characters that have been taken captive (during battle, siege, kidnapping, failed spy attempts etc)
+        /// </summary>
+        public List<Character> myCaptives = new List<Character>();
+
 
         /// <summary>
         /// Constructor for PlayerCharacter
@@ -4605,6 +5206,7 @@ namespace hist_mmorpg
             this.mySieges = pc.mySieges;
         }
 
+		//TODO change to Proto
         /// <summary>
         /// Retrieves PlayerCharacter-specific information for Character display 
         /// </summary>
@@ -4800,8 +5402,16 @@ namespace hist_mmorpg
         /// <returns>bool indicating acceptance of offer</returns>
         /// <param name="npc">NPC receiving offer</param>
         /// <param name="offer">Proposed wage</param>
-        public bool ProcessEmployOffer(NonPlayerCharacter npc, uint offer)
+        public bool ProcessEmployOffer(NonPlayerCharacter npc, uint offer,out ProtoMessage result)
         {
+            // The player must have sufficient funds
+            if (offer > this.GetHomeFief().GetAvailableTreasury())
+            {
+                result = new ProtoMessage();
+                result.ResponseType = DisplayMessages.ErrorGenericInsufficientFunds;
+                return false;
+            }
+            
             bool accepted = false;
 
             // get NPC's potential salary
@@ -4811,7 +5421,7 @@ namespace hist_mmorpg
             double chance = Utility_Methods.GetRandomDouble(100);
 
             // get 'npcHire' trait effect modifier (increase/decrease chance of offer being accepted)
-            double hireTraits = this.CalcTraitEffect("npcHire");
+            double hireTraits = this.CalcTraitEffect(Globals_Game.Stats.NPCHIRE);
 
             // convert to % to allow easy modification of chance
             hireTraits = (hireTraits * 100);
@@ -4837,7 +5447,6 @@ namespace hist_mmorpg
             double maxAcceptable = potentialSalary + (potentialSalary / 10);
             // get range
             double rangeNegotiable = (maxAcceptable - minAcceptable);
-
             // ensure this offer is more than the last from this PC
             bool offerLess = false;
             if (npc.lastOffer.ContainsKey(this.charID))
@@ -4862,24 +5471,25 @@ namespace hist_mmorpg
             if (offer > maxAcceptable)
             {
                 accepted = true;
-                string toDisplay = npc.firstName + " " + npc.familyName + ": You've made me an offer I can't refuse, Milord!";
-                Globals_Game.UpdatePlayer(this.playerID, toDisplay);
+                result = new ProtoMessage();
+                result.ResponseType = DisplayMessages.CharacterOfferHigh;
             }
 
             // automatically reject if offer < 10% below potential salary
             else if (offer < minAcceptable)
             {
                 accepted = false;
-                string toDisplay = npc.firstName + " " + npc.familyName + ": Don't insult me, Sirrah!";
-                Globals_Game.UpdatePlayer(this.playerID, toDisplay);
+                result = new ProtoMessage();
+                result.ResponseType = DisplayMessages.CharacterOfferLow;
             }
 
             // automatically reject if offer < previous offer
             else if (offerLess)
             {
                 accepted = false;
-                string toDisplay = "That's not how haggling works where I come from, my lord.  You must improve on your previous offer (£" + npc.lastOffer[this.charID] + ")";
-                Globals_Game.UpdatePlayer(this.playerID, toDisplay);
+                result = new ProtoMessage();
+                result.ResponseType = DisplayMessages.CharacterOfferHaggle;
+                result.MessageFields = new string[] { npc.lastOffer[this.charID].ToString() };
             }
 
             else
@@ -4890,13 +5500,13 @@ namespace hist_mmorpg
                 if (chance <= offerPercentage)
                 {
                     accepted = true;
-                    string toDisplay = npc.firstName + " " + npc.familyName + ": It's a deal, Milord!";
-                    Globals_Game.UpdatePlayer(this.playerID, toDisplay);
+                    result = new ProtoMessage();
+                    result.ResponseType = DisplayMessages.CharacterOfferOk;
                 }
                 else
                 {
-                    string toDisplay = npc.firstName + " " + npc.familyName + ": You'll have to do better than that, Good Sir!";
-                    Globals_Game.UpdatePlayer(this.playerID, toDisplay);
+                    result = new ProtoMessage();
+                    result.ResponseType = DisplayMessages.CharacterOfferAlmost;
                 }
             }
 
@@ -5021,7 +5631,7 @@ namespace hist_mmorpg
             npc.employer = null;
 
             // remove NPC from entourage
-            npc.inEntourage = false;
+            RemoveFromEntourage(npc);
 
             // if NPC has entries in goTo, clear
             if (npc.goTo.Count > 0)
@@ -5041,23 +5651,26 @@ namespace hist_mmorpg
             {
                 npc.goTo.Clear();
             }
-
-            // keep track of original days value for PC
-            double myDays = this.days;
-
-            // ensure days are synchronised
-            double minDays = Math.Min(this.days, npc.days);
-            this.days = minDays;
-            npc.days = minDays;
-
-            // add to entourage
-            npc.inEntourage = true;
-
-            // ensure days of entourage are synched with PC
-            if (this.days != myDays)
+            lock (entourageLock)
             {
-                this.AdjustDays(0);
+                // keep track of original days value for PC
+                double myDays = this.days;
+
+                // ensure days are synchronised
+                double minDays = Math.Min(this.days, npc.days);
+                this.days = minDays;
+                npc.days = minDays;
+
+                // add to entourage
+                npc.setEntourage(true);
+                this.myEntourage.Add(npc);
+                // ensure days of entourage are synched with PC
+                if (this.days != myDays)
+                {
+                    this.AdjustDays(0);
+                }
             }
+           
         }
 
         /// <summary>
@@ -5066,8 +5679,12 @@ namespace hist_mmorpg
         /// <param name="npc">NPC to be removed</param>
         public void RemoveFromEntourage(NonPlayerCharacter npc)
         {
-            //remove from entourage
-            npc.inEntourage = false;
+            lock (entourageLock)
+            {
+                //remove from entourage
+                npc.setEntourage(false);
+                this.myEntourage.Remove(npc);
+            }
         }
 
         /// <summary>
@@ -5106,10 +5723,11 @@ namespace hist_mmorpg
         /// for entourage if PlayerCharacter allowed to enter
         /// </summary>
         /// <returns>bool indicating success</returns>
-        public override bool EnterKeep()
+        public override bool EnterKeep(out ProtoMessage error)
         {
+            error = null;
             // invoke base method for PlayerCharacter
-            bool success = base.EnterKeep();
+            bool success = base.EnterKeep(out error);
 
             // if PlayerCharacter enters keep
             if (success)
@@ -5123,10 +5741,8 @@ namespace hist_mmorpg
                         if (location.barredCharacters.Contains(this.myNPCs[i].charID))
                         {
                             this.myNPCs[i].inKeep = false;
-                            String toDisplay = "";
-                            toDisplay += "Bailiff: One or more of your entourage is barred from entering this keep!";
-                            toDisplay += "\r\nThey will rejoin you after your visit.";
-                            Globals_Game.UpdatePlayer(this.playerID, toDisplay);
+                            error = new ProtoMessage();
+                            error.ResponseType = DisplayMessages.CharacterBarredKeep;
                         }
                         else
                         {
@@ -5191,11 +5807,11 @@ namespace hist_mmorpg
         /// <param name="target">Target fief</param>
         /// <param name="cost">Travel cost (days)</param>
         /// <param name="siegeCheck">bool indicating whether to check whether the move would end a siege</param>
-        public override bool MoveCharacter(Fief target, double cost, bool siegeCheck = true)
+        public override bool MoveCharacter(Fief target, double cost, out ProtoMessage error, bool siegeCheck = true)
         {
 
             // use base method to move PlayerCharacter
-            bool success = base.MoveCharacter(target, cost);
+            bool success = base.MoveCharacter(target, cost, out error,siegeCheck);
 
             // if PlayerCharacter move successfull
             if (success)
@@ -5236,11 +5852,11 @@ namespace hist_mmorpg
         /// Carries out conditional checks prior to recruitment
         /// </summary>
         /// <returns>bool indicating whether recruitment can proceed</returns>
-        public bool ChecksBeforeRecruitment()
+        public bool ChecksBeforeRecruitment(out ProtoMessage error)
         {
+            error = null;
             bool proceed = true;
             int indivTroopCost = 0;
-            string toDisplay = "";
 
             // get home fief
             Fief homeFief = this.GetHomeFief();
@@ -5259,8 +5875,8 @@ namespace hist_mmorpg
             if (this.location.owner != this)
             {
                 proceed = false;
-                toDisplay = "You cannot recruit in this fief, my lord, as you don't actually own it.";
-                Globals_Game.UpdatePlayer(this.playerID, toDisplay);
+                error = new ProtoMessage();
+                error.ResponseType = DisplayMessages.CharacterRecruitOwn;
             }
             else
             {
@@ -5268,8 +5884,9 @@ namespace hist_mmorpg
                 if (this.location.hasRecruited)
                 {
                     proceed = false;
-                    toDisplay = "I'm afraid you have already recruited here in this season, my lord.";
-                    Globals_Game.UpdatePlayer(this.playerID, toDisplay);
+
+                    error = new ProtoMessage();
+                    error.ResponseType = DisplayMessages.CharacterRecruitAlready;
                 }
                 else
                 {
@@ -5278,9 +5895,8 @@ namespace hist_mmorpg
                         && (this.location.loyalty < 7))
                     {
                         proceed = false;
-                        toDisplay = "I'm sorry, my lord, you do not speak the same language as the people in this fief,\r\n";
-                        toDisplay += "and thier loyalty is not sufficiently high to allow recruitment.";
-                        Globals_Game.UpdatePlayer(this.playerID, toDisplay);
+                        error = new ProtoMessage();
+                        error.ResponseType = DisplayMessages.CharacterLoyaltyLanguage;
                     }
                     else
                     {
@@ -5288,8 +5904,8 @@ namespace hist_mmorpg
                         if (!(homeFief.GetAvailableTreasury() > indivTroopCost))
                         {
                             proceed = false;
-                            toDisplay = "I'm sorry, my Lord; you have insufficient funds for recruitment.";
-                            Globals_Game.UpdatePlayer(this.playerID, toDisplay);
+                            error = new ProtoMessage();
+                            error.ResponseType = DisplayMessages.ArmyMaintainInsufficientFunds;
                         }
                         else
                         {
@@ -5297,8 +5913,8 @@ namespace hist_mmorpg
                             if (this.days < 1)
                             {
                                 proceed = false;
-                                toDisplay = "I'm afraid you don't have enough days for this operation, my lord.";
-                                Globals_Game.UpdatePlayer(this.playerID, toDisplay);
+                                error = new ProtoMessage();
+                                error.ResponseType = DisplayMessages.ErrorGenericNotEnoughDays;
                             }
                             else
                             {
@@ -5306,8 +5922,8 @@ namespace hist_mmorpg
                                 if (!String.IsNullOrWhiteSpace(this.location.siege))
                                 {
                                     proceed = false;
-                                    toDisplay = "I'm sorry, my lord, you cannot recruit from a fief under siege.";
-                                    Globals_Game.UpdatePlayer(this.playerID, toDisplay);
+                                    error = new ProtoMessage();
+                                    error.ResponseType = DisplayMessages.CharacterRecruitSiege;
                                 }
                                 else
                                 {
@@ -5315,8 +5931,8 @@ namespace hist_mmorpg
                                     if (this.location.status.Equals('R'))
                                     {
                                         proceed = false;
-                                        toDisplay = "I'm sorry, my lord, you cannot recruit from a fief in rebellion.";
-                                        Globals_Game.UpdatePlayer(this.playerID, toDisplay);
+                                        error = new ProtoMessage();
+                                        error.ResponseType = DisplayMessages.CharacterRecruitRebellion;
                                     }
                                 }
                             }
@@ -5327,21 +5943,19 @@ namespace hist_mmorpg
 
             return proceed;
         }
-        
-        //TODO lots of confirmation
+
         /// <summary>
         /// Recruits troops from the current fief
         /// </summary>
         /// <returns>uint containing number of troops recruited</returns>
         /// <param name="number">How many troops to recruit</param>
-        /// <param name="armyExists">bool indicating whether the army already exists</param>
-        public int RecruitTroops(uint number, bool armyExists)
+        /// <param name="thisArmy">Army to recruit into- null to create new army</param>
+        /// <param name="isConfirm">Whether or not this action has been confirmed by client</param>
+        public ProtoMessage RecruitTroops(uint number, Army thisArmy, bool isConfirm)
         {
+            bool armyExists = (thisArmy != null);
             // used to record outcome of various checks
             bool proceed = true;
-
-            // used to confirm final purchase of troops
-            bool confirmPurchase = false;
 
             int troopsRecruited = 0;
             int revisedRecruited = 0;
@@ -5351,9 +5965,6 @@ namespace hist_mmorpg
 
             // get home fief
             Fief homeFief = this.GetHomeFief();
-
-            // get army
-            Army thisArmy = null;
 
             // calculate cost of individual soldier
             if (this.location.ancestralOwner == this)
@@ -5365,16 +5976,15 @@ namespace hist_mmorpg
                 indivTroopCost = 2000;
             }
 
-            // string to hold any messages
-            string toDisplay = "";
 
             // various checks to see whether to proceed
-            proceed = this.ChecksBeforeRecruitment();
+            ProtoMessage error = null;
+            proceed = this.ChecksBeforeRecruitment(out error);
 
             // if have not passed all of checks above, return
             if (!proceed)
             {
-                return troopsRecruited;
+                return error;
             }
 
             // actual days taken
@@ -5384,15 +5994,16 @@ namespace hist_mmorpg
             if (this.days < daysUsed)
             {
                 proceed = false;
-                toDisplay = "I'm afraid, due to poor organisation, you have run out of days, my lord.";
-                Globals_Game.UpdatePlayer(this.playerID, toDisplay);
+                error = new ProtoMessage();
+                error.ResponseType = DisplayMessages.ErrorGenericPoorOrganisation;
             }
 
+            //TODO move troop calculatioms + confirmation to client
             if (proceed)
             {
                 // calculate potential cost
                 troopCost = Convert.ToInt32(number) * indivTroopCost;
-
+                //TODO client confirm revised troop numbers
                 // check to see if can afford the specified number of troops
                 // if can't afford specified number
                 if (!(homeFief.GetAvailableTreasury() >= troopCost))
@@ -5400,25 +6011,14 @@ namespace hist_mmorpg
                     // work out how many troops can afford
                     double roughNumber = homeFief.GetAvailableTreasury() / indivTroopCost;
                     revisedRecruited = Convert.ToInt32(Math.Floor(roughNumber));
-
-                    // present alternative number and ask for confirmation
-                    toDisplay = "Sorry, milord, you do not have the funds to recruit " + number + " troops.";
-                    toDisplay += "  However, you can afford to recruit " + revisedRecruited + ".\r\n\r\n";
-                    toDisplay += "Do you wish to proceed with the recruitment of the revised number?";
-                    DialogResult dialogResult = MessageBox.Show(toDisplay, "Proceed with revised recruitment?", MessageBoxButtons.OKCancel);
-
-                    // if choose to cancel
-                    if (dialogResult == DialogResult.Cancel)
-                    {
-                        proceed = false;
-                        Globals_Game.UpdatePlayer(this.playerID, toDisplay);
-                    }
-                    // chooses to proceed
-                    else
-                    {
-                        // revise number to recruit
-                        number = Convert.ToUInt32(revisedRecruited);
-                    }
+                    //Return revised number, ask client to submit new amount
+                    ProtoRecruit recruitDetails = new ProtoRecruit();
+                    recruitDetails.ResponseType = DisplayMessages.CharacterRecruitInsufficientFunds;
+                    recruitDetails.MessageFields = new string[] { number.ToString(), revisedRecruited.ToString() };
+                    recruitDetails.amount = Convert.ToUInt32(revisedRecruited);
+                    recruitDetails.cost = revisedRecruited * indivTroopCost;
+                    recruitDetails.armyID = thisArmy.armyID;
+                    return recruitDetails;
                 }
 
                 if (proceed)
@@ -5434,104 +6034,80 @@ namespace hist_mmorpg
                         // calculate total cost
                         troopCost = troopsRecruited * indivTroopCost;
 
-                        // confirm recruitment
-                        toDisplay = troopsRecruited + " men have responded to your call, milord, and they would cost " + troopCost + " to recruit.\r\n\r\n";
-                        toDisplay += "There is " + homeFief.GetAvailableTreasury() + " in the home treasury.  Do you wish to proceed with recruitment?";
-                        DialogResult dialogResult = MessageBox.Show(toDisplay, "Proceed with recruitment?", MessageBoxButtons.OKCancel);
-
-                        // if choose to cancel
-                        if (dialogResult == DialogResult.Cancel)
-                        {
-                            confirmPurchase = false;
-                            Globals_Game.UpdatePlayer(this.playerID, toDisplay);
-                        }
-                        // chooses to proceed
-                        else
-                        {
-                            confirmPurchase = true;
-                        }
                     }
                     // if less than specified number respond to call
                     else
                     {
                         // calculate total cost
                         troopCost = troopsRecruited * indivTroopCost;
-
-                        // confirm recruitment
-                        toDisplay = "Only " + troopsRecruited + " men have responded to your call, milord, and they would cost " + troopCost + " to recruit.\r\n\r\n";
-                        toDisplay += "There is " + homeFief.GetAvailableTreasury() + " in the home treasury.  Do you wish to proceed with recruitment?";
-                        DialogResult dialogResult = MessageBox.Show(toDisplay, "Proceed with recruitment?", MessageBoxButtons.OKCancel);
-
-                        // if choose to cancel
-                        if (dialogResult == DialogResult.Cancel)
-                        {
-                            confirmPurchase = false;
-                            Globals_Game.UpdatePlayer(this.playerID, toDisplay);
-                        }
-                        // chooses to proceed
-                        else
-                        {
-                            confirmPurchase = true;
-                        }
                     }
-
-                    if (confirmPurchase)
+                    if (!isConfirm)
                     {
-                        // if no existing army, create one
-                        if (!armyExists)
+                        ProtoRecruit recruitmentDetails = new ProtoRecruit();
+                        recruitmentDetails.armyID = thisArmy.armyID;
+                        recruitmentDetails.ResponseType = DisplayMessages.CharacterRecruitOk;
+                        recruitmentDetails.amount = Convert.ToUInt32(troopsRecruited);
+                        recruitmentDetails.cost = troopCost;
+                        recruitmentDetails.treasury = this.GetHomeFief().Treasury;
+                        recruitmentDetails.MessageFields = new string[] { recruitmentDetails.amount.ToString(), recruitmentDetails.cost.ToString(), recruitmentDetails.treasury.ToString() };
+                        return recruitmentDetails;
+                    }
+                    // if no existing army, create one
+                    if (!armyExists)
+                    {
+                        // if necessary, exit keep (new armies are created outside keep)
+                        if (this.inKeep)
                         {
-                            // if necessary, exit keep (new armies are created outside keep)
-                            if (this.inKeep)
-                            {
-                                this.ExitKeep();
-                            }
-
-                            thisArmy = new Army(Globals_Game.GetNextArmyID(), this.charID, this.charID, this.days, this.location.id);
-                            thisArmy.AddArmy();
+                            this.ExitKeep();
                         }
 
+                        thisArmy = new Army(Globals_Game.GetNextArmyID(), null, this.charID, this.days, this.location.id);
+                        thisArmy.AddArmy();
+                    }
+
+                    // deduct cost of troops from treasury
+                    homeFief.AdjustTreasury(-troopCost);
+
+                    // get army nationality
+                    string thisNationality = this.nationality.natID;
+
+                    // work out how many of each type recruited
+                    uint[] typesRecruited = new uint[] { 0, 0, 0, 0, 0, 0, 0 };
+                    uint totalSoFar = 0;
+                    for (int i = 0; i < typesRecruited.Length; i++)
+                    {
+                        // work out 'trained' troops numbers
+                        if (i < typesRecruited.Length - 1)
+                        {
+                            typesRecruited[i] = Convert.ToUInt32(troopsRecruited * Globals_Server.recruitRatios[thisNationality][i]);
+                            totalSoFar += typesRecruited[i];
+                        }
+                        // fill up with rabble
                         else
                         {
-                            thisArmy = this.GetArmy();
+                            typesRecruited[i] = Convert.ToUInt32(troopsRecruited) - totalSoFar;
                         }
-
-                        // deduct cost of troops from treasury
-                        homeFief.treasury = homeFief.treasury - troopCost;
-
-                        // get army nationality
-                        string thisNationality = this.nationality.natID;
-
-                        // work out how many of each type recruited
-                        uint[] typesRecruited = new uint[] { 0, 0, 0, 0, 0, 0, 0 };
-                        uint totalSoFar = 0;
-                        for (int i = 0; i < typesRecruited.Length; i++)
-                        {
-                            // work out 'trained' troops numbers
-                            if (i < typesRecruited.Length - 1)
-                            {
-                                typesRecruited[i] = Convert.ToUInt32(troopsRecruited * Globals_Server.recruitRatios[thisNationality][i]);
-                                totalSoFar += typesRecruited[i];
-                            }
-                            // fill up with rabble
-                            else
-                            {
-                                typesRecruited[i] = Convert.ToUInt32(troopsRecruited) - totalSoFar;
-                            }
-                        }
-
-                        // add new troops to army
-                        typesRecruited.CopyTo(thisArmy.troops, 0);
-
-                        // indicate recruitment has occurred in this fief
-                        this.location.hasRecruited = true;
                     }
+                    for (int i = 0; i < thisArmy.troops.Length; i++)
+                    {
+                        thisArmy.troops[i] += typesRecruited[i];
+                    }
+
+                    // indicate recruitment has occurred in this fief
+                    this.location.hasRecruited = true;
                 }
             }
 
             // update character's days
             this.AdjustDays(daysUsed);
 
-            return troopsRecruited;
+            {
+                ProtoRecruit recruitDetails = new ProtoRecruit();
+                recruitDetails.armyID = thisArmy.armyID;
+                recruitDetails.ResponseType = DisplayMessages.Success;
+                recruitDetails.MessageFields = new string[] { troopsRecruited.ToString(), troopCost.ToString() };
+                return recruitDetails;
+            }
         }
 
         /// <summary>
@@ -5757,37 +6333,39 @@ namespace hist_mmorpg
             string location = titlePlace.id;
 
             // description
-            string description = "On this day of Our Lord the title of the ";
+            string[] fields = new string[4];
             if (titlePlace is Fief)
             {
-                description += "fief";
+                fields[0]= "fief";
             }
             else if (titlePlace is Province)
             {
-                description += "province";
+                fields[0] =  "province";
             }
-            description += " of " + titlePlace.name + " was ";
+            fields[1] = titlePlace.name;
             if ((newTitleHolder == placeOwner) && (oldTitleHolder != null))
             {
-                description += "removed by His Royal Highness ";
-                description += this.firstName + " " + this.familyName + " from the previous holder ";
-                description += oldTitleHolder.firstName + " " + oldTitleHolder.familyName;
+                fields[3] = ".";
+                fields[2] = "removed by His Royal Highness " + this.firstName + " " + this.familyName + " from the previous holder "+ oldTitleHolder.firstName + " " + oldTitleHolder.familyName;
             }
             else
             {
-                description += "granted by its owner ";
-                description += placeOwner.firstName + " " + placeOwner.familyName + " to ";
-                description += newTitleHolder.firstName + " " + newTitleHolder.familyName;
+                fields[2] =  "granted by its owner "+ placeOwner.firstName + " " + placeOwner.familyName + " to "+newTitleHolder.firstName + " " + newTitleHolder.familyName;
                 if ((oldTitleHolder != null) && (oldTitleHolder != placeOwner))
                 {
-                    description += "; This has necessitated the removal of ";
-                    description += oldTitleHolder.firstName + " " + oldTitleHolder.familyName + " from the title";
+                    fields[3] = "; This has necessitated the removal of "+oldTitleHolder.firstName + " " + oldTitleHolder.familyName + " from the title";
+                }
+                else
+                {
+                    fields[3] = ".";
                 }
             }
-            description += ".";
 
             // create and add a journal entry to the pastEvents journal
-            JournalEntry thisEntry = new JournalEntry(entryID, year, season, thisPersonae, type, loc: location, descr: description);
+            ProtoMessage titleTrans = new ProtoMessage();
+            titleTrans.ResponseType = DisplayMessages.CharacterTransferTitle;
+            titleTrans.MessageFields = fields;
+            JournalEntry thisEntry = new JournalEntry(entryID, year, season, thisPersonae, type, titleTrans,loc: location);
             success = Globals_Game.AddPastEvent(thisEntry);
         }
 
@@ -5801,10 +6379,12 @@ namespace hist_mmorpg
         /// <returns>bool indicating success</returns>
         /// <param name="newHolder">The character receiving the title</param>
         /// <param name="titlePlace">The place to which the title refers</param>
-        public bool GrantTitle(Character newHolder, Place titlePlace)
+        /// <param name="result">The result of attempting to grant</param>
+        public bool GrantTitle(Character newHolder, Place titlePlace, out ProtoMessage result)
         {
+            result = null;
             bool proceed = true;
-            string toDisplay = "";
+            DisplayMessages toDisplay = DisplayMessages.None;
 
             // only fiefs or provinces
             if ((titlePlace is Fief) || (titlePlace is Province))
@@ -5813,7 +6393,7 @@ namespace hist_mmorpg
                 // ownership (must be owner)
                 if (!(this == titlePlace.owner))
                 {
-                    toDisplay = "Only the owner can grant a title to another character.";
+                    toDisplay = DisplayMessages.CharacterTitleOwner;
                     proceed = false;
                 }
 
@@ -5827,7 +6407,7 @@ namespace hist_mmorpg
                         {
                             if (highestPlaces.Count == 1)
                             {
-                                toDisplay = "You cannot grant your highest ranking title to another character.";
+                                toDisplay = DisplayMessages.CharacterTitleHighest;
                                 proceed = false;
                             }
                         }
@@ -5843,7 +6423,7 @@ namespace hist_mmorpg
                                 // check if king
                                 if ((titlePlace as Fief).ancestralOwner != (titlePlace as Fief).province.kingdom.owner)
                                 {
-                                    toDisplay = "You cannot grant an ancestral title to another character.";
+                                    toDisplay = DisplayMessages.CharacterTitleAncestral;
                                     proceed = false;
                                 }
                             }
@@ -5854,7 +6434,7 @@ namespace hist_mmorpg
                         {
                             if ((titlePlace as Province).owner != (titlePlace as Province).kingdom.owner)
                             {
-                                toDisplay = "Only the king can grant a provincial title to another character.";
+                                toDisplay = DisplayMessages.CharacterTitleKing;
                                 proceed = false;
                             }
                         }
@@ -5867,7 +6447,8 @@ namespace hist_mmorpg
                 }
                 else
                 {
-                    Globals_Game.UpdatePlayer(this.playerID, toDisplay);
+                    result = new ProtoMessage();
+                    result.ResponseType = toDisplay;
                 }
             }
 
@@ -5939,7 +6520,7 @@ namespace hist_mmorpg
 
             foreach (Fief thisFief in this.ownedFiefs)
             {
-                totalFunds += thisFief.treasury;
+                totalFunds += thisFief.Treasury;
             }
 
             return totalFunds;
@@ -5969,7 +6550,86 @@ namespace hist_mmorpg
             return newLeader;
         }
 
+        /// <summary>
+        /// Add a captive to a fief's gaol
+        /// </summary>
+        /// <param name="captive"></param>
+        /// <param name="fief"></param>
+        public void AddCaptive(Character captive, Fief fief)
+        {
+            // Move captive and add to gaol
+            myCaptives.Add(captive);
+            captive.captorID = this.charID;
+            ProtoMessage ignore;
+            captive.MoveCharacter(fief, 0, out ignore);
+            captive.inKeep = false;
+            fief.gaol.Add(captive);
+
+            // Remove char as bailiff;
+            List<Fief> bailiffFiefs = captive.GetFiefsBailiff();
+            foreach (Fief f in bailiffFiefs)
+            {
+                f.bailiff = null;
+            }
+
+            // Remove char as army leader
+            if (!string.IsNullOrWhiteSpace(captive.armyID))
+            {
+                captive.GetArmy().leader = null;
+                captive.armyID = null;
+            }
+        }
+
+        /// <summary>
+        /// Kill the specified captive and update the captive's family/employer of the death
+        /// </summary>
+        /// <param name="captive">Captive to be executted</param>
+        public void ExecuteCaptive(Character captive)
+        {
+            captive.location.gaol.Remove(captive);
+            myCaptives.Remove(captive);
+            captive.ProcessDeath("execute");
+            Globals_Game.UpdatePlayer(captive.GetPlayerCharacter().playerID, DisplayMessages.CharacterExecuted, new string[] { captive.firstName + " " + captive.familyName });
+            
+        }
+
+        /// <summary>
+        /// Send a ransom to the family/employer of one of your captives
+        /// </summary>
+        /// <param name="captive">Captive to be ransomed</param>
+        public void RansomCaptive(Character captive)
+        {
+            uint ransom = captive.CalculateRansom();
+            string captor = this.charID + "|Captor";
+            string thisCaptive = captive.charID + "|Captive";
+            string headOfCaptive = captive.GetPlayerCharacter().charID + "|HeadOfCaptiveFamily";
+            string[] personae = new string[]{captor,thisCaptive, headOfCaptive};
+            ProtoMessage ransomMessage = new ProtoMessage();
+            ransomMessage.MessageFields=new string [] {captive.firstName + " " + captive.familyName, ransom.ToString()};
+            JournalEntry entry = new JournalEntry(Globals_Game.GetNextJournalEntryID(), Globals_Game.clock.currentYear, Globals_Game.clock.currentSeason, personae, "ransom", ransomMessage);
+            Globals_Game.AddPastEvent(entry);
+            captive.ransomDemand = ""+entry.jEntryID;
+            // Update player and captive owner of ransom
+            Globals_Game.UpdatePlayer(captive.GetPlayerCharacter().playerID, DisplayMessages.RansomReceived, new string[] { captive.firstName + " " + captive.familyName });
+        }
+
+        /// <summary>
+        /// Releases one of your captives. The captive will immediately be transported to their employer/family's home fief
+        /// </summary>
+        /// <param name="captive">The captive to be released</param>
+        public void ReleaseCaptive(Character captive)
+        {
+            captive.location.gaol.Remove(captive);
+            myCaptives.Remove(captive);
+            captive.captorID = null;
+            // Send captive to home fief (avoids being recaptured repeatedly)
+            ProtoMessage ignore;
+            captive.ransomDemand = null;
+            captive.MoveCharacter(captive.GetPlayerCharacter().GetHomeFief(), 0, out ignore, false);
+            Globals_Game.UpdatePlayer(captive.GetPlayerCharacter().playerID, DisplayMessages.CharacterReleased, new string[] { captive.firstName + " " + captive.familyName });
+        }
     }
+
 
     /// <summary>
     /// Class storing data on NonPlayerCharacter
@@ -5992,7 +6652,7 @@ namespace hist_mmorpg
         /// <summary>
         /// Denotes if in employer's entourage
         /// </summary>
-        public bool inEntourage { get; set; }
+        public bool inEntourage { get; protected set; }
         /// <summary>
         /// Denotes if is player's heir
         /// </summary>
@@ -6034,6 +6694,7 @@ namespace hist_mmorpg
             this.inEntourage = inEnt;
             this.lastOffer = new Dictionary<string, uint>();
             this.isHeir = isH;
+            Globals_Game.npcMasterList.Add(this.charID, this);
         }
 
         /// <summary>
@@ -6077,6 +6738,7 @@ namespace hist_mmorpg
             this.isHeir = false;
         }
 
+		//TODO replace with proto
         /// <summary>
         /// Retrieves NonPlayerCharacter-specific information for Character display
         /// </summary>
@@ -6121,33 +6783,46 @@ namespace hist_mmorpg
         }
 
         /// <summary>
+        /// Sets entourage value
+        /// </summary>
+        /// <param name="inEntourage"></param>
+        public void setEntourage(bool inEntourage)
+        {
+            this.inEntourage = inEntourage;
+        }
+        /// <summary>
+        /// Removes character from entourage
+        /// </summary>
+        public void removeSelfFromEntourage()
+        {
+            PlayerCharacter pc = this.GetEmployer();
+            if (pc == null)
+            {
+                pc = this.GetHeadOfFamily();
+            }
+            if (pc == null && this.inEntourage)
+            {
+                throw new Exception("Entourage discrepancy");
+            }
+            if (pc != null)
+            {
+                pc.RemoveFromEntourage(this);
+            }
+        }
+        /// <summary>
         /// Performs conditional checks prior to assigning the NonPlayerCharacter as heir
         /// </summary>
         /// <returns>bool indicating NonPlayerCharacter's suitability as heir</returns>
         /// <param name="pc">The PlayerCharacter who is choosing the heir</param>
-        public bool ChecksForHeir(PlayerCharacter pc)
+        public bool ChecksForHeir(PlayerCharacter pc, out ProtoMessage error)
         {
             bool suitableHeir = true;
-
-            if (String.IsNullOrWhiteSpace(this.familyID))
+            error = null;
+            if (String.IsNullOrWhiteSpace(this.familyID) || this.familyID != pc.familyID || !this.isMale)
             {
                 suitableHeir = false;
-                string toDisplay = "You must choose a family member as your heir.";
-                Globals_Game.UpdatePlayer(pc.playerID, toDisplay);
-            }
-
-            else if (this.familyID != pc.familyID)
-            {
-                suitableHeir = false;
-                string toDisplay = "You must choose a family member as your heir.";
-                Globals_Game.UpdatePlayer(pc.playerID, toDisplay);
-            }
-
-            else if (!this.isMale)
-            {
-                suitableHeir = false; 
-                string toDisplay = "You cannot choose a female as your heir.";
-                Globals_Game.UpdatePlayer(pc.playerID, toDisplay);
+                error = new ProtoMessage();
+                error.ResponseType = DisplayMessages.CharacterHeir;
             }
 
             return suitableHeir;
@@ -6186,17 +6861,17 @@ namespace hist_mmorpg
                 {
                     famAllowance = 10000;
                 }
-
+                int age = this.CalcAge();
                 // calculate age modifier
-                if ((this.CalcAge() <= 7))
+                if ((age <= 7))
                 {
                     ageModifier = 0.25;
                 }
-                else if ((this.CalcAge() > 7) && (this.CalcAge() <= 14))
+                else if ((age > 7) && (age <= 14))
                 {
                     ageModifier = 0.5;
                 }
-                else if ((this.CalcAge() > 14) && (this.CalcAge() <= 21))
+                else if ((age > 14) && (age <= 21))
                 {
                     ageModifier = 0.75;
                 }
@@ -6830,6 +7505,14 @@ namespace hist_mmorpg
         /// Holds ailments effecting character's health
         /// </summary>
         public Dictionary<string, Ailment> ailments = new Dictionary<string, Ailment>();
+        /// <summary>
+        /// Holds captor charID
+        /// </summary>
+        public string captorID { get; set; }
+        /// <summary>
+        /// Holds jentry id of ransom demand
+        /// </summary>
+        public string ransom { get; set; }
 
 		/// <summary>
         /// Constructor for Character_Serialised
@@ -6889,6 +7572,8 @@ namespace hist_mmorpg
                 this.armyID = charToUse.armyID;
                 this.ailments = charToUse.ailments;
                 this.fiancee = charToUse.fiancee;
+                this.captorID = charToUse.captorID;
+                this.ransom = charToUse.ransomDemand;
             }
 		}
 

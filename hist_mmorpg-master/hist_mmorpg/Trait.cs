@@ -21,7 +21,7 @@ namespace hist_mmorpg
         /// <summary>
         /// Holds trait effects
         /// </summary>
-        public Dictionary<string, double> effects;
+        public Dictionary<Globals_Game.Stats, double> effects;
 
         /// <summary>
         /// Constructor for Trait
@@ -29,7 +29,7 @@ namespace hist_mmorpg
         /// <param name="id">String holding trait ID</param>
         /// <param name="nam">String holding trait name</param>
         /// <param name="effs">Dictionary(string, double) holding trait effects</param>
-        public Trait(String id, String nam, Dictionary<string, double> effs)
+        public Trait(String id, String nam, Dictionary<Globals_Game.Stats, double> effs)
         {
             // VALIDATION
 
@@ -49,19 +49,6 @@ namespace hist_mmorpg
             if (!Utility_Methods.ValidateName(nam))
             {
                 throw new InvalidDataException("Trait name must be 1-40 characters long and contain only valid characters (a-z and ') or spaces");
-            }
-
-            // EFFS
-            // effect name
-            string[] effNames = new string[effs.Count];
-            effs.Keys.CopyTo(effNames, 0);
-
-            for (int i = 0; i < effNames.Length; i++ )
-            {
-                if (!Utility_Methods.ValidateName(effNames[i]))
-                {
-                    throw new InvalidDataException("All Trait effect names must be 1-40 characters long and contain only valid characters (a-z and ') or spaces");
-                }
             }
 
             // effect values

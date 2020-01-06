@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-
+using System.Runtime.Serialization;
 namespace hist_mmorpg
 {
     /// <summary>
@@ -72,12 +72,13 @@ namespace hist_mmorpg
         {
             return this.baseLanguage.name + " (dialect " + this.dialect + ")";
         }
+			
     }
 
     /// <summary>
     /// Class storing base langauge data
     /// </summary>
-    public class BaseLanguage
+    public class BaseLanguage 
     {
         /// <summary>
         /// Holds base langauge ID
@@ -126,6 +127,7 @@ namespace hist_mmorpg
         public BaseLanguage()
         {
         }
+			
     }
 
     /// <summary>

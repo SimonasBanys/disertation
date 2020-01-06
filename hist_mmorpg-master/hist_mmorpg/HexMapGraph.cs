@@ -4,7 +4,9 @@ using System.IO;
 using System.Text;
 using QuickGraph;
 using QuickGraph.Algorithms;
-
+using QuickGraph.Serialization;
+using System.Xml;
+using System.Diagnostics;
 namespace hist_mmorpg
 {
     /// <summary>
@@ -207,6 +209,7 @@ namespace hist_mmorpg
         public TaggedEdge<Fief, string> CreateEdge(Fief s, Fief t, string tag)
         {
             // create route
+            Trace.WriteLine("The edge tag is: " + tag);
             TaggedEdge<Fief, string> myEdge = new TaggedEdge<Fief, string>(s, t, tag);
             return myEdge;
         }
@@ -308,7 +311,7 @@ namespace hist_mmorpg
             Fief myFief = null;
 
             // check for correct direction codes
-            string[] correctDirections = new string[6] { "E", "W", "SE", "SW", "NE", "NW" };
+            string[] correctDirections = new string[8] { "E", "W", "SE", "SW", "NE", "NW","N","S" };
             bool dirCorrect = false;
             foreach (string correctDir in correctDirections)
             {
@@ -410,6 +413,63 @@ namespace hist_mmorpg
                 output += e.Tag + " to (" + e.Target.id + ") ";
             }
             return output;
+        }
+
+        /// <summary>
+        /// Serializes the current graph to GraphML format
+        /// </summary>
+        public void serialize()
+        {
+            using (var xwriter = XmlWriter.Create("graphTest.bin"))
+            {
+                VertexIdentity<Fief> vIds = new VertexIdentity<Fief>(getIdFromFief);
+                EdgeIdentity<Fief, TaggedEdge<Fief, string>> eIds = new EdgeIdentity<Fief, TaggedEdge<Fief, string>>(getStringFromEdge);
+                this.myMap.SerializeToGraphML<Fief, TaggedEdge<Fief, string>, AdjacencyGraph<Fief, TaggedEdge<Fief, string>>>(xwriter, vIds, eIds);
+            }
+
+        }
+
+        /// <summary>
+        /// Returns a string representing the edge tag (used in serialization
+        /// </summary>
+        /// <param name="edge">Edge to get string from</param>
+        /// <returns></returns>
+        public string getStringFromEdge(TaggedEdge<Fief, string> edge)
+        {
+            return edge.Tag;
+        }
+
+        /// <summary>
+        /// Returns the Fief id (used in serialization)
+        /// </summary>
+        /// <param name="f">Fief to get id from</param>
+        /// <returns></returns>
+        public string getIdFromFief(Fief f)
+        {
+            return f.id;
+        }
+
+        /// <summary>
+        /// Returns the Fief from the relative id
+        /// </summary>
+        /// <param name="id">Fief id</param>
+        /// <returns></returns>
+        public Fief getFiefFromID(String id)
+        {
+            return Globals_Game.fiefMasterList[id];
+        }
+
+        public void deserialize()
+        {
+            AdjacencyGraph<Fief, TaggedEdge<Fief, string>> tmpGraph = new AdjacencyGraph<Fief, TaggedEdge<Fief, string>>();
+            IdentifiableVertexFactory<Fief> fiefFactory = new IdentifiableVertexFactory<Fief>(getFiefFromID);
+            IdentifiableEdgeFactory<Fief, TaggedEdge<Fief, string>> edgeFactory = new IdentifiableEdgeFactory<Fief, TaggedEdge<Fief, string>>(CreateEdge);
+            using (var xwriter =  XmlReader.Create("graphTest.bin"))
+            {
+                tmpGraph.DeserializeFromGraphML<Fief,TaggedEdge<Fief,string>,AdjacencyGraph<Fief, TaggedEdge<Fief, string>>>(xwriter,fiefFactory,edgeFactory);
+                
+            }
+            this.myMap = tmpGraph;
         }
     }
 

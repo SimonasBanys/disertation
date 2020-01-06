@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
 
 namespace hist_mmorpg
 {
@@ -78,7 +77,7 @@ namespace hist_mmorpg
             // lastOffer (will remain empty for family members)
             newNPC.lastOffer = new Dictionary<string, uint>();
             // inEntourage
-            newNPC.inEntourage = false;
+            newNPC.setEntourage(false); 
             // isHeir
             newNPC.isHeir = false;
 
@@ -199,29 +198,55 @@ namespace hist_mmorpg
         /// </summary>
         /// <returns>bool indicating whether or not to proceed with pregnancy attempt</returns>
         /// <param name="husband">The husband</param>
-        public static bool ChecksBeforePregnancyAttempt(Character husband)
+        public static bool ChecksBeforePregnancyAttempt(Character husband, out ProtoMessage error)
         {
+            error = null;
             bool proceed = true;
             bool isPlayer = husband is PlayerCharacter;
-            bool isSonOfPlayer = (husband.GetFather()) is PlayerCharacter;
-            if (!isPlayer && !isSonOfPlayer)
+            bool isAncestorOfPlayer = (husband.GetHeadOfFamily()) is PlayerCharacter;
+            if (!isPlayer && !isAncestorOfPlayer)
             {
                 //TODO error log
+                error = new ProtoMessage();
+                error.ResponseType = DisplayMessages.CharacterProposalFamily;
+                error.MessageFields = new string[] { "husband" };
                 return false;
             }
+            // Must be male, as I discovered when William Marshal got pregnant.
+            if (!husband.isMale)
+            {
+                error = new ProtoMessage();
+                error.ResponseType = DisplayMessages.CharacterNotMale;
+                return false;
+            }
+            
+            // Husband cannot be a captive
+            if(!string.IsNullOrWhiteSpace(husband.captorID)) {
+                error = new ProtoMessage();
+                error.ResponseType = DisplayMessages.CharacterHeldCaptive;
+                return false;
+            }
+            
             // check is married
             // get spouse
             Character wife = husband.GetSpouse();
 
             if (wife != null)
             {
+                // Husband cannot be a captive
+                if (!string.IsNullOrWhiteSpace(wife.captorID))
+                {
+                    error = new ProtoMessage();
+                    error.ResponseType = DisplayMessages.CharacterHeldCaptive;
+                    return false;
+                }
                 // check to make sure is in same fief
                 if (!(wife.location == husband.location))
                 {
                     if (isPlayer)
-                    {  
-                        string message = "You have to be in the same fief to do that!";
-                        Globals_Game.UpdatePlayer(((PlayerCharacter)husband).playerID, message);
+                    {
+                        error = new ProtoMessage();
+                        error.ResponseType = DisplayMessages.ErrorGenericNotInSameFief;
                     }
                     proceed = false;
                 }
@@ -233,8 +258,9 @@ namespace hist_mmorpg
                     {
                         if (isPlayer)
                         {
-                            string message = "error:birth:" + wife.firstName + " " + wife.familyName + " is already pregnant, milord.  Don't be so impatient!";
-                            Globals_Game.UpdatePlayer(((PlayerCharacter)husband).playerID,message);
+                            error = new ProtoMessage();
+                            error.ResponseType = DisplayMessages.BirthAlreadyPregnant;
+                            error.MessageFields = new string[] { wife.firstName + " " + wife.familyName };
                         }
                         proceed = false;
                     }
@@ -246,8 +272,8 @@ namespace hist_mmorpg
                         {
                             if (isPlayer)
                             {
-                                string message = "error:birth:I'm afraid the husband and wife are being separated by the ongoing siege.";
-                                Globals_Game.UpdatePlayer(((PlayerCharacter)husband).playerID, message);
+                                error = new ProtoMessage();
+                                error.ResponseType = DisplayMessages.BirthSiegeSeparation;
                             }
                             proceed = false;
                         }
@@ -259,11 +285,8 @@ namespace hist_mmorpg
 
                             if (minDays < 1)
                             {
-                                if (isPlayer)
-                                {
-                                    string message = "error:birth:Sorry, you don't have enough time left for this in the current season.";
-                                    Globals_Game.UpdatePlayer(((PlayerCharacter)husband).playerID, message);
-                                }
+                                error = new ProtoMessage();
+                                error.ResponseType = DisplayMessages.ErrorGenericNotEnoughDays;
                                 proceed = false;
                             }
                             else
@@ -296,7 +319,6 @@ namespace hist_mmorpg
             // otherwise, the husband is the son of a player- alert the husband's father's user
             else
             {
-                string toDisplay;
                 string whoThisIs = "";
                 if (isPlayer)
                 {
@@ -306,12 +328,9 @@ namespace hist_mmorpg
                 {
                     whoThisIs = "This man is ";
                 }
-                toDisplay = "error:birth:," + whoThisIs + "not married, my lord.";
-                if(isPlayer) Globals_Game.UpdatePlayer(((PlayerCharacter)husband).playerID, toDisplay);
-                else
-                {
-                    Globals_Game.UpdatePlayer(((PlayerCharacter)husband.GetFather()).playerID, toDisplay);
-                }
+                error = new ProtoMessage();
+                error.ResponseType = DisplayMessages.BirthNotMarried;
+                error.MessageFields=new string[]{whoThisIs};
                 proceed = false;
             }
 

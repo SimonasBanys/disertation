@@ -6,6 +6,9 @@ using System.Text.RegularExpressions;
 
 namespace hist_mmorpg
 {
+    /// <summary>
+    /// Methods used throughout the JominiEngine- includes ID verification and retrieving objects from IDs
+    /// </summary>
     public static class Utility_Methods
     {
         /// <summary>
@@ -28,12 +31,10 @@ namespace hist_mmorpg
                 // personae
                 string sysAdminEntry = Globals_Game.sysAdmin.charID + "|sysAdmin";
                 string[] jEntryPersonae = new string[] { sysAdminEntry };
-
-                // description
-                string description = "To be added";
-
+                
                 // create and send a proposal (journal entry)
-                jEntry = new JournalEntry(jEntryID, year, season, jEntryPersonae, "CSV_importError", descr: description);
+                ProtoMessage errorMessage = new ProtoMessage();
+                jEntry = new JournalEntry(jEntryID, year, season, jEntryPersonae, "CSV_importError", errorMessage);
             }
 
             return jEntry;
@@ -64,7 +65,7 @@ namespace hist_mmorpg
         /// Checks that a JournalEntry personae entry is in the correct format
         /// </summary>
         /// <returns>bool indicating whether the personae entry is valid</returns>
-        /// <param name="id">The personae entry to be validated</param>
+        /// <param name="personae">The personae entry to be validated</param>
         public static bool ValidateJentryPersonae(string personae)
         {
             bool isValid = true;
@@ -188,7 +189,7 @@ namespace hist_mmorpg
         /// Checks that a days value is in the correct range
         /// </summary>
         /// <returns>bool indicating whether the value is valid</returns>
-        /// <param name="stat">The value to be validated</param>
+        /// <param name="days">The value to be validated</param>
         public static bool ValidateDays(double days)
         {
             bool isValid = true;
@@ -538,7 +539,7 @@ namespace hist_mmorpg
         /// Checks to see if a string meets the specified conditions (all letters, all numbers)
         /// </summary>
         /// <returns>bool indicating whether the string fulfils the conditions</returns>
-        /// <param name="matchType">Type of pattern to match (letters, numbers)</param>
+        /// <param name="matchType">Type of pattern to match (letters, numbers, combined)</param>
         /// <param name="input">string to be converted</param>
         public static bool CheckStringValid(string matchType, string input)
         {
@@ -549,6 +550,8 @@ namespace hist_mmorpg
                 case "numbers":
                     int myNumber;
                     return int.TryParse(input, out myNumber);
+                case "combined":
+                    return Regex.IsMatch(input, @"^[a-zA-Z0-9]+$");
                 default:
                     return false;
             }
@@ -624,6 +627,88 @@ namespace hist_mmorpg
             return traitSet;
 
         }
- 
+
+        /// <summary>
+        /// Get Army from ID. Returns the army and Success if armyID is valid and army is in armyMasterList; null and an error if otherwise
+        /// </summary>
+        /// <param name="armyID">ID of army</param>
+        /// <param name="error">Error code on failure</param>
+        /// <returns>Army as indicated by armyID, or null</returns>
+        public static Army GetArmy(string armyID, out DisplayMessages error)
+        {
+            if (string.IsNullOrWhiteSpace(armyID) || !ValidateArmyID((armyID)))
+            {
+                error = DisplayMessages.ErrorGenericMessageInvalid;
+                return null;
+            }
+            Army a;
+            Globals_Game.armyMasterList.TryGetValue(armyID, out a);
+            if (a == null)
+            {
+                error = DisplayMessages.ErrorGenericArmyUnidentified;
+                return null;
+            }
+            error = DisplayMessages.Success;
+            return a;
+        }
+
+        /// <summary>
+        /// Get Fief from ID. Returns the fief and Success if fiefID is not null/empty and fief exists in FiefMasterList; null and an error if otherwise
+        /// </summary>
+        /// <param name="fiefID">ID of Fief</param>
+        /// <param name="error">Error code on failure</param>
+        /// <returns>Fief as indicated by fiefID, or null</returns>
+        public static Fief GetFief(string fiefID, out DisplayMessages error)
+        {
+            if (string.IsNullOrWhiteSpace(fiefID))
+            {
+                error = DisplayMessages.ErrorGenericMessageInvalid;
+                return null;
+            }
+            Fief f;
+            Globals_Game.fiefMasterList.TryGetValue(fiefID, out f);
+            if (f == null)
+            {
+                error = DisplayMessages.ErrorGenericFiefUnidentified;
+                return null;
+            }
+            error = DisplayMessages.Success;
+            return f;
+        }
+
+        /// <summary>
+        /// Get Character (NPC or PC) from ID. Returns the Character and Success if charID is not null/empty and of the correct format, and Character exists in npcMasterList or pcMasterList; null and an error if otherwise
+        /// </summary>
+        /// <param name="charID"></param>
+        /// <param name="error"></param>
+        /// <returns></returns>
+        public static Character GetCharacter(string charID, out DisplayMessages error)
+        {
+            if (string.IsNullOrWhiteSpace(charID) || !ValidateCharacterID(charID))
+            {
+                error = DisplayMessages.ErrorGenericMessageInvalid;
+                return null;
+            }
+            Character c;
+            NonPlayerCharacter npc;
+            PlayerCharacter pc;
+            Globals_Game.npcMasterList.TryGetValue(charID, out npc);
+            if (npc == null)
+            {
+                Globals_Game.pcMasterList.TryGetValue(charID, out pc);
+                if (pc == null)
+                {
+                    error = DisplayMessages.ErrorGenericCharacterUnidentified;
+                    return null;
+                }
+                c = pc;
+            }
+            else
+            {
+                c = npc;
+            }
+            error = DisplayMessages.Success;
+            return c;
+        }
     }
 }

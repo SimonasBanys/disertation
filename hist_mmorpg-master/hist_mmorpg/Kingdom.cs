@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-
+using System.Runtime.Serialization;
 namespace hist_mmorpg
 {
     /// <summary>
@@ -47,23 +47,24 @@ namespace hist_mmorpg
 
         /// <summary>
         /// Processes functions involved in lodging a new ownership (and kingship) challenge
+        /// Returns ProtoMessage in case of error
         /// </summary>
-        public void LodgeOwnershipChallenge(PlayerCharacter challenger)
+        public ProtoMessage LodgeOwnershipChallenge(PlayerCharacter challenger)
         {
             bool proceed = true;
-
+            ProtoMessage result = null;
             // ensure aren't current owner
             if (challenger == this.owner)
             {
-                string toDisplay = "You are already the King of " + this.name + "!";
-                Globals_Game.UpdatePlayer(challenger.playerID, toDisplay);
+                result = new ProtoMessage();
+                result.ResponseType = DisplayMessages.KingdomAlreadyKing;
             }
 
             else
             {
                 // create and send new OwnershipChallenge
                 OwnershipChallenge newChallenge = new OwnershipChallenge(Globals_Game.GetNextOwnChallengeID(), challenger.charID, "kingdom", this.id);
-                proceed = Globals_Game.AddOwnershipChallenge(newChallenge);
+                proceed = Globals_Game.AddOwnershipChallenge(newChallenge,out result);
             }
 
             if (proceed)
@@ -92,14 +93,20 @@ namespace hist_mmorpg
                 string entryType = "depose_new";
 
                 // journal entry description
-                string description = "On this day of Our Lord a challenge for the crown of " + this.name + " (" + this.id + ")";
-                description += " has COMMENCED.  " + challenger.firstName + " " + challenger.familyName + " seeks to press his claim ";
-                description += "and depose the current king, His Highness " + currentOwner.firstName + " " + currentOwner.familyName + ", King of " + this.name + ".";
+                string[] fields = new string[4];
+                fields[0] = this.name;
+                fields[1] = this.id;
+                fields[2] = challenger.firstName + " " + challenger.familyName;
+                fields[3] = currentOwner.firstName + " " + currentOwner.familyName;
 
+                ProtoMessage ownershipChallenge = new ProtoMessage();
+                ownershipChallenge.MessageFields = fields;
+                ownershipChallenge.ResponseType = DisplayMessages.KingdomOwnershipChallenge;
                 // create and send a proposal (journal entry)
-                JournalEntry myEntry = new JournalEntry(entryID, year, season, entryPersonae, entryType, descr: description, loc: entryLoc);
+                JournalEntry myEntry = new JournalEntry(entryID, year, season, entryPersonae, entryType,ownershipChallenge, loc: entryLoc);
                 Globals_Game.AddPastEvent(myEntry);
             }
+            return result;
         }
 
         /// <summary>

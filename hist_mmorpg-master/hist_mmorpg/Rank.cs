@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-
+using System.Runtime.Serialization;
+using ProtoBuf;
 namespace hist_mmorpg
 {
     /// <summary>
@@ -115,6 +116,7 @@ namespace hist_mmorpg
 
             return rankName;
         }
+			
 
     }
 
@@ -233,18 +235,18 @@ namespace hist_mmorpg
             string type = "grantPosition";
 
             // description
-            string description = "On this day of Our Lord the position of " + this.title[0].name;
-            description += " was granted by His Majesty " + king.firstName + " " + king.familyName + " to ";
-            description += newPositionHolder.firstName + " " + newPositionHolder.familyName;
+            
+            String[] fields = new string[] { this.title[0].name, king.firstName + " " + king.familyName, newPositionHolder.firstName + " " + newPositionHolder.familyName, "" };
             if (oldPositionHolder != null)
             {
-                description += "; This has necessitated the removal of ";
-                description += oldPositionHolder.firstName + " " + oldPositionHolder.familyName + " from the position";
+                fields[3] = "; This has necessitated the removal of " + oldPositionHolder.firstName + " " + oldPositionHolder.familyName + " from the position";
             }
-            description += ".";
 
+            ProtoMessage bestowPosition = new ProtoMessage();
+            bestowPosition.MessageFields = fields;
+            bestowPosition.ResponseType = DisplayMessages.RankTitleTransfer;
             // create and add a journal entry to the pastEvents journal
-            JournalEntry thisEntry = new JournalEntry(entryID, year, season, thisPersonae, type, descr: description);
+            JournalEntry thisEntry = new JournalEntry(entryID, year, season, thisPersonae, type,bestowPosition);
             success = Globals_Game.AddPastEvent(thisEntry);
         }
 
@@ -296,6 +298,7 @@ namespace hist_mmorpg
 
             return holder;
         }
+			
     }
 
     /// <summary>
@@ -400,6 +403,7 @@ namespace hist_mmorpg
     /// <summary>
     /// Struct storing data on title name
     /// </summary>
+    [ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
     public struct TitleName
     {
         /// <summary>
@@ -441,5 +445,6 @@ namespace hist_mmorpg
             this.langID = lang;
             this.name = nam;
         }
+			
     }
 }

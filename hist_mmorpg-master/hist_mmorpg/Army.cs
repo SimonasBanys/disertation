@@ -1,25 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Text;
 using System.IO;
-using System.Windows.Forms;
-using ProtoBuf;
-
+using System.Threading;
 namespace hist_mmorpg 
 {
     /// <summary>
     /// Class storing data on army 
     /// </summary>
     /// 
-    [ProtoContract]
+    [ContractVerification(true)]
     public class Army 
     {
-        //TODO Fix boolean logic 
 		/// <summary>
 		/// Holds army ID
 		/// </summary>
-        
-        [ProtoMember(1)]
 		public String armyID { get; set; }
         /// <summary>
         /// Holds troops in army
@@ -31,44 +27,43 @@ namespace hist_mmorpg
         /// 5 = foot
         /// 6 = rabble
         /// </summary>
-        [ProtoMember(2)]
         public uint[] troops = new uint[7] {0, 0, 0, 0, 0, 0, 0};
         /// <summary>
         /// Holds army leader (ID)
         /// </summary>
-        [ProtoMember(3)]
         public string leader { get; set; }
         /// <summary>
         /// Holds army owner (ID)
         /// </summary>
-        [ProtoMember(4)]
         public string owner { get; set; }
         /// <summary>
         /// Holds army's remaining days in season
         /// </summary>
-        [ProtoMember(5)]
         public double days { get; set; }
         /// <summary>
         /// Holds army location (fiefID)
         /// </summary>
-        [ProtoMember(6)]
         public string location { get; set; }
         /// <summary>
         /// Indicates whether army is being actively maintained by owner
         /// </summary>
-        [ProtoMember(7)]
         public bool isMaintained { get; set; }
         /// <summary>
         /// Indicates army's aggression level (automated response to combat)
         /// </summary>
-        [ProtoIgnore]
         public byte aggression { get; set; }
         /// <summary>
         /// Indicates army's combat odds value (i.e. at what odds will attempt automated combat action)
         /// </summary>
-        [global::ProtoBuf.ProtoMember(9)]
         public byte combatOdds { get; set; }
 
+        [ContractInvariantMethod]
+        private void Invariant()
+        {
+            Contract.Invariant(location!=null);
+            Contract.Invariant(owner!=null);
+            Contract.Invariant(armyID!=null);
+        }
         /// <summary>
         /// Constructor for Army
         /// </summary>
@@ -83,6 +78,7 @@ namespace hist_mmorpg
         /// <param name="trp">uint[] holding troops in army</param>
         public Army(String id, string ldr, string own, double day, string loc, bool maint = false, byte aggr = 1, byte odds = 9, uint[] trp = null)
         {
+            Contract.Requires(!string.IsNullOrWhiteSpace(id) && !string.IsNullOrWhiteSpace(own) && !string.IsNullOrWhiteSpace(loc));
             // VALIDATION
 
             // ID
@@ -188,20 +184,27 @@ namespace hist_mmorpg
             armyLocation.armies.Add(this.armyID);
 
         }
+        /// <summary>
+        /// Calculates the maintenance cost for this army
+        /// </summary>
+        /// <returns>uint representing cost</returns>
+        public uint getMaintenanceCost()
+        {
+            Contract.Requires(troops!=null);
+            return this.CalcArmySize() * 500;
+        }
 
         /// <summary>
         /// Maintains the specified field army
         /// </summary>
-        public void MantainArmy()
+        public void MaintainArmy(out ProtoMessage result)
         {
-            string toDisplay = "";
-
             // get cost
-            uint maintCost = this.CalcArmySize() * 500;
+            uint maintCost = getMaintenanceCost();
 
             // get available treasury
             Fief homeFief = this.GetOwner().GetHomeFief();
-            int availTreas = homeFief.GetAvailableTreasury();
+            int availTreas = homeFief.GetAvailableTreasury(true);
 
             // check if army is already maintained
             if (!this.isMaintained)
@@ -210,34 +213,29 @@ namespace hist_mmorpg
                 if (maintCost > availTreas)
                 {
                     // display 'no' message
-                    toDisplay += "Sorry, milord, to maintain this army would cost £" + maintCost + "\r\n";
-                    toDisplay += "and you only have £" + availTreas + " available in the home treasury.";
-                    Globals_Game.UpdatePlayer(owner, "error:army:" + toDisplay);
+                    result = new ProtoMessage();
+                    result.ResponseType = DisplayMessages.ArmyMaintainInsufficientFunds;
+                    string[] fields = { maintCost.ToString(), availTreas.ToString() };
+                    result.MessageFields = fields;
                 }
-                //TODO this will be done client side
                 else
                 {
-                    // present alternative number and ask for confirmation
-                    toDisplay = "It will cost £" + maintCost + " to maintain this army";
-                    toDisplay += " and you have £" + homeFief.treasury + " in your home treasury.\r\n\r\n";
-                    toDisplay += "Do you wish to proceed?";
-                    DialogResult dialogResult = MessageBox.Show(toDisplay, "Proceed with operation?", MessageBoxButtons.OKCancel);
+                    
+                    // set isMaintained
+                    this.isMaintained = true;
 
-                    // if choose to proceed
-                    if (dialogResult != DialogResult.Cancel)
-                    {
-                        // set isMaintained
-                        this.isMaintained = true;
-
-                        // deduct funds from treasury
-                        homeFief.treasury -= Convert.ToInt32(maintCost);
-
-                        // display confirmation message
-                        toDisplay = "Army maintained at a cost of £" + maintCost + ".";
-
-                        Globals_Game.UpdatePlayer(owner, "confirm:army:" + toDisplay);
-                    }
+                    // deduct funds from treasury
+                    homeFief.AdjustTreasury(- Convert.ToInt32(maintCost));
+                    result = new ProtoArmy(this,this.GetOwner());
+                    (result as ProtoArmy).includeAll(this);
+                    result.ResponseType = DisplayMessages.ArmyMaintainConfirm;
+                    result.MessageFields = new string[] { maintCost.ToString() };
                 }
+            }
+            else
+            {
+                result = new ProtoMessage();
+                result.ResponseType = DisplayMessages.ArmyMaintainedAlready;
             }
         }
 
@@ -335,7 +333,7 @@ namespace hist_mmorpg
                 // if new leader is NPC, remove from player's entourage
                 if (newLeader is NonPlayerCharacter)
                 {
-                    (newLeader as NonPlayerCharacter).inEntourage = false;
+                    (newLeader as NonPlayerCharacter).removeSelfFromEntourage();
                 }
 
                 // calculate days synchronisation
@@ -397,50 +395,57 @@ namespace hist_mmorpg
         /// </summary>
         /// <remarks>
         /// Predicate: assumes leader has enough days for movement
+        /// Must be called from within MoveCharacter!
+        /// If moving a leaderless army, use MoveWithoutLeader
         /// </remarks>
         /// <returns>bool indicating success</returns>
         /// <param name="showAttrition">bool indicating whether to display message containing attrition losses</param>
         public bool MoveArmy(bool showAttrition = false)
         {
             bool success = false;
-
             // get leader
             Character myLeader = this.GetLeader();
-
+            if (myLeader == null)
+            {
+                return success;
+            }
             // get old fief
             Fief myOldFief = Globals_Game.fiefMasterList[this.location];
             // get new fief
             Fief myNewFief = Globals_Game.fiefMasterList[myLeader.location.id];
 
             // remove from old fief
-            myOldFief.RemoveArmy(this.armyID);
-
-            // add to new fief
-            myNewFief.AddArmy(this.armyID);
-
-            // change location
-            this.location = myLeader.location.id;
-
-            // update days
-            this.days = myLeader.days;
-
-            // calculate attrition
-            double attritionModifer = this.CalcAttrition();
-            // apply attrition
-            uint troopsLost = this.ApplyTroopLosses(attritionModifer);
-
-            // inform player of losses
-            if (showAttrition)
+            if (!myOldFief.RemoveArmy(this.armyID))
             {
-                if (troopsLost > 0)
+                return success;
+            }
+            else
+            {
+                success = true;
+                // add to new fief
+                myNewFief.AddArmy(this.armyID);
+
+                // change location
+                this.location = myLeader.location.id;
+
+                // update days
+                this.days = myLeader.days;
+
+                // calculate attrition
+                double attritionModifer = this.CalcAttrition();
+                // apply attrition
+                uint troopsLost = this.ApplyTroopLosses(attritionModifer);
+
+                // inform player of losses
+                if (showAttrition)
                 {
-                    if (Globals_Game.userChars.ContainsKey(owner))
+                    if (troopsLost > 0)
                     {
-                        Globals_Game.UpdatePlayer(owner, "update:army:" + "Your army (" + this.armyID + ") has lost " + troopsLost + " from attrition in " + myNewFief.name);
+                        string[] fields = new string[] { this.armyID, troopsLost.ToString(), myNewFief.name };
+                        Globals_Game.UpdatePlayer(GetOwner().playerID, DisplayMessages.ArmyMove, fields);
                     }
                 }
             }
-
             return success;
         }
 
@@ -473,11 +478,13 @@ namespace hist_mmorpg
         /// <returns>double containing casualty modifier to be applied troops</returns>
         public double CalcAttrition()
         {
+            Contract.Requires(troops!=null);
             uint troopNumbers = this.CalcArmySize();
             double casualtyModifier = 0;
             Double attritionChance = 0;
             String toDisplay = "";
-
+            // initialise fields for display
+            string[] fields = new string[] { "", "", "", "", "" };
             // ensure is no attrition if army maintained
             if (!this.isMaintained)
             {
@@ -486,9 +493,10 @@ namespace hist_mmorpg
 
                 // get leader
                 Character myLeader = this.GetLeader();
-
+                
                 // calculate base chance of attrition
                 attritionChance = (troopNumbers / Convert.ToDouble(currentFief.population)) * 100;
+                fields[0] = attritionChance+"";
                 toDisplay += "Base chance: " + attritionChance + "\r\n";
 
                 // factor in effect of leader (need to check if army has leader)
@@ -496,14 +504,14 @@ namespace hist_mmorpg
                 {
                     // apply effect of leader
                     attritionChance = attritionChance - ((myLeader.CalculateStature() + myLeader.management) / 2);
-                    toDisplay += "Leader effect: " + (myLeader.CalculateStature() + myLeader.management) / 2 + "\r\n";
+                    fields[1] = "Leader effect: " + (myLeader.CalculateStature() + myLeader.management) / 2 + "\r\n";
                 }
 
                 // factor in effect of season (add 20 if is winter or spring)
                 if ((Globals_Game.clock.currentSeason == 0) || (Globals_Game.clock.currentSeason == 3))
                 {
                     attritionChance = attritionChance + 20;
-                    toDisplay += "Season effect: 20\r\n";
+                    fields[2] = "Season effect: 20\r\n";
                 }
 
                 // normalise chance of attrition
@@ -524,13 +532,13 @@ namespace hist_mmorpg
                 {
                     // calculate base casualtyModifier
                     casualtyModifier = (troopNumbers / Convert.ToDouble(currentFief.population)) / 10;
-                    toDisplay += "casualtyModifier: " + casualtyModifier + "\r\n";
+                    fields[3] = "casualtyModifier: " + casualtyModifier + "\r\n";
 
                     // factor in effect of season on potential losses (* 3 if is winter or spring)
                     if ((Globals_Game.clock.currentSeason == 0) || (Globals_Game.clock.currentSeason == 3))
                     {
                         casualtyModifier = casualtyModifier * 3;
-                        toDisplay += "casualtyModifier after seasonal effect: " + casualtyModifier + "\r\n";
+                        fields[4] =  "casualtyModifier after seasonal effect: " + casualtyModifier + "\r\n";
                     }
 
                 }
@@ -538,7 +546,7 @@ namespace hist_mmorpg
 
             if (casualtyModifier > 0)
             {
-                Globals_Game.UpdatePlayer(owner, "update:army:" + toDisplay);
+                Globals_Game.UpdatePlayer(owner,DisplayMessages.ArmyAttritionDebug,fields, "DEBUG");
             }
 
             return casualtyModifier;
@@ -554,6 +562,7 @@ namespace hist_mmorpg
         /// <param name="lossModifier">modifier to be applied to each troop type</param>
         public uint ApplyTroopLosses(double lossModifier)
         {
+            Contract.Requires(troops!=null);
             // keep track of total troops lost
             uint troopsLost = 0;
 
@@ -575,8 +584,10 @@ namespace hist_mmorpg
         /// </remarks>
         /// <returns>bool indicating success of transfer</returns>
         /// <param name="details">string[] containing troop numbers and recipient (ID)</param>
-        public bool CreateDetachment(string[] details)
+        public bool CreateDetachment(uint[] troops, string leftFor, out ProtoMessage result)
         {
+            Contract.Requires(troops!=null);
+            result = null;
             bool proceed = true;
             bool adjustDays = true;
             int daysTaken = 0;
@@ -586,30 +597,38 @@ namespace hist_mmorpg
             Character myLeader = null;
 
             // carry out CONDITIONAL CHECKS
-
             // 1. check arry length
-            if (details.Length != 8)
+            if (troops.Length != 7)
             {
                 proceed = false;
                 adjustDays = false;
-                toDisplay = "Not enough data parts in transfer details array.";
-                Globals_Game.UpdatePlayer(owner, "error:army:" + toDisplay);
+                result = new ProtoMessage();
+                result.ResponseType =DisplayMessages.ArmyDetachmentArrayWrongLength;
+                //LEGACY
+                /*
+                Globals_Game.UpdatePlayer(owner, DisplayMessages.ArmyDetachmentArrayWrongLength);
+                */
             }
             else
             {
                 // 2. check each troop type; if not enough in army, cancel
-                for (int i = 0; i < details.Length - 1; i++)
+                for (int i = 0; i < troops.Length - 1; i++)
                 {
-                    if (Convert.ToUInt32(details[i]) > this.troops[i])
+                    if (troops[i] > this.troops[i])
                     {
-                        toDisplay = "You don't have enough " + troopTypeLabels[i] + " in your army for that transfer.";
-                        Globals_Game.UpdatePlayer(owner, "error:army:" + toDisplay);
+                        result = new ProtoMessage();
+                        result.ResponseType=DisplayMessages.ArmyDetachmentNotEnoughTroops;
+                        result.MessageFields=new string[] {troopTypeLabels[i]};
+                        //LEGACY
+                        /*
+                        Globals_Game.UpdatePlayer(owner, DisplayMessages.ArmyDetachmentNotEnoughTroops,new string[] {troopTypeLabels[i]});
+                        */
                         proceed = false;
                         adjustDays = false;
                     }
                     else
                     {
-                        totalTroopsToTransfer += Convert.ToUInt32(details[i]);
+                        totalTroopsToTransfer += troops[i];
                     }
                 }
 
@@ -618,20 +637,26 @@ namespace hist_mmorpg
                     // 3. if no troops selected for transfer, cancel
                     if (totalTroopsToTransfer < 1)
                     {
-                        toDisplay = "You haven't selected any troops for transfer.";
-                        Globals_Game.UpdatePlayer(owner, "error:army:" + toDisplay);
+                        result = new ProtoMessage();
+                        result.ResponseType=DisplayMessages.ArmyDetachmentNotSelected;
+                        //LEGACY
+                        /*
+                        Globals_Game.UpdatePlayer(owner, DisplayMessages.ArmyDetachmentNotSelected);
+                        */
                         proceed = false;
                         adjustDays = false;
                     }
                     else
                     {
                         // 4. check have minimum days necessary for transfer
-                        Client client = Globals_Server.clients[owner];
-                        if (client == null) { } //TODO choose what to do when client unexpectedly null
-                        if (client.armyToView.days < 10)
+                        if (this.days < 10)
                         {
-                            toDisplay = "You don't have enough days left for this transfer.";
-                            Globals_Game.UpdatePlayer(owner, "error:army:" + toDisplay);
+                            result = new ProtoMessage();
+                            result.ResponseType=DisplayMessages.ErrorGenericNotEnoughDays;
+                            //LEGACY
+                            /*
+                            Globals_Game.UpdatePlayer(this.owner, DisplayMessages.ErrorGenericNotEnoughDays);
+                            */
                             proceed = false;
                             adjustDays = false;
                         }
@@ -642,20 +667,28 @@ namespace hist_mmorpg
                             // calculate time taken for transfer
                             daysTaken = Globals_Game.myRand.Next(10, 31);
 
-                            if (daysTaken > client.armyToView.days)
+                            if (daysTaken > this.days)
                             {
-                                toDisplay = "Poor organisation means that you have run out of days for this transfer.\r\nTry again next season.";
-                                Globals_Game.UpdatePlayer(owner, "error:army:" + toDisplay);
+                                result = new ProtoMessage();
+                                result.ResponseType = DisplayMessages.ErrorGenericPoorOrganisation;
+                                //LEGACY
+                                /*
+                                 * 
+                                Globals_Game.UpdatePlayer(this.owner, DisplayMessages.ErrorGenericPoorOrganisation);
+                                */
                                 proceed = false;
                             }
                             else
                             {
                                 // 6. check transfer recipient exists
-                                if (!Globals_Game.pcMasterList.ContainsKey(details[7]))
+                                if (!Globals_Game.pcMasterList.ContainsKey(leftFor))
                                 {
-                                    toDisplay = "Cannot identify transfer recipient.";
-                                    Globals_Game.UpdatePlayer(owner, "error:army:" + toDisplay);
-                                    
+                                    result = new ProtoMessage();
+                                    result.ResponseType = DisplayMessages.ErrorGenericUnidentifiedRecipient;
+                                    //LEGACY
+                                    /*
+                                    Globals_Game.UpdatePlayer(owner, DisplayMessages.ErrorGenericUnidentifiedRecipient);
+                                    */
                                     proceed = false;
                                     adjustDays = false;
                                 }
@@ -668,28 +701,14 @@ namespace hist_mmorpg
 
                                     if (myLeader == null)
                                     {
-                                        toDisplay = "An army without a leader cannot make a transfer.";
-                                        Globals_Game.UpdatePlayer(owner, "error:army:" + toDisplay);
+                                        result = new ProtoMessage();
+                                        result.ResponseType = DisplayMessages.ArmyNoLeader;
+                                        //LEGACY
+                                        /*
+                                        Globals_Game.UpdatePlayer(owner, DisplayMessages.ArmyNoLeader);
+                                        */
                                         proceed = false;
                                         adjustDays = false;
-                                    }
-                                    else
-                                    {
-                                        // 8. if reduces army to < 100 troops, display warning
-                                        if (((this.CalcArmySize() - totalTroopsToTransfer) < 100) && (proceed))
-                                        {
-                                            toDisplay = "This transfer will reduce your army manpower to dangerous levels.  Click OK to proceed.";
-                                            DialogResult dialogResult = MessageBox.Show(toDisplay, "Proceed with transfer?", MessageBoxButtons.OKCancel);
-
-                                            // if choose to cancel
-                                            if (dialogResult == DialogResult.Cancel)
-                                            {
-                                                toDisplay = "Transfer cancelled.";
-                                                Globals_Game.UpdatePlayer(owner, "error:army:" + toDisplay);
-                                                proceed = false;
-                                                adjustDays = false;
-                                            }
-                                        }
                                     }
                                 }
                             }
@@ -703,22 +722,25 @@ namespace hist_mmorpg
                 // remove troops from army
                 for (int i = 0; i < this.troops.Length; i++)
                 {
-                    this.troops[i] -= Convert.ToUInt32(details[i]);
+                    this.troops[i] -= troops[i];
                 }
 
                 // get fief
                 Fief thisFief = this.GetLocation();
 
                 // create transfer entry
-                string[] thisTransfer = new string[10] { this.owner, details[7], details[0], details[1], details[2],
-                            details[3], details[4], details[5], details[6], (this.days - daysTaken).ToString() };
-
+                ProtoDetachment thisTransfer = new ProtoDetachment();
+                thisTransfer.leftBy = this.owner;
+                thisTransfer.leftFor = leftFor;
+                thisTransfer.troops = troops;
+                thisTransfer.days = (int)this.days - daysTaken;
                 // add to fief's troopTransfers list
-                string tranferID = Globals_Game.GetNextDetachmentID();
-                thisFief.troopTransfers.Add(tranferID, thisTransfer);
+                string transferID = Globals_Game.GetNextDetachmentID();
+                thisTransfer.id = transferID;
+                thisFief.troopTransfers.Add(transferID, thisTransfer);
 
                 // check detachment added to troopTransfers
-                if (!thisFief.troopTransfers.ContainsKey(tranferID))
+                if (!thisFief.troopTransfers.ContainsKey(transferID))
                 {
                     proceed = false;
                 }
@@ -811,7 +833,7 @@ namespace hist_mmorpg
         public uint[] GetTroopsEstimate(Character observer)
         {
             uint[] troopNumbers = new uint[7] {0, 0, 0, 0, 0, 0, 0};
-
+            Console.WriteLine("___TEST: Number of troop types: " + troops.Length +", length in Troops Estimate: "+troopNumbers.Length);
             if (observer != null)
             {
                 // get random int (0-2) to decide whether to over- or under-estimate troop number
@@ -851,6 +873,7 @@ namespace hist_mmorpg
         /// <returns>the fief</returns>
         public Fief GetLocation()
         {
+            Contract.Ensures(Contract.Result<Fief>()!=null);
             Fief thisFief = null;
 
             if (!String.IsNullOrWhiteSpace(this.location))
@@ -870,6 +893,7 @@ namespace hist_mmorpg
         /// <returns>the owner</returns>
         public PlayerCharacter GetOwner()
         {
+            Contract.Ensures(Contract.Result<PlayerCharacter>()!=null);
             PlayerCharacter myOwner = null;
 
             // get leader from PC master list
@@ -890,6 +914,7 @@ namespace hist_mmorpg
         /// <returns>the leader</returns>
         public Character GetLeader()
         {
+            Contract.Ensures(Contract.Result<Character>()==null||Contract.Result<Character>()!=null);
             Character myLeader = null;
 
             if (!String.IsNullOrWhiteSpace(this.leader))
@@ -917,8 +942,20 @@ namespace hist_mmorpg
         /// </remarks>
         /// <param name="target">The fief to move to</param>
         /// <param name="travelCost">The cost of moving to target fief</param>
-        public void MoveWithoutLeader(Fief target, double travelCost)
+        public void MoveWithoutLeader(Fief target, double travelCost,out ProtoMessage result)
         {
+            result = null;
+            if (this.days < travelCost)
+            {
+                result = new ProtoMessage();
+                result.ResponseType = DisplayMessages.ErrorGenericNotEnoughDays;
+                result.MessageFields = new string[] { this.days.ToString(), travelCost.ToString() };
+                //LEGACY
+                /*
+                Globals_Game.UpdatePlayer(this.GetOwner().playerID, DisplayMessages.ErrorGenericNotEnoughDays,new string[] {this.days.ToString(),travelCost.ToString()});
+                */
+                return;
+            }
             // get current location
             Fief from = this.GetLocation();
 
@@ -1169,17 +1206,22 @@ namespace hist_mmorpg
         /// </summary>
         /// <returns>bool indicating whether attack can proceed</returns>
         /// <param name="targetArmy">The army to be attacked</param>
-        public bool ChecksBeforeAttack(Army targetArmy)
+        public bool ChecksBeforeAttack(Army targetArmy,out ProtoMessage result)
         {
             bool proceed = true;
-            string toDisplay = "";
-
+            result = null;
             // check has enough days to give battle (1)
             if (this.days < 1)
             {
-                toDisplay = "error:army:Your army doesn't have enough days left to give battle.";
-                Globals_Game.UpdatePlayer(owner, toDisplay);
-                proceed = false;
+                result = new ProtoMessage();
+                result.ResponseType = DisplayMessages.ErrorGenericNotEnoughDays;
+                return false;
+            }
+            if (this.GetLocation() != targetArmy.GetLocation())
+            {
+                result = new ProtoMessage();
+                result.ResponseType = DisplayMessages.ErrorGenericNotInSameFief;
+                return false;
             }
             else
             {
@@ -1188,8 +1230,8 @@ namespace hist_mmorpg
                 string siegeID = targetArmy.CheckIfSiegeDefenderGarrison();
                 if (!String.IsNullOrWhiteSpace(siegeID))
                 {
-                    Globals_Game.UpdatePlayer(owner, "error:army:The defending army is currently being besieged and cannot be attacked.");
-
+                    result = new ProtoMessage();
+                    result.ResponseType = DisplayMessages.ArmyBesieged;
                 }
 
                 else
@@ -1198,8 +1240,8 @@ namespace hist_mmorpg
                     siegeID = targetArmy.CheckIfSiegeDefenderAdditional();
                     if (!String.IsNullOrWhiteSpace(siegeID))
                     {
-                        toDisplay = "error:army:The defending army is currently being besieged and cannot be attacked.";
-                        Globals_Game.UpdatePlayer(owner, toDisplay);
+                        result = new ProtoMessage();
+                        result.ResponseType = DisplayMessages.ArmyBesieged;
                         proceed = false;
                     }
 
@@ -1208,27 +1250,9 @@ namespace hist_mmorpg
                         // check if are attacking your own army
                         if (this.GetOwner() == targetArmy.GetOwner())
                         {
-                            toDisplay = "error:army:You cannot attack one of your own armies.";
-                            Globals_Game.UpdatePlayer(owner, toDisplay);
+                            result = new ProtoMessage();
+                            result.ResponseType = DisplayMessages.ArmyAttackSelf;
                             proceed = false;
-                        }
-
-                        else
-                        {
-                            // check if attacking king's army
-                            if (this.GetOwner() == this.GetOwner().GetKing())
-                            {
-                                // display warning and get decision
-                                DialogResult dialogResult = MessageBox.Show("You are about to attack an army owned by your king.\r\nClick 'OK' to proceed.", "Proceed with attack?", MessageBoxButtons.OKCancel);
-
-                                // if choose to cancel
-                                if (dialogResult == DialogResult.Cancel)
-                                {
-                                    toDisplay = "error:army:Attack cancelled.";
-                                    Globals_Game.UpdatePlayer(owner, toDisplay);
-                                    proceed = false;
-                                }
-                            }
                         }
                     }
                 }
@@ -1238,35 +1262,18 @@ namespace hist_mmorpg
             {
                 // SIEGE INVOLVEMENT (BESIEGER)
                 // check if attacking army is besieging a keep
+
+                //TODO client side confirmation of end siege if besieging
                 string siegeID = this.CheckIfBesieger();
                 if (!String.IsNullOrWhiteSpace(siegeID))
                 {
-                    // display warning and get decision
-                    DialogResult dialogResult = MessageBox.Show("Your army is besieging a keep and this action would end the siege.\r\nClick 'OK' to proceed.", "Proceed with attack?", MessageBoxButtons.OKCancel);
+                    Siege thisSiege = null;
+                    thisSiege = Globals_Game.siegeMasterList[siegeID];
 
-                    // if choose to cancel
-                    if (dialogResult == DialogResult.Cancel)
-                    {
-                        toDisplay = "error:army:Attack cancelled.";
-                        Globals_Game.UpdatePlayer(owner, toDisplay);
-                        proceed = false;
-                    }
-
-                    // if choose to proceed
-                    else
-                    {
-                        Siege thisSiege = null;
-                        thisSiege = Globals_Game.siegeMasterList[siegeID];
-
-                        // construct event description to be passed into siegeEnd
-                        string siegeDescription = "On this day of Our Lord the forces of ";
-                        siegeDescription += thisSiege.GetBesiegingPlayer().firstName + " " + thisSiege.GetBesiegingPlayer().familyName;
-                        siegeDescription += " have chosen to abandon the siege of " + thisSiege.GetFief().name;
-                        siegeDescription += ". " + thisSiege.GetDefendingPlayer().firstName + " " + thisSiege.GetDefendingPlayer().familyName;
-                        siegeDescription += " retains ownership of the fief.";
-
-                        thisSiege.SiegeEnd(false, siegeDescription);
-                    }
+                    // construct event description to be passed into siegeEnd
+                    string[] fields = new string[] {thisSiege.GetBesiegingPlayer().firstName + " " + thisSiege.GetBesiegingPlayer().familyName,thisSiege.GetFief().name,thisSiege.GetDefendingPlayer().firstName + " " + thisSiege.GetDefendingPlayer().familyName};
+                    thisSiege.SiegeEnd(false, DisplayMessages.SiegeEndDefault,fields);
+                    
                 }
             }
 
@@ -1323,162 +1330,46 @@ namespace hist_mmorpg
 
             // remove from armyMasterList
             Globals_Game.armyMasterList.Remove(this.armyID);
+
+            Globals_Game.UpdatePlayer(this.GetOwner().playerID, DisplayMessages.ArmyDisband, new string[] { this.armyID });
         }
 
         /// <summary>
-        /// Retrieves information for Army display screen
+        /// Calculates any advantages troops may have against an enemy army based on how effective certain troop types are against each other
         /// </summary>
-        /// <returns>String containing information to display</returns>
-        /// <param name="a">Army for which information is to be displayed</param>
-        /// <param name="observer">Character observing the army</param>
-        public string DisplayArmyData(Character observer)
+        /// <param name="enemyTroops">Array of enemy troops</param>
+        /// <returns>Resulting advantage based on calculations</returns>
+        public uint CalculateTroopTypeAdvatages(uint[] enemyTroops)
         {
-            bool isMyArmy = false;
-            string armyText = "";
-            uint[] troopNumbers = this.troops;
-            uint totalTroops = 0;
-            Fief armyLocation = this.GetLocation();
-
-            // get owner
-            PlayerCharacter thisOwner = this.GetOwner();
-
-            // check if observer is owner (will effect display of details)
-            if (thisOwner == observer)
+            uint advantage = 0;
+            // Iterate over troops
+            // Outer loop = this army troop type
+            for (int i = 0; i < this.troops.Length; i++)
             {
-                isMyArmy = true;
-            }
-
-            // ID
-            armyText += "ID: " + this.armyID + "\r\n\r\n";
-
-            // nationality
-            armyText += "Nationality: " + this.GetOwner().nationality.name + "\r\n\r\n";
-
-            // owner
-            armyText += "Owner: " + thisOwner.firstName + " " + thisOwner.familyName + " (" + thisOwner.charID + ")\r\n\r\n";
-
-            if (isMyArmy)
-            {
-                // days left
-                armyText += "Days left: " + this.days + "\r\n\r\n";
-            }
-
-            // location
-            armyText += "Location: " + armyLocation.name + " (Province: " + armyLocation.province.name + ".  Kingdom: " + armyLocation.province.kingdom.name + ")\r\n\r\n";
-
-            // check if is garrison in a siege
-            string siegeID = this.CheckIfSiegeDefenderGarrison();
-            if (String.IsNullOrWhiteSpace(siegeID))
-            {
-                // check if is additional defender in a siege
-                siegeID = this.CheckIfSiegeDefenderAdditional();
-            }
-
-            // if is defender in a siege, indicate
-            if (!String.IsNullOrWhiteSpace(siegeID))
-            {
-                armyText += "NOTE: This army is currently UNDER SIEGE\r\n\r\n";
-            }
-
-            else
-            {
-                // check if is besieger in a siege
-                siegeID = this.CheckIfBesieger();
-
-                // if is besieger in a siege, indicate
-                if (!String.IsNullOrWhiteSpace(siegeID))
+                // Inter loop = enemy army troop type
+                for (int j = 0; j < this.troops.Length; j++)
                 {
-                    armyText += "NOTE: This army is currently BESIEGING THIS FIEF\r\n\r\n";
-                }
-
-                // check if is siege in fief (but army not involved)
-                else
-                {
-                    if (!String.IsNullOrWhiteSpace(armyLocation.siege))
+                    // Get advantage of of this army's current troop type versus the enemy's troop type
+                    double thisAdvantage = 0;
+                    Globals_Server.troopTypeAdvantages.TryGetValue(new Tuple<uint,uint>((uint)i,(uint)j),out thisAdvantage);
+                    if (thisAdvantage == 0) continue;
+                    else
                     {
-                        armyText += "NOTE: This fief is currently UNDER SIEGE\r\n\r\n";
+                        // Calculate difference between troops taking advantage multiplier into account
+                        //double difference = this.troops[i] * thisAdvantage - enemyTroops[j];
+                        double difference = enemyTroops[j] - (this.troops[i] * thisAdvantage);
+                        // if enemy has enough troops to counter advantage, advantage is 0
+                        if (difference <= 0)
+                        {
+                            difference = enemyTroops[j];
+                        }
+                        // If this army has advantage, ensure advantage does not exceed number of enemy troops for this troop types
+                        advantage += (uint)difference;
                     }
                 }
             }
-
-            // leader
-            Character armyLeader = this.GetLeader();
-
-            armyText += "Leader: ";
-
-            if (armyLeader == null)
-            {
-                armyText += "THIS ARMY HAS NO LEADER!";
-
-                if (isMyArmy)
-                {
-                    armyText += "  You should appoint one as soon as possible.";
-                }
-            }
-            else
-            {
-                armyText += armyLeader.firstName + " " + armyLeader.familyName + " (" + armyLeader.charID + ")";
-            }
-            armyText += "\r\n\r\n";
-
-            // get troop numbers
-            if (isMyArmy)
-            {
-                // actual troop numbers if is player's army
-                troopNumbers = this.troops;
-            }
-            else
-            {
-                // estimated troop numbers if is NOT player's army
-                troopNumbers = this.GetTroopsEstimate(observer);
-            }
-
-            armyText += "Troop numbers";
-            if (!isMyArmy)
-            {
-                armyText += " (ESTIMATE)";
-            }
-            armyText += ":\r\n";
-
-            // labels for troop types
-            string[] troopTypeLabels = new string[] { " - Knights: ", " - Men-at-Arms: ", " - Light Cavalry: ", " - Longbowmen: ", " - Crossbowmen: ", " - Foot: ", " - Rabble: " };
-
-            // display numbers for each troop type
-            for (int i = 0; i < troopNumbers.Length; i++)
-            {
-                armyText += troopTypeLabels[i] + troopNumbers[i];
-                totalTroops += troopNumbers[i];
-                armyText += "\r\n";
-            }
-
-            // display total
-            armyText += "   ==================\r\n";
-            armyText += " - TOTAL: " + totalTroops + "\r\n\r\n";
-
-            if (isMyArmy)
-            {
-                // whether is maintained (and at what cost)
-                if (this.isMaintained)
-                {
-                    uint armyCost = this.CalcArmySize() * 500;
-
-                    armyText += "This army is currently being maintained (at a cost of £" + armyCost + ")\r\n\r\n";
-                }
-                else
-                {
-                    armyText += "This army is NOT currently being maintained\r\n\r\n";
-                }
-
-                // aggression level
-                armyText += "Aggression level: " + this.aggression + "\r\n\r\n";
-
-                // sally value
-                armyText += "Sally value: " + this.combatOdds + "\r\n\r\n";
-            }
-
-            return armyText;
+                return advantage;
         }
-
         /// <summary>
         /// Calculates battle values of both armies participating in a battle or siege
         /// </summary>
@@ -1490,25 +1381,25 @@ namespace hist_mmorpg
         /// <param name="isSiege">bool indicating if the circumstance is a siege storm</param>
         public uint[] CalculateBattleValues(Army defender, int keepLvl = 0, bool isSiegeStorm = false)
         {
+
             uint[] battleValues = new uint[2];
-            double attackerLV = 0;
-            double defenderLV = 0;
+            double attackerLV = 1;
+            double defenderLV = 1;
 
             // get leaders
             Character attackerLeader = this.GetLeader();
             Character defenderLeader = defender.GetLeader();
-
             // get leadership values for each army leader
-            attackerLV = attackerLeader.GetLeadershipValue(isSiegeStorm);
+            if (attackerLeader != null)
+            {
+                attackerLV = attackerLeader.GetLeadershipValue(isSiegeStorm);
+            }
+            
 
             // defender may not have leader
             if (defenderLeader != null)
             {
                 defenderLV = defenderLeader.GetLeadershipValue(isSiegeStorm);
-            }
-            else
-            {
-                defenderLV = 4;
             }
 
             // calculate battle modifier based on LVs
@@ -1576,7 +1467,8 @@ namespace hist_mmorpg
                         }
 
                         // perform retreat
-                        bool success = thisLeader.MoveCharacter(target, travelCost, false);
+                        ProtoMessage moveResult;
+                        bool success = thisLeader.MoveCharacter(target, travelCost,out moveResult, false);
                     }
 
                     // if no leader
@@ -1589,28 +1481,33 @@ namespace hist_mmorpg
                         }
 
                         // perform retreat
-                        this.MoveWithoutLeader(target, travelCost);
+                        ProtoMessage message;
+                        this.MoveWithoutLeader(target, travelCost,out message);
                     }
                 }
-
             }
+            Globals_Game.UpdatePlayer(thisOwner.playerID, DisplayMessages.ArmyRetreat, new string[] { this.armyID, this.location });
 
         }
 
         /// <summary>
         /// Processes the addition of one or more detachments to the army
+        /// Returns an error message on fail
+        /// UPDATE: Can now leave detachments for other players. Allows to better team play
         /// </summary>
         /// <param name="detachments">The detachments to add</param>
-        /// <param name="c">Client performing operation</param>
-        public void ProcessPickups(ListView.CheckedListViewItemCollection detachments)
+        public ProtoMessage ProcessPickups(string[] detachmentIDs)
         {
+            ProtoMessage error = new ProtoMessage();
+            error.ResponseType = DisplayMessages.Error;
             bool proceed = true;
             bool adjustDays = true;
             double daysTaken = 0;
             double minDays = 0;
             bool displayNotAllMsg = false;
             uint[] totTroopsToAdd = new uint[] { 0, 0, 0, 0, 0, 0, 0 };
-            string toDisplay = "";
+            Dictionary<string, ProtoDetachment> troops = new Dictionary<string,ProtoDetachment>();
+            DisplayMessages toDisplay = DisplayMessages.None;
 
             // set minDays to thisArmy.days (as default value)
             minDays = this.days;
@@ -1622,8 +1519,12 @@ namespace hist_mmorpg
             // check have minimum days necessary for transfer
             if (this.days < 10)
             {
-                toDisplay = "error:army:You don't have enough days left for this transfer.";
-                Globals_Game.UpdatePlayer(owner, toDisplay);
+                error.ResponseType = DisplayMessages.ErrorGenericNotEnoughDays;
+                return error;
+                //LEGACY
+                /*
+                Globals_Game.UpdatePlayer(this.GetOwner().playerID, DisplayMessages.ErrorGenericNotEnoughDays);
+                */
                 proceed = false;
                 adjustDays = false;
             }
@@ -1635,37 +1536,54 @@ namespace hist_mmorpg
                 // check if have enough days for transfer in this instance
                 if (daysTaken > this.days)
                 {
+                    error.ResponseType = DisplayMessages.ErrorGenericPoorOrganisation;
+                    return error;
                     daysTaken = this.days;
-                    toDisplay = "error:army:Poor organisation means that you have run out of days for this transfer.\r\nTry again next season.";
-                    Globals_Game.UpdatePlayer(owner, toDisplay);
+                    //LEGACY
+                    /*
+                    Globals_Game.UpdatePlayer(owner, DisplayMessages.ErrorGenericPoorOrganisation);
+                    */
                     proceed = false;
                 }
                 else
                 {
                     // make sure collecting army is owned by recipient or donator
-                    foreach (ListViewItem item in detachments)
+                    foreach (string id in detachmentIDs)
                     {
-                        // get donating player
-                        PlayerCharacter pcFrom = null;
-                        if (Globals_Game.pcMasterList.ContainsKey(item.SubItems[9].Text))
-                        {
-                            pcFrom = Globals_Game.pcMasterList[item.SubItems[9].Text];
-                        }
-
-                        // get donating player
-                        PlayerCharacter pcFor = null;
-                        if (Globals_Game.pcMasterList.ContainsKey(item.SubItems[10].Text))
-                        {
-                            pcFor = Globals_Game.pcMasterList[item.SubItems[10].Text];
-                        }
-
-                        // check for appropriate collecting player
-                        if ((myOwner != pcFrom) && (myOwner != pcFor))
-                        {
-                            toDisplay = "error:army:You are not permitted to collect at least one of the selected detachments.";
-                            Globals_Game.UpdatePlayer(owner, toDisplay);
-                            proceed = false;
-                            adjustDays = false;
+                        if(this.GetLocation().troopTransfers.ContainsKey(id)) {
+                            ProtoDetachment details = this.GetLocation().troopTransfers[id];
+                            // get donating player
+                            PlayerCharacter pcFrom = null;
+                            if (Globals_Game.pcMasterList.ContainsKey(details.leftBy))
+                            {
+                                pcFrom = Globals_Game.pcMasterList[details.leftBy];
+                            }
+                            // get target player
+                            PlayerCharacter pcFor = null;
+                            if (Globals_Game.pcMasterList.ContainsKey(details.leftFor))
+                            {
+                                pcFor = Globals_Game.pcMasterList[details.leftFor];
+                            }
+                            // check for appropriate collecting player
+                            if (myOwner != pcFor)
+                            {
+                                error.ResponseType = DisplayMessages.ArmyPickupsDenied;
+                                return error;
+                                //LEGACY
+                                /*
+                                Globals_Game.UpdatePlayer(owner, DisplayMessages.ArmyPickupsDenied);
+                                */
+                                proceed = false;
+                                adjustDays = false;
+                            }
+                            else
+                            {
+                                troops.Add(id,details);
+                                if (minDays < Convert.ToDouble(details.days))
+                                {
+                                    minDays = Convert.ToDouble(details.days);
+                                }
+                            }
                         }
                     }
                 }
@@ -1677,45 +1595,24 @@ namespace hist_mmorpg
                 Fief thisFief = this.GetLocation();
 
                 // check for minimum days
-                foreach (ListViewItem item in detachments)
+                foreach (KeyValuePair<string,ProtoDetachment> pair in troops)
                 {
-                    double thisDays = Convert.ToDouble(item.SubItems[8].Text);
+                    ProtoDetachment item = pair.Value;
+                    double thisDays = Convert.ToDouble(item.days);
 
                     // check if detachment has enough days for transfer in this instance
                     // if not, flag display of message at end of process, but do nothing else
                     if (thisDays < daysTaken)
                     {
                         displayNotAllMsg = true;
-                        toDisplay = "At least one detachment could not be added due to poor organisation.";
+                        toDisplay = DisplayMessages.ArmyPickupsNotEnoughDays;
                     }
                     else
                     {
-                        if (thisDays < minDays)
-                        {
-                            minDays = thisDays;
-                        }
-                    }
-                }
+                        uint[] thisTroops = item.troops;
 
-                foreach (ListViewItem item in detachments)
-                {
-                    double thisDays = Convert.ToDouble(item.SubItems[8].Text);
-
-                    // get numbers of each type to add
-                    uint[] thisTroops = new uint[] { Convert.ToUInt32(item.SubItems[1].Text), Convert.ToUInt32(item.SubItems[2].Text),
-                            Convert.ToUInt32(item.SubItems[3].Text), Convert.ToUInt32(item.SubItems[4].Text),
-                            Convert.ToUInt32(item.SubItems[5].Text), Convert.ToUInt32(item.SubItems[6].Text),
-                            Convert.ToUInt32(item.SubItems[7].Text) };
-
-                    // if does have enough days, proceed
-                    if (thisDays >= daysTaken)
-                    {
-                        // create temporary army to check attrition
-                        Army tempArmy = new Army(Globals_Game.GetNextArmyID(), null, item.SubItems[9].Text,
-                            thisDays, this.location, trp: thisTroops);
-
-                        // compare days to minDays, apply attrition if necessary
-                        // then add to troopsToAdd
+                        Army tempArmy = new Army(Globals_Game.GetNextArmyID(), null, item.leftFor,
+                                thisDays, this.location, trp: thisTroops);
                         if (thisDays > minDays)
                         {
                             // check for attrition (to bring it down to minDays)
@@ -1734,21 +1631,18 @@ namespace hist_mmorpg
                                 }
                             }
                         }
-
                         for (int i = 0; i < totTroopsToAdd.Length; i++)
                         {
                             totTroopsToAdd[i] += tempArmy.troops[i];
                         }
 
                         // remove detachment from fief
-                        thisFief.troopTransfers.Remove(item.SubItems[0].Text);
+                        thisFief.troopTransfers.Remove(pair.Key);
 
                         // nullify tempArmy
                         tempArmy = null;
                     }
-
                 }
-
             }
 
             if (adjustDays)
@@ -1836,14 +1730,15 @@ namespace hist_mmorpg
                 // if not all selected detachments could be picked up (not enough days), show message
                 if (displayNotAllMsg)
                 {
-                    Globals_Game.UpdatePlayer(owner, toDisplay);
+                    error.ResponseType = toDisplay;
+                    return error;
+                    //LEGACY
+                    /*
+                    Globals_Game.UpdatePlayer(GetOwner().playerID, toDisplay);
+                    */
                 }
             }
+            return null;
         }
-  
-     /*   public void Serialize()
-        {
-            Serializer.Serialize(File.Create("myTest.txt"), this);
-        }*/
     }
 }

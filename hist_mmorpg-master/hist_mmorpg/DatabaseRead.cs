@@ -182,7 +182,12 @@ namespace hist_mmorpg
                 // add Fief to fiefMasterList
                 Globals_Game.fiefMasterList.Add(f.id, f);
             }
-
+            // ========== load CLIENTS
+            foreach (string username in Globals_Server.client_keys)
+            {
+                Client c = DatabaseRead_Client(gameID, username);
+                Globals_Server.Clients.Add(c.username, c);
+            }
             // ========= process any CHARACTER goTo QUEUES containing entries
             if (Globals_Game.goToList.Count > 0)
             {
@@ -206,6 +211,12 @@ namespace hist_mmorpg
             Globals_Game.gameMap = DatabaseRead.DatabaseRead_map(gameID, "mapEdges");
         }
 
+		public static void DatabaseRead_Test(string gameID) {
+			var result = Globals_Server.rClient.Get (gameID, "test");
+			if (!result.IsSuccess) {
+				Console.WriteLine ("Failed to get test object : " + result.ErrorMessage);
+			}
+		}
         //TODO
         public static Client DatabaseRead_Client(string gameID, string clientID)
         {
@@ -229,6 +240,18 @@ namespace hist_mmorpg
         /// <param name="gameID">Game for which key lists to be retrieved</param>
         public static void DatabaseRead_keyLists(string gameID)
         {
+			// populate nationalityKeys
+			var natKeyResult = Globals_Server.rClient.Get(gameID, "nationalityKeys");
+			if (natKeyResult.IsSuccess)
+			{
+				Globals_Game.nationalityKeys = natKeyResult.Value.GetObject<List<string>>();
+			}
+			else
+			{
+				string toDisplay = "InitialDBload: Unable to retrieve nationalityKeys from database."+natKeyResult.ErrorMessage;
+				Globals_Server.logError(toDisplay);
+			}
+			Console.WriteLine("Reading traitkeys- bucket = "+gameID + ", key = traitKeys");
             // populate traitKeys
             var traitKeyResult = Globals_Server.rClient.Get(gameID, "traitKeys");
             if (traitKeyResult.IsSuccess)
@@ -237,21 +260,11 @@ namespace hist_mmorpg
             }
             else
             {
-                string toDisplay = "InitialDBload: Unable to retrieve traitKeys from database.";
+				string toDisplay = "InitialDBload: Unable to retrieve traitKeys from database. "+traitKeyResult.ErrorMessage;
                 Globals_Server.logError(toDisplay);
             }
 
-            // populate nationalityKeys
-            var natKeyResult = Globals_Server.rClient.Get(gameID, "nationalityKeys");
-            if (natKeyResult.IsSuccess)
-            {
-                Globals_Game.nationalityKeys = natKeyResult.Value.GetObject<List<string>>();
-            }
-            else
-            {
-                string toDisplay = "InitialDBload: Unable to retrieve nationalityKeys from database.";
-                Globals_Server.logError(toDisplay);
-            }
+           
 
             // populate langKeys
             var langKeyResult = Globals_Server.rClient.Get(gameID, "langKeys");
@@ -407,6 +420,16 @@ namespace hist_mmorpg
             {
                 string toDisplay ="InitialDBload: Unable to retrieve siegeKeys from database.";
                 Globals_Server.logError(toDisplay);
+            }
+
+            var clientKeyResult = Globals_Server.rClient.Get(gameID, "clientKeys");
+            if (clientKeyResult.IsSuccess)
+            {
+                Globals_Server.client_keys = clientKeyResult.Value.GetObject<List<string>>();
+            }
+            else
+            {
+                Globals_Server.logError("InitialDBload: unable to retrieve clientKeys from database.");
             }
 
         }
@@ -985,7 +1008,7 @@ namespace hist_mmorpg
             }
             else
             {
-                string toDisplay = "InitialDBload: Unable to retrieve PlayerCharacter " + pcID;
+				string toDisplay = "InitialDBload: Unable to retrieve PlayerCharacter " + pcID + ": "+pcResult.ErrorMessage;
                 Globals_Server.logError(toDisplay);
             }
 
@@ -1345,7 +1368,22 @@ namespace hist_mmorpg
 
                 }
             }
-
+            // populate gaol
+            if (fs.gaol.Count > 0)
+            {
+                foreach (string charID in fs.gaol)
+                {
+                    Character prisoner = Globals_Game.getCharFromID(charID);
+                    if (prisoner != null)
+                    {
+                        fOut.gaol.Add(prisoner);
+                    }
+                    else
+                    {
+                        Globals_Server.logError("Read from database: character unidentified- " + charID);
+                    }
+                }
+            }
             // insert rank using rankID
             if (fs.rank > 0)
             {
