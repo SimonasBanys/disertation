@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace hist_mmorpg
+namespace ProtoMessage
 {
     /// <summary>
     /// Class storing data on a siege
@@ -187,7 +187,7 @@ namespace hist_mmorpg
             }
 
             // DEFADD
-            if (!String.IsNullOrWhiteSpace(defAdd))
+            if (!String.IsNullOrEmpty(defAdd))
             {
                 // trim and ensure 1st is uppercase
                 defAdd = Utility_Methods.FirstCharToUpper(defAdd.Trim());
@@ -212,7 +212,7 @@ namespace hist_mmorpg
             this.totalCasualtiesDefender = totDef;
             this.totalDays = totDay;
             this.defenderAdditional = defAdd;
-            if (String.IsNullOrWhiteSpace(end))
+            if (String.IsNullOrEmpty(end))
             {
                 this.endDate = null;
             }
@@ -238,7 +238,7 @@ namespace hist_mmorpg
         {
             Fief besiegedFief = null;
 
-            if (!String.IsNullOrWhiteSpace(this.besiegedFief))
+            if (!String.IsNullOrEmpty(this.besiegedFief))
             {
                 if (Globals_Game.fiefMasterList.ContainsKey(this.besiegedFief))
                 {
@@ -257,7 +257,7 @@ namespace hist_mmorpg
         {
             Army besieger = null;
 
-            if (!String.IsNullOrWhiteSpace(this.besiegerArmy))
+            if (!String.IsNullOrEmpty(this.besiegerArmy))
             {
                 if (Globals_Game.armyMasterList.ContainsKey(this.besiegerArmy))
                 {
@@ -276,7 +276,7 @@ namespace hist_mmorpg
         {
             Army defenderGarrison = null;
 
-            if (!String.IsNullOrWhiteSpace(this.defenderGarrison))
+            if (!String.IsNullOrEmpty(this.defenderGarrison))
             {
                 if (Globals_Game.armyMasterList.ContainsKey(this.defenderGarrison))
                 {
@@ -295,7 +295,7 @@ namespace hist_mmorpg
         {
             Army thisDefenderAdditional = null;
 
-            if (!String.IsNullOrWhiteSpace(this.defenderAdditional))
+            if (!String.IsNullOrEmpty(this.defenderAdditional))
             {
                 if (Globals_Game.armyMasterList.ContainsKey(this.defenderAdditional))
                 {
@@ -314,7 +314,7 @@ namespace hist_mmorpg
         {
             PlayerCharacter defendingPlyr = null;
 
-            if (!String.IsNullOrWhiteSpace(this.defendingPlayer))
+            if (!String.IsNullOrEmpty(this.defendingPlayer))
             {
                 if (Globals_Game.pcMasterList.ContainsKey(this.defendingPlayer))
                 {
@@ -333,7 +333,7 @@ namespace hist_mmorpg
         {
             PlayerCharacter besiegingPlyr = null;
 
-            if (!String.IsNullOrWhiteSpace(this.besiegingPlayer))
+            if (!String.IsNullOrEmpty(this.besiegingPlayer))
             {
                 if (Globals_Game.pcMasterList.ContainsKey(this.besiegingPlayer))
                 {
@@ -508,7 +508,7 @@ namespace hist_mmorpg
             PlayerCharacter besiegerOwner = this.GetBesiegingPlayer(); ;
 
             // check if besieger still in field (i.e. has not been disbanded)
-            if (String.IsNullOrWhiteSpace(this.besiegerArmy))
+            if (String.IsNullOrEmpty(this.besiegerArmy))
             {
                 siegeEnded = true;
             }
@@ -987,7 +987,7 @@ namespace hist_mmorpg
                     if (thisCharacter.inKeep)
                     {
                         // fief owner and his family
-                        if (!String.IsNullOrWhiteSpace(thisCharacter.familyID))
+                        if (!String.IsNullOrEmpty(thisCharacter.familyID))
                         {
                             if (thisCharacter.familyID.Equals(this.GetDefendingPlayer().charID))
                             {
@@ -1202,174 +1202,6 @@ namespace hist_mmorpg
         /// Processes a single reduction round of the siege
         /// </summary>
         /// <param name="type">The type of round - storm, negotiate, reduction (default)</param>
-        public void SiegeReductionRound(string type = "reduction")
-        {
-            bool siegeRaised = false;
-            Fief besiegedFief = this.GetFief();
-            Army besieger = this.GetBesiegingArmy();
-            Army defenderGarrison = this.GetDefenderGarrison();
-            Army defenderAdditional = null;
-
-            // check for sallying army
-            if (!String.IsNullOrWhiteSpace(this.defenderAdditional))
-            {
-                defenderAdditional = this.GetDefenderAdditional();
-
-                if (defenderAdditional.aggression > 0)
-                {
-                    // get odds
-                    int battleOdds = Battle.GetBattleOdds(defenderAdditional, besieger);
-
-                    // if odds OK, give battle
-                    if (battleOdds >= defenderAdditional.combatOdds)
-                    {
-                        // process battle and apply results, if required
-                        ProtoBattle battleResults;
-                        siegeRaised = Battle.GiveBattle(defenderAdditional, besieger, out battleResults, circumstance: "siege");
-
-                        // check for disbandment of defenderAdditional and remove from siege if necessary
-                        if (!siegeRaised)
-                        {
-                            if (!besiegedFief.armies.Contains(this.defenderAdditional))
-                            {
-                                defenderAdditional = null;
-                            }
-                        }
-
-                    }
-                }
-            }
-
-            if (siegeRaised)
-            {
-                // NOTE: if sally was success, siege is ended in Form1.giveBattle
-                string toDisplay = "The defenders have successfully raised the siege!";
-                Globals_Game.UpdatePlayer(GetDefendingPlayer().playerID, DisplayMessages.SiegeRaised);
-                Globals_Game.UpdatePlayer(GetBesiegingPlayer().playerID, DisplayMessages.SiegeRaised);
-            }
-
-            else
-            {
-                Character defenderLeader = defenderGarrison.GetLeader();
-                Character attackerLeader = besieger.GetLeader();
-
-                // process results of siege round
-                // reduce keep level by 8%
-                double originalKeepLvl = besiegedFief.keepLevel;
-                besiegedFief.keepLevel = (besiegedFief.keepLevel * 0.92);
-
-                // apply combat losses to defenderGarrison
-                // NOTE: attrition for both sides is calculated in siege.syncDays
-
-                double combatLosses = 0.01;
-                uint troopsLost = defenderGarrison.ApplyTroopLosses(combatLosses);
-
-                // check for death of defending PCs/NPCs
-                if (defenderLeader != null)
-                {
-                    bool characterDead = false;
-
-                    // if defenderLeader is PC, check for casualties amongst entourage
-                    if (defenderLeader is PlayerCharacter)
-                    {
-                        for (int i = 0; i < (defenderLeader as PlayerCharacter).myNPCs.Count; i++)
-                        {
-                            NonPlayerCharacter thisNPC = (defenderLeader as PlayerCharacter).myNPCs[i];
-                            characterDead = thisNPC.CalculateCombatInjury(combatLosses);
-
-                            if (characterDead)
-                            {
-                                // process death
-                                (defenderLeader as PlayerCharacter).myNPCs[i].ProcessDeath("injury");
-                            }
-                        }
-                    }
-
-                    // check defenderLeader
-                    characterDead = defenderLeader.CalculateCombatInjury(combatLosses);
-
-                    if (characterDead)
-                    {
-                        // remove as leader
-                        defenderGarrison.leader = null;
-
-                        // process death
-                        defenderLeader.ProcessDeath("injury");
-                    }
-                }
-
-                // update total days (NOTE: siege.days will be updated in syncDays)
-                this.totalDays += 10;
-
-                // synchronise days
-                this.SyncSiegeDays(this.days - 10);
-
-                if (type.Equals("reduction"))
-                {
-                    // UPDATE SIEGE LOSSES
-                    this.totalCasualtiesDefender += Convert.ToInt32(troopsLost);
-
-                    // =================== construct and send JOURNAL ENTRY
-                    // ID
-                    uint entryID = Globals_Game.GetNextJournalEntryID();
-
-                    // personae
-                    List<string> tempPersonae = new List<string>();
-                    tempPersonae.Add(this.GetDefendingPlayer().charID + "|fiefOwner");
-                    tempPersonae.Add(this.GetBesiegingPlayer().charID + "|attackerOwner");
-                    if (attackerLeader != null)
-                    {
-                        tempPersonae.Add(attackerLeader.charID + "|attackerLeader");
-                    }
-                    if (defenderLeader != null)
-                    {
-                        tempPersonae.Add(defenderLeader.charID + "|defenderGarrisonLeader");
-                    }
-                    // get additional defending leader
-                    Character addDefendLeader = null;
-                    if (defenderAdditional != null)
-                    {
-                        addDefendLeader = defenderAdditional.GetLeader();
-                        if (addDefendLeader != null)
-                        {
-                            tempPersonae.Add(addDefendLeader.charID + "|defenderAdditionalLeader");
-                        }
-                    }
-                    string[] siegePersonae = tempPersonae.ToArray();
-
-                    // location
-                    string siegeLocation = this.GetFief().id;
-
-                    // use popup text as description
-                    DisplayMessages ResponseType = DisplayMessages.SiegeReduction;
-                    string[] fields = new string[5];
-                    fields[0] = this.GetFief().name;
-                    fields[1] = this.GetBesiegingPlayer().firstName + " " + this.GetBesiegingPlayer().familyName;
-                    fields[2] = troopsLost+"";
-                    fields[3] = originalKeepLvl + "";
-                    fields[4] = besiegedFief.keepLevel + "";
-
-                    ProtoMessage round = new ProtoMessage();
-                    round.ResponseType = ResponseType;
-                    round.MessageFields = fields;
-                    // put together new journal entry
-                    JournalEntry siegeResult = new JournalEntry(entryID, Globals_Game.clock.currentYear, Globals_Game.clock.currentSeason, siegePersonae, "siegeReduction", round, loc: siegeLocation);
-
-                    // add new journal entry to pastEvents
-                    Globals_Game.AddPastEvent(siegeResult);
-                }
-
-                if (type.Equals("storm"))
-                {
-                    this.SiegeStormRound(troopsLost, originalKeepLvl);
-                }
-                else if (type.Equals("negotiation"))
-                {
-                    this.SiegeNegotiationRound(troopsLost, originalKeepLvl);
-                }
-            }
-
-        }
 
     }
 }

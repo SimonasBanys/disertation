@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace hist_mmorpg
+namespace ProtoMessage
 {
     /// <summary>
     /// Class storing season data
@@ -36,7 +36,7 @@ namespace hist_mmorpg
         /// <param name="s">byte holding current season (default: 0)</param>
         public GameClock(String id, uint yr, byte s = 0)
         {
-            if (String.IsNullOrWhiteSpace(id))
+            if (String.IsNullOrEmpty(id))
             {
                 throw new InvalidDataException("GameClock ID must be a string > 0 characters in length");
             }

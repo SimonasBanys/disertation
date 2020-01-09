@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
 
-namespace hist_mmorpg
+namespace ProtoMessage
 {
     /// <summary>
     /// enum representing all valid actions in the gane
@@ -252,7 +252,7 @@ namespace hist_mmorpg
         /// <summary>
         /// Holds HexMapGraph for this game
         /// </summary>
-        public static HexMapGraph gameMap;
+       // public static HexMapGraph gameMap;
         /// <summary>
         /// Holds GameClock for this game
         /// </summary>
@@ -361,7 +361,7 @@ namespace hist_mmorpg
         /// <summary>
         /// Holds the current Game
         /// </summary>
-        public static Game game;
+       // public static Game game;
         /// <summary>
         /// Gets the game's end date (year)
         /// </summary>
@@ -376,9 +376,9 @@ namespace hist_mmorpg
         /// Gets the current scores for all players
         /// </summary>
         /// <returns>SortedList<double, string> containing current scores</returns>
-        public static SortedList<double, string> GetCurrentScores()
+        public static SortedDictionary<double, string> GetCurrentScores()
         {
-            SortedList<double, string> currentScores = new SortedList<double, string>();
+            SortedDictionary<double, string> currentScores = new SortedDictionary<double, string>();
             double thisScore = 0;
 
             foreach (KeyValuePair<string, VictoryData> scoresEntry in Globals_Game.victoryData)
@@ -904,7 +904,7 @@ namespace hist_mmorpg
         {
             bool gameEnded = false;
 
-            SortedList<double, string> currentScores = new SortedList<double, string>();
+            SortedDictionary<double, string> currentScores = new SortedDictionary<double, string>();
             if (Globals_Game.gameType == 0)
             {
                 //update scores
@@ -1207,8 +1207,8 @@ namespace hist_mmorpg
                                 || ((bride.location == groom.location) && (bride.inKeep != groom.inKeep)))
                             {
                                 // if there's a siege in the fief where the character is in the keep
-                                if (((!String.IsNullOrWhiteSpace(bride.location.siege)) && (bride.inKeep))
-                                    || ((!String.IsNullOrWhiteSpace(groom.location.siege)) && (groom.inKeep)))
+                                if (((!String.IsNullOrEmpty(bride.location.siege)) && (bride.inKeep))
+                                    || ((!String.IsNullOrEmpty(groom.location.siege)) && (groom.inKeep)))
                                 {
                                     proceed = false;
 
@@ -1250,10 +1250,10 @@ namespace hist_mmorpg
         /// <param name="message"></param>
         public static void UpdatePlayer(string player, DisplayMessages message, string[] fields = null, string type = null)
         {
-            if(string.IsNullOrWhiteSpace(player)||(message == null)) {
+            if(string.IsNullOrEmpty(player)||(message == null)) {
                 return;
             }
-            if (string.IsNullOrWhiteSpace(type))
+            if (string.IsNullOrEmpty(type))
             {
                 // if a user is currently signed in send the message direct to client
                 if (Globals_Server.Clients.ContainsKey(player))
@@ -1286,7 +1286,7 @@ namespace hist_mmorpg
         /// <param name="message">Message to be sent</param>
         public static void UpdatePlayer(string player, ProtoMessage message)
         {
-            if (string.IsNullOrWhiteSpace(player)) return;
+            if (string.IsNullOrEmpty(player)) return;
             Client c = null;
             Globals_Server.Clients.TryGetValue(player, out c);
             if (c != null)
@@ -1304,12 +1304,6 @@ namespace hist_mmorpg
         {
             // add new observer to list
             registeredObservers.Add(obs);
-        }
-
-        public static void RegisterObserver(global::ProtoMessage.Client obs)
-        {
-            Client foraddClient = new Client(obs.username, obs.myPlayerCharacter.playerID);
-            registeredObservers.Add(foraddClient);
         }
 
         /// <summary>
@@ -1335,7 +1329,7 @@ namespace hist_mmorpg
             {
                 Client c=null;
                 // Check PlayerCharacter is being played
-                if (!string.IsNullOrWhiteSpace(pc.playerID))
+                if (!string.IsNullOrEmpty(pc.playerID))
                 {
                     Globals_Server.Clients.TryGetValue(pc.playerID, out c);
                 }
@@ -1647,7 +1641,7 @@ namespace hist_mmorpg
         {
             PlayerCharacter challenger = null;
 
-            if (!String.IsNullOrWhiteSpace(this.challengerID))
+            if (!String.IsNullOrEmpty(this.challengerID))
             {
                 if (Globals_Game.pcMasterList.ContainsKey(this.challengerID))
                 {
@@ -1666,7 +1660,7 @@ namespace hist_mmorpg
         {
             Place contestedPlace = null;
 
-            if (!String.IsNullOrWhiteSpace(this.placeID))
+            if (!String.IsNullOrEmpty(this.placeID))
             {
                 // get province
                 if (this.placeType.Equals("province"))

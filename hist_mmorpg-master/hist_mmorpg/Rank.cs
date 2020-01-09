@@ -5,7 +5,7 @@ using System.Text;
 using System.IO;
 using System.Runtime.Serialization;
 using ProtoBuf;
-namespace hist_mmorpg
+namespace ProtoMessage
 {
     /// <summary>
     /// Class storing data on rank and title
@@ -145,7 +145,7 @@ namespace hist_mmorpg
             // VALIDATION
 
             // HOLDER
-            if (!String.IsNullOrWhiteSpace(holder))
+            if (!String.IsNullOrEmpty(holder))
             {
                 // trim and ensure 1st is uppercase
                 holder = Utility_Methods.FirstCharToUpper(holder.Trim());
@@ -190,7 +190,7 @@ namespace hist_mmorpg
             PlayerCharacter oldPositionHolder = null;
 
             // remove existing holder if necessary
-            if (!String.IsNullOrWhiteSpace(this.officeHolder))
+            if (!String.IsNullOrEmpty(this.officeHolder))
             {
                 // get current holder
                 if (Globals_Game.pcMasterList.ContainsKey(this.officeHolder))
@@ -364,7 +364,7 @@ namespace hist_mmorpg
             }
 
             // HOLDER
-            if (!String.IsNullOrWhiteSpace(holder))
+            if (!String.IsNullOrEmpty(holder))
             {
                 // trim and ensure 1st is uppercase
                 holder = Utility_Methods.FirstCharToUpper(holder.Trim());

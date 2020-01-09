@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
-namespace hist_mmorpg
+namespace ProtoMessage
 {
     /// <summary>
     /// Class storing data on character (PC and NPC)
@@ -260,7 +260,7 @@ namespace hist_mmorpg
             }
 
             // FAMID
-            if (!String.IsNullOrWhiteSpace(famID))
+            if (!String.IsNullOrEmpty(famID))
             {
                 // trim and ensure 1st is uppercase
                 famID = Utility_Methods.FirstCharToUpper(famID.Trim());
@@ -272,7 +272,7 @@ namespace hist_mmorpg
             }
 
             // SP
-            if (!String.IsNullOrWhiteSpace(sp))
+            if (!String.IsNullOrEmpty(sp))
             {
                 // trim and ensure 1st is uppercase
                 sp = Utility_Methods.FirstCharToUpper(sp.Trim());
@@ -284,7 +284,7 @@ namespace hist_mmorpg
             }
 
             // FATH
-            if (!String.IsNullOrWhiteSpace(fath))
+            if (!String.IsNullOrEmpty(fath))
             {
                 // trim and ensure 1st is uppercase
                 fath = Utility_Methods.FirstCharToUpper(fath.Trim());
@@ -296,7 +296,7 @@ namespace hist_mmorpg
             }
 
             // MOTH
-            if (!String.IsNullOrWhiteSpace(moth))
+            if (!String.IsNullOrEmpty(moth))
             {
                 // trim and ensure 1st is uppercase
                 moth = Utility_Methods.FirstCharToUpper(moth.Trim());
@@ -320,7 +320,7 @@ namespace hist_mmorpg
             }
 
             // FIA
-            if (!String.IsNullOrWhiteSpace(fia))
+            if (!String.IsNullOrEmpty(fia))
             {
                 // trim and ensure 1st is uppercase
                 fia = Utility_Methods.FirstCharToUpper(fia.Trim());
@@ -352,7 +352,7 @@ namespace hist_mmorpg
             }
 
             // AID
-            if (!String.IsNullOrWhiteSpace(aID))
+            if (!String.IsNullOrEmpty(aID))
             {
                 // trim and ensure 1st is uppercase
                 aID = Utility_Methods.FirstCharToUpper(aID.Trim());
@@ -1100,7 +1100,7 @@ namespace hist_mmorpg
             {
                 return this.GetHeadOfFamily();
             }
-            else if (!string.IsNullOrWhiteSpace((this as NonPlayerCharacter).employer))
+            else if (!string.IsNullOrEmpty((this as NonPlayerCharacter).employer))
             {
                 return (this as NonPlayerCharacter).GetEmployer();
             }
@@ -1123,7 +1123,7 @@ namespace hist_mmorpg
             // PCs
             if (this is PlayerCharacter)
             {
-                if (!String.IsNullOrWhiteSpace((this as PlayerCharacter).playerID))
+                if (!String.IsNullOrEmpty((this as PlayerCharacter).playerID))
                 {
                     role = "player";
                 }
@@ -1136,7 +1136,7 @@ namespace hist_mmorpg
             // NPCs
             else
             {
-                if (!String.IsNullOrWhiteSpace((this as NonPlayerCharacter).familyID))
+                if (!String.IsNullOrEmpty((this as NonPlayerCharacter).familyID))
                 {
                     if ((this as NonPlayerCharacter).isHeir)
                     {
@@ -1147,7 +1147,7 @@ namespace hist_mmorpg
                         role = "family";
                     }
                 }
-                else if (!String.IsNullOrWhiteSpace((this as NonPlayerCharacter).employer))
+                else if (!String.IsNullOrEmpty((this as NonPlayerCharacter).employer))
                 {
                     role = "employee";
                 }
@@ -1173,7 +1173,7 @@ namespace hist_mmorpg
             this.location.charactersInFief.Remove(this);
 
             // ============== 3. remove from ARMY LEADERSHIP
-            if (!String.IsNullOrWhiteSpace(this.armyID))
+            if (!String.IsNullOrEmpty(this.armyID))
             {
                 // get army
                 Army thisArmy = null;
@@ -1195,7 +1195,7 @@ namespace hist_mmorpg
             }
 
             // ============== 4. if married, remove from SPOUSE
-            if (!String.IsNullOrWhiteSpace(this.spouse))
+            if (!String.IsNullOrEmpty(this.spouse))
             {
                 mySpouse = this.GetSpouse();
 
@@ -1207,7 +1207,7 @@ namespace hist_mmorpg
             }
 
             // ============== 5. if engaged, remove from FIANCEE and CANCEL MARRIAGE
-            if (!String.IsNullOrWhiteSpace(this.fiancee))
+            if (!String.IsNullOrEmpty(this.fiancee))
             {
                 string marriageRole = "";
                 Character myFiancee = this.GetFiancee();
@@ -1259,7 +1259,7 @@ namespace hist_mmorpg
             else
             {
                 // if is an employee
-                if (!String.IsNullOrWhiteSpace((this as NonPlayerCharacter).employer))
+                if (!String.IsNullOrEmpty((this as NonPlayerCharacter).employer))
                 {
                     // get boss
                     employer = (this as NonPlayerCharacter).GetEmployer();
@@ -1448,12 +1448,12 @@ namespace hist_mmorpg
                 }
 
                 // personae
-                if (!String.IsNullOrWhiteSpace(interestedPlayerEntry))
+                if (!String.IsNullOrEmpty(interestedPlayerEntry))
                 {
                     tempPersonae.Add(interestedPlayerEntry);
                 }
                 tempPersonae.Add(deceasedCharacterEntry);
-                if (!String.IsNullOrWhiteSpace(allEntry))
+                if (!String.IsNullOrEmpty(allEntry))
                 {
                     tempPersonae.Add(allEntry);
                 }
@@ -1522,7 +1522,7 @@ namespace hist_mmorpg
                 if (this.GetPlayerCharacter() != null)
                 {
 
-                    if (!String.IsNullOrWhiteSpace(this.GetPlayerCharacter().playerID))
+                    if (!String.IsNullOrEmpty(this.GetPlayerCharacter().playerID))
                     {
                         Client c;
                         Globals_Server.Clients.TryGetValue(this.GetPlayerCharacter().playerID, out c);
@@ -1625,7 +1625,7 @@ namespace hist_mmorpg
                 npc.goTo.Clear();
 
                 // employees are taken on by king
-                if (!String.IsNullOrWhiteSpace(npc.employer))
+                if (!String.IsNullOrEmpty(npc.employer))
                 {
                     if (npc.employer.Equals(deceased.charID))
                     {
@@ -1635,7 +1635,7 @@ namespace hist_mmorpg
                 }
 
                 // family members are cast into the cruel world
-                else if (!String.IsNullOrWhiteSpace(npc.familyID))
+                else if (!String.IsNullOrEmpty(npc.familyID))
                 {
                     // familyID
                     npc.familyID = null;
@@ -1678,7 +1678,7 @@ namespace hist_mmorpg
                     }
 
                     // forthcoming marriage
-                    if (!String.IsNullOrWhiteSpace(npc.fiancee))
+                    if (!String.IsNullOrEmpty(npc.fiancee))
                     {
                         Character npcFiancee = npc.GetFiancee();
 
@@ -1780,7 +1780,7 @@ namespace hist_mmorpg
 			}
 
             // UPDATE GLOBALS_GAME.VICTORYDATA
-            if (!String.IsNullOrWhiteSpace(deceased.playerID))
+            if (!String.IsNullOrEmpty(deceased.playerID))
             {
                 if (Globals_Game.victoryData.ContainsKey(deceased.playerID))
                 {
@@ -1820,7 +1820,7 @@ namespace hist_mmorpg
             // ============== 2. change all FAMILYID & EMPLOYER of MYNPCS to promotedNPC's
             for (int i = 0; i < promotedNPC.myNPCs.Count; i++ )
             {
-                if (!String.IsNullOrWhiteSpace(promotedNPC.myNPCs[i].familyID))
+                if (!String.IsNullOrEmpty(promotedNPC.myNPCs[i].familyID))
                 {
                     if (promotedNPC.myNPCs[i].familyID.Equals(deceased.charID))
                     {
@@ -1828,7 +1828,7 @@ namespace hist_mmorpg
                     }
                 }
 
-                else if (!String.IsNullOrWhiteSpace(promotedNPC.myNPCs[i].employer))
+                else if (!String.IsNullOrEmpty(promotedNPC.myNPCs[i].employer))
                 {
                     if (promotedNPC.myNPCs[i].employer.Equals(deceased.charID))
                     {
@@ -1899,7 +1899,7 @@ namespace hist_mmorpg
             }
 
             // ============== 7. update GLOBALS_GAME.VICTORYDATA
-            if (!String.IsNullOrWhiteSpace(promotedNPC.playerID))
+            if (!String.IsNullOrEmpty(promotedNPC.playerID))
             {
                 if (Globals_Game.victoryData.ContainsKey(promotedNPC.playerID))
                 {
@@ -1986,7 +1986,7 @@ namespace hist_mmorpg
             }
 
             // create new NPC and assign location
-            if (!String.IsNullOrWhiteSpace(newLocationID))
+            if (!String.IsNullOrEmpty(newLocationID))
             {
                 // create basic NPC
                 NonPlayerCharacter newNPC = null;
@@ -2026,7 +2026,7 @@ namespace hist_mmorpg
             PlayerCharacter player = null;
             if (this is PlayerCharacter) player = (PlayerCharacter)this;
             // check if character leading an army
-            if (!String.IsNullOrWhiteSpace(this.armyID))
+            if (!String.IsNullOrEmpty(this.armyID))
             {
                 // get army
                 thisArmy = this.GetArmy();
@@ -2142,7 +2142,7 @@ namespace hist_mmorpg
             }
 
             // cannot be member of any family
-            if (!String.IsNullOrWhiteSpace(this.familyID))
+            if (!String.IsNullOrEmpty(this.familyID))
             {
                 canHire = false;
             }
@@ -2222,8 +2222,7 @@ namespace hist_mmorpg
         public Army GetArmy()
         {
             Army thisArmy = null;
-
-            if (!String.IsNullOrWhiteSpace(this.armyID))
+            if (!String.IsNullOrEmpty(this.armyID))
             {
                 if (Globals_Game.armyMasterList.ContainsKey(this.armyID))
                 {
@@ -2246,7 +2245,7 @@ namespace hist_mmorpg
         {
             Character father = null;
 
-            if (!String.IsNullOrWhiteSpace(this.father))
+            if (!String.IsNullOrEmpty(this.father))
             {
                 if (Globals_Game.pcMasterList.ContainsKey(this.father))
                 {
@@ -2269,7 +2268,7 @@ namespace hist_mmorpg
         {
             Character mother = null;
 
-            if (!String.IsNullOrWhiteSpace(this.mother))
+            if (!String.IsNullOrEmpty(this.mother))
             {
                 if (Globals_Game.pcMasterList.ContainsKey(this.mother))
                 {
@@ -2292,7 +2291,7 @@ namespace hist_mmorpg
         {
             PlayerCharacter headFamily = null;
 
-            if (!String.IsNullOrWhiteSpace(this.familyID))
+            if (!String.IsNullOrEmpty(this.familyID))
             {
                 if (Globals_Game.pcMasterList.ContainsKey(this.familyID))
                 {
@@ -2318,7 +2317,7 @@ namespace hist_mmorpg
             bool proceed = true;
             // get army if appropriate
             Army armyToLead = null;
-            if (!String.IsNullOrWhiteSpace(armyID))
+            if (!String.IsNullOrEmpty(armyID))
             {
                 if (Globals_Game.armyMasterList.ContainsKey(armyID))
                 {
@@ -2340,7 +2339,7 @@ namespace hist_mmorpg
                 else
                 {
                     // 2. check is an active player
-                    if (String.IsNullOrWhiteSpace((this as PlayerCharacter).playerID))
+                    if (String.IsNullOrEmpty((this as PlayerCharacter).playerID))
                     {
                         proceed = false;
                         error = new ProtoMessage();
@@ -2367,7 +2366,6 @@ namespace hist_mmorpg
                 // 1. check is male
                 if (!this.isMale)
                 {
-                    Console.WriteLine("Not male");
                     proceed = false;
                     error = new ProtoMessage();
                     error.ResponseType = DisplayMessages.CharacterNotMale;
@@ -2378,7 +2376,6 @@ namespace hist_mmorpg
                     // 2. check is of age
                     if (this.CalcAge() < 14)
                     {
-                        Console.Write("too young");
                         proceed = false;
                         error = new ProtoMessage();
                         error.ResponseType = DisplayMessages.CharacterNotOfAge;
@@ -2394,7 +2391,6 @@ namespace hist_mmorpg
                             // Army must be defined
                             if (armyToLead == null)
                             {
-                                Console.WriteLine("No Army");
                                 ProtoMessage noArmy = new ProtoMessage();
                                 noArmy.ResponseType = DisplayMessages.ErrorGenericArmyUnidentified;
                                 error = noArmy;
@@ -2402,7 +2398,6 @@ namespace hist_mmorpg
                             }
                             if ((!(this.location.id.Equals(armyToLead.location))))
                             {
-                                Console.WriteLine("Not same location");
                                 proceed = false;
                                 error = new ProtoMessage();
                                 error.ResponseType = DisplayMessages.CharacterLeaderLocation;
@@ -2410,11 +2405,10 @@ namespace hist_mmorpg
                             else
                             {
                                 // 4. check if army leader is already leader of this army
-                                if ((!String.IsNullOrWhiteSpace(this.armyID)) && (!String.IsNullOrWhiteSpace(armyID)))
+                                if ((!String.IsNullOrEmpty(this.armyID)) && (!String.IsNullOrEmpty(armyID)))
                                 {
                                     if (this.armyID.Equals(armyID))
                                     {
-                                        Console.WriteLine("Already leader");
                                         proceed = false;
                                         error = new ProtoMessage();
                                         error.ResponseType = DisplayMessages.CharacterLeadingArmy;
@@ -2476,7 +2470,7 @@ namespace hist_mmorpg
             PlayerCharacter player = null;
             if (this is PlayerCharacter)
             {
-                if (!string.IsNullOrWhiteSpace((this as PlayerCharacter).playerID))
+                if (!string.IsNullOrEmpty((this as PlayerCharacter).playerID))
                 {
                     player = this as PlayerCharacter;
                 }
@@ -2487,7 +2481,7 @@ namespace hist_mmorpg
                 {
                     player = this.GetHeadOfFamily();
                 }
-                if (!string.IsNullOrWhiteSpace((this as NonPlayerCharacter).employer))
+                if (!string.IsNullOrEmpty((this as NonPlayerCharacter).employer))
                 {
                     player = (this as NonPlayerCharacter).GetEmployer();
                 }
@@ -2499,7 +2493,7 @@ namespace hist_mmorpg
                 if (myArmy != null)
                 {
                     string thisSiegeID = myArmy.CheckIfBesieger();
-                    if (!String.IsNullOrWhiteSpace(thisSiegeID))
+                    if (!String.IsNullOrEmpty(thisSiegeID))
                     {
                         // end the siege
                             Siege thisSiege = Globals_Game.siegeMasterList[thisSiegeID];
@@ -2601,7 +2595,7 @@ namespace hist_mmorpg
                 }
 
                 // check if has accompanying army, if so move it
-                if (!String.IsNullOrWhiteSpace(this.armyID))
+                if (!String.IsNullOrEmpty(this.armyID))
                 {
                     this.GetArmy().MoveArmy();
                 }
@@ -2646,7 +2640,7 @@ namespace hist_mmorpg
             }
 
             // if army leader, synchronise army days
-            if (!String.IsNullOrWhiteSpace(this.armyID))
+            if (!String.IsNullOrEmpty(this.armyID))
             {
                 // get army
                 Army thisArmy = this.GetArmy();
@@ -3028,7 +3022,7 @@ namespace hist_mmorpg
         {
             Character mySpouse = null;
 
-            if (!String.IsNullOrWhiteSpace(this.spouse))
+            if (!String.IsNullOrEmpty(this.spouse))
             {
                 if (Globals_Game.pcMasterList.ContainsKey(this.spouse))
                 {
@@ -3051,7 +3045,7 @@ namespace hist_mmorpg
         {
             Character myFiancee = null;
 
-            if (!String.IsNullOrWhiteSpace(this.fiancee))
+            if (!String.IsNullOrEmpty(this.fiancee))
             {
                 if (Globals_Game.pcMasterList.ContainsKey(this.fiancee))
                 {
@@ -3273,7 +3267,7 @@ namespace hist_mmorpg
                 tempPersonae.Add(this.charID + "|injuredCharacter");
                 if (this is NonPlayerCharacter)
                 {
-                    if (!String.IsNullOrWhiteSpace(this.familyID))
+                    if (!String.IsNullOrEmpty(this.familyID))
                     {
                         concernedPlayer = (this as NonPlayerCharacter).GetHeadOfFamily();
                         if (concernedPlayer != null)
@@ -3282,7 +3276,7 @@ namespace hist_mmorpg
                         }
                     }
 
-                    else if (!String.IsNullOrWhiteSpace((this as NonPlayerCharacter).employer))
+                    else if (!String.IsNullOrEmpty((this as NonPlayerCharacter).employer))
                     {
                         concernedPlayer = (this as NonPlayerCharacter).GetEmployer();
                         if (concernedPlayer != null)
@@ -3345,11 +3339,11 @@ namespace hist_mmorpg
             {
                 employer = (this as PlayerCharacter);
             }
-            else if (!String.IsNullOrWhiteSpace((this as NonPlayerCharacter).employer))
+            else if (!String.IsNullOrEmpty((this as NonPlayerCharacter).employer))
             {
                 employer = (this as NonPlayerCharacter).GetEmployer();
             }
-            else if (!String.IsNullOrWhiteSpace(this.familyID))
+            else if (!String.IsNullOrEmpty(this.familyID))
             {
                 employer = this.GetHeadOfFamily();
             }
@@ -3490,13 +3484,13 @@ namespace hist_mmorpg
             string charText = "";
 
             // check to see if is army leader
-            if (!String.IsNullOrWhiteSpace(this.armyID))
+            if (!String.IsNullOrEmpty(this.armyID))
             {
                 charText += "NOTE: This character is currently LEADING AN ARMY (" + this.armyID + ")\r\n\r\n";
             }
 
             // check to see if is under siege
-            if (!String.IsNullOrWhiteSpace(this.location.siege))
+            if (!String.IsNullOrEmpty(this.location.siege))
             {
                 if (this.inKeep)
                 {
@@ -3510,7 +3504,7 @@ namespace hist_mmorpg
             // player ID
             if (this is PlayerCharacter)
             {
-                if (!String.IsNullOrWhiteSpace((this as PlayerCharacter).playerID))
+                if (!String.IsNullOrEmpty((this as PlayerCharacter).playerID))
                 {
                     charText += "Player ID: " + (this as PlayerCharacter).playerID + "\r\n";
                 }
@@ -3609,7 +3603,7 @@ namespace hist_mmorpg
                 // marital status
                 NonPlayerCharacter thisSpouse = null;
                 charText += "Marital status: ";
-                if (!String.IsNullOrWhiteSpace(this.spouse))
+                if (!String.IsNullOrEmpty(this.spouse))
                 {
                     // get spouse
                     if (Globals_Game.npcMasterList.ContainsKey(this.spouse))
@@ -3662,7 +3656,7 @@ namespace hist_mmorpg
 
                 // engaged
                 charText += "You are ";
-                if (!String.IsNullOrWhiteSpace(this.fiancee))
+                if (!String.IsNullOrEmpty(this.fiancee))
                 {
                     charText += "engaged to be married to ID " + this.fiancee;
                 }
@@ -3674,7 +3668,7 @@ namespace hist_mmorpg
 
                 // father
                 charText += "Father's ID: ";
-                if (!String.IsNullOrWhiteSpace(this.father))
+                if (!String.IsNullOrEmpty(this.father))
                 {
                     charText += this.father;
                 }
@@ -3686,7 +3680,7 @@ namespace hist_mmorpg
 
                 // mother
                 charText += "Mother's ID: ";
-                if (!String.IsNullOrWhiteSpace(this.mother))
+                if (!String.IsNullOrEmpty(this.mother))
                 {
                     charText += this.mother;
                 }
@@ -3698,7 +3692,7 @@ namespace hist_mmorpg
 
                 // head of family
                 charText += "Head of family's ID: ";
-                if (!String.IsNullOrWhiteSpace(this.familyID))
+                if (!String.IsNullOrEmpty(this.familyID))
                 {
                     charText += this.familyID;
                 }
@@ -3905,7 +3899,7 @@ namespace hist_mmorpg
                 else
                 {
                     // check isn't engaged
-                    if (!String.IsNullOrWhiteSpace(bride.fiancee))
+                    if (!String.IsNullOrEmpty(bride.fiancee))
                     {
                         message = DisplayMessages.CharacterProposalEngaged;
                         field = "bride";
@@ -3915,7 +3909,7 @@ namespace hist_mmorpg
                     else
                     {
                         // check isn't married
-                        if (!String.IsNullOrWhiteSpace(bride.spouse))
+                        if (!String.IsNullOrEmpty(bride.spouse))
                         {
                             message = DisplayMessages.CharacterProposalMarried;
                             field = "bride";
@@ -3924,7 +3918,7 @@ namespace hist_mmorpg
                         else
                         {
                             // check is family member of player
-                            //if ((bride.GetHeadOfFamily() == null) || (String.IsNullOrWhiteSpace(bride.GetHeadOfFamily().playerID)))
+                            //if ((bride.GetHeadOfFamily() == null) || (String.IsNullOrEmpty(bride.GetHeadOfFamily().playerID)))
                             if ((bride.GetHeadOfFamily() == null))
                             {
                                 message = DisplayMessages.CharacterProposalFamily;
@@ -3958,7 +3952,7 @@ namespace hist_mmorpg
                                     else
                                     {
                                         // check is unmarried
-                                        if (!String.IsNullOrWhiteSpace(this.spouse))
+                                        if (!String.IsNullOrEmpty(this.spouse))
                                         {
                                             message = DisplayMessages.CharacterProposalMarried;
                                             field = "groom";
@@ -3967,7 +3961,7 @@ namespace hist_mmorpg
                                         else
                                         {
                                             // check isn't engaged
-                                            if (!String.IsNullOrWhiteSpace(this.fiancee))
+                                            if (!String.IsNullOrEmpty(this.fiancee))
                                             {
                                                 message = DisplayMessages.CharacterProposalEngaged;
                                                 field = "groom";
@@ -3976,7 +3970,7 @@ namespace hist_mmorpg
                                             else
                                             {
                                                 // check is family member of player OR is player themself
-                                                if (String.IsNullOrWhiteSpace(this.familyID))
+                                                if (String.IsNullOrEmpty(this.familyID))
                                                 {
                                                     message = DisplayMessages.CharacterProposalFamily;
                                                     field = "groom";
@@ -4023,71 +4017,13 @@ namespace hist_mmorpg
         /// Moves character one hex in a random direction
         /// </summary>
         /// <returns>bool indicating success</returns>
-        public bool RandomMoveNPC(out ProtoMessage error)
-        {
-            error = null;
-            bool success = false;
-
-            // generate random int 0-6 to see if moves
-            int randomInt = Globals_Game.myRand.Next(7);
-
-            if (randomInt > 0)
-            {
-                // get a destination
-                Fief target = Globals_Game.gameMap.chooseRandomHex(this.location);
-
-                // get travel cost
-                double travelCost = this.location.getTravelCost(target);
-
-                // perform move
-                success = this.MoveCharacter(target, travelCost,out error);
-            }
-
-            return success;
-        }
+       
 
         /// <summary>
         /// Moves character sequentially through fiefs stored in goTo queue
         /// </summary>
         /// <returns>bool indicating success</returns>
-       public bool CharacterMultiMove(out ProtoMessage error)
-        {
-            error = null;
-            bool success = false;
-            double travelCost = 0;
-            int steps = this.goTo.Count;
-
-            for (int i = 0; i < steps; i++)
-            {
-                // get travel cost
-                travelCost = this.location.getTravelCost(this.goTo.Peek(), this.armyID);
-                // attempt to move character
-                success = this.MoveCharacter(this.goTo.Peek(), travelCost,out error);
-                // if move successfull, remove fief from goTo queue
-                if (success)
-                {
-                    this.goTo.Dequeue();
-                }
-                // if not successfull, exit loop
-                else
-                {
-                    break;
-                }
-           }
-           //ASK about this condition
-           if (this is PlayerCharacter)
-           {
-               // if player has moved, indicate success
-               if (this.goTo.Count < steps)
-               {
-                   success = true;
-               }
-           }
-
-           return success;
-
-        }
-
+     
        /// <summary>
        /// Allows the character to remain in their current location for the specified
        /// number of days, incrementing bailiffDaysInFief if appropriate
@@ -4278,129 +4214,7 @@ namespace hist_mmorpg
        /// Allows the character to be moved along a specific route by using direction codes
        /// </summary>
        /// <param name="directions">string[] containing list of sequential directions to follow</param>
-       public void TakeThisRoute(string[] directions,out ProtoMessage error)
-       {
-           error = null;
-           bool proceed;
-           Fief source = null;
-           Fief target = null;
-           PlayerCharacter player;
-           if (this is PlayerCharacter)
-           {
-               player = this as PlayerCharacter;
-           }
-           else
-           {
-               player = this.GetHeadOfFamily();
-               if (player == null)
-               {
-                   player = (this as NonPlayerCharacter).GetEmployer();
-               }
-           }
-           Queue<Fief> route = new Queue<Fief>();
-
-           // remove from entourage, if necessary
-           if (this is NonPlayerCharacter)
-           {
-               if ((this as NonPlayerCharacter).inEntourage)
-               {
-                   player.RemoveFromEntourage(this as NonPlayerCharacter);
-               }
-           }
-
-           // convert to Queue of fiefs
-           for (int i = 0; i < directions.Length; i++)
-           {
-               // source for first move is character's current location
-               if (i == 0)
-               {
-                   source = this.location;
-               }
-               // source for all other moves is the previous target fief
-               else
-               {
-                   source = target;
-               }
-
-               // get the target fief
-               target = Globals_Game.gameMap.GetFief(source, directions[i].ToUpper());
-
-               // if target successfully acquired, add to queue
-               if (target != null)
-               {
-                   route.Enqueue(target);
-               }
-               // if no target acquired, display message and break
-               else
-               {
-                   error = new ProtoMessage();
-                   error.ResponseType = DisplayMessages.CharacterInvalidMovement;
-                   break;
-               }
-
-           }
-
-           // if there are any fiefs in the queue, overwrite the character's goTo queue
-           // then process by calling characterMultiMove
-           if (route.Count > 0)
-           {
-               this.goTo = route;
-               proceed = this.CharacterMultiMove(out error);
-           }
-       }
-       /// <summary>
-       /// Moves the character to a specified fief using the shortest path
-       /// </summary>
-       /// <param name="fiefID">String containing the ID of the target fief</param>
-       public void MoveTo(string fiefID, out ProtoMessage error)
-       {
-           error = null;
-           PlayerCharacter player = null;
-           if (this is PlayerCharacter)
-           {
-               player = this as PlayerCharacter;
-           }
-           // remove from entourage, if necessary
-           if (this is NonPlayerCharacter)
-           {
-               player = this.GetHeadOfFamily();
-               if (player == null)
-               {
-                   player = (this as NonPlayerCharacter).GetEmployer();
-               }
-               if ((this as NonPlayerCharacter).inEntourage)
-               {
-                   player.RemoveFromEntourage(this as NonPlayerCharacter);
-               }
-           }
-
-           // check for existence of fief
-           if (Globals_Game.fiefMasterList.ContainsKey(fiefID))
-           {
-               // retrieves target fief
-               Fief target = Globals_Game.fiefMasterList[fiefID];
-
-               // obtains goTo queue for shortest path to target
-               this.goTo = Globals_Game.gameMap.GetShortestPath(this.location, target);
-
-               // if retrieve valid path
-               if (this.goTo.Count > 0)
-               {
-                   // perform move
-                   this.CharacterMultiMove(out error);
-               }
-
-           }
-
-           // if target fief not found
-           else
-           {
-               error = new ProtoMessage();
-               error.ResponseType = DisplayMessages.ErrorGenericFiefUnidentified;
-           }
-
-       }
-       
+      
        
        /// <summary>
        /// Spy on a fief to obtain information. Note: SpyCheck should be performed first
@@ -4429,7 +4243,7 @@ namespace hist_mmorpg
            double escapeChance = Utility_Methods.GetRandomDouble(75, 25);
 
            // Calculate total chance of success
-           double success = GetSpySuccessChance(fief);
+           /*double success = GetSpySuccessChance(fief);
            // Check for success
            if (success > successChance)
            {
@@ -4482,6 +4296,8 @@ namespace hist_mmorpg
            }
             result.ResponseType = DisplayMessages.Success;
            return isSuccessful;
+           */
+           return true;
        }
 
 
@@ -4491,7 +4307,7 @@ namespace hist_mmorpg
         /// </summary>
         /// <param name="target">Target to spy on- currently Fief, Character or Army</param>
         /// <returns>Chance of success</returns>
-        public double GetSpySuccessChance(object target)
+        /*public double GetSpySuccessChance(object target)
         {
 #if DEBUG
             if (0<=fixedSuccessChance&&fixedSuccessChance <=100)
@@ -4534,7 +4350,7 @@ namespace hist_mmorpg
                     return -1;
                 }
 
-                if (!string.IsNullOrWhiteSpace(army.leader))
+                if (!string.IsNullOrEmpty(army.leader))
                 {
                     perceptiveCharacter = army.GetLeader();
                 }
@@ -4552,12 +4368,12 @@ namespace hist_mmorpg
             }
             return baseChance + ((stealth - enemyPerception) * 100);
         }
-
+        */
         public bool SpyCheck(Character character, out ProtoMessage result)
         {
             result = null;
             // Cannot spy on captive
-            if (!string.IsNullOrWhiteSpace(character.captorID))
+            if (!string.IsNullOrEmpty(character.captorID))
             {
                 result = new ProtoMessage(DisplayMessages.ErrorSpyCaptive);
                 return false;
@@ -4671,8 +4487,8 @@ namespace hist_mmorpg
            result = new ProtoMessage();
            this.AdjustDays(10);
            // Total chance of success
-           double success = GetSpySuccessChance(character);
-           
+          // double success = GetSpySuccessChance(character);
+           double success = 0;
            // Get random success and escape chances 
            double successChance = Utility_Methods.GetRandomDouble(85, 15);
            double escapeChance = Utility_Methods.GetRandomDouble(75, 25);
@@ -4783,8 +4599,8 @@ namespace hist_mmorpg
            result = new ProtoMessage();
            this.AdjustDays(10);
             // Total chance of success
-            double success = GetSpySuccessChance(army);
-
+            //double success = GetSpySuccessChance(army);
+           double success = 0;
            // Get random success and escape chances 
            double successChance = Utility_Methods.GetRandomDouble(85, 15);
            double escapeChance = Utility_Methods.GetRandomDouble(75, 25);
@@ -4870,7 +4686,7 @@ namespace hist_mmorpg
            }
            // target must belong to a player
            // TODO use commented line in final
-           //if(target.GetPlayerCharacter()==null||string.IsNullOrWhiteSpace(target.GetPlayerCharacter().playerID)) {
+           //if(target.GetPlayerCharacter()==null||string.IsNullOrEmpty(target.GetPlayerCharacter().playerID)) {
            if (target.GetPlayerCharacter() == null)
            {
                // error
@@ -4879,7 +4695,7 @@ namespace hist_mmorpg
                return false;
            }
            // Cannot already be a captive
-           if (!string.IsNullOrWhiteSpace(target.captorID))
+           if (!string.IsNullOrEmpty(target.captorID))
            {
                result = new ProtoMessage();
                result.ResponseType = DisplayMessages.CharacterHeldCaptive;
@@ -4926,13 +4742,12 @@ namespace hist_mmorpg
                successModifier -= 0.20;
            }
            // If target is leading an army, decrease by 10%
-           if (!string.IsNullOrWhiteSpace(target.armyID))
+           if (!string.IsNullOrEmpty(target.armyID))
            {
                successModifier -= 0.1;
            }
 
            success = success * successModifier;
-           Console.WriteLine("Kidnap success: " + success + ",SuccessChance: " + successChance + ",EscapeChance: " + escapeChance);
            if (success > successChance)
            {
                isSuccessful = true;
@@ -4944,15 +4759,13 @@ namespace hist_mmorpg
                isSuccessful = false;
            }
            // Check whether detected or killed
-           Console.WriteLine("Escape chance: " + escapeChance);
            if ((success + escapeChance) / 2 < detectedThreshold)
            {
-               Console.WriteLine("Detected");
                wasDetected = true;
            }
            if ((success + escapeChance) / 2 < killThreshold)
            {
-               Console.WriteLine("Killed");
+               //Console.WriteLine("Killed");
                wasKilled = true;
                this.ProcessDeath("kidnap");
            }
@@ -5527,7 +5340,7 @@ namespace hist_mmorpg
         public void HireNPC(NonPlayerCharacter npc, uint wage)
         {
             // if was in employ of another PC, fire from that position
-            if (!String.IsNullOrWhiteSpace(npc.employer))
+            if (!String.IsNullOrEmpty(npc.employer))
             {
                 if (!npc.employer.Equals(this.charID))
                 {
@@ -5919,7 +5732,7 @@ namespace hist_mmorpg
                             else
                             {
                                 // 6. check for siege
-                                if (!String.IsNullOrWhiteSpace(this.location.siege))
+                                if (!String.IsNullOrEmpty(this.location.siege))
                                 {
                                     proceed = false;
                                     error = new ProtoMessage();
@@ -6165,7 +5978,7 @@ namespace hist_mmorpg
             if (myKing != null)
             {
                 // get queen
-                if (!String.IsNullOrWhiteSpace(myKing.spouse))
+                if (!String.IsNullOrEmpty(myKing.spouse))
                 {
                     if (Globals_Game.npcMasterList.ContainsKey(myKing.spouse))
                     {
@@ -6242,7 +6055,7 @@ namespace hist_mmorpg
         {
             Fief thisHomeFief = null;
 
-            if (!String.IsNullOrWhiteSpace(this.homeFief))
+            if (!String.IsNullOrEmpty(this.homeFief))
             {
                 if (Globals_Game.fiefMasterList.ContainsKey(this.homeFief))
                 {
@@ -6261,7 +6074,7 @@ namespace hist_mmorpg
         {
             Fief ancestralHome = null;
 
-            if (!String.IsNullOrWhiteSpace(this.ancestralHomeFief))
+            if (!String.IsNullOrEmpty(this.ancestralHomeFief))
             {
                 if (Globals_Game.fiefMasterList.ContainsKey(this.ancestralHomeFief))
                 {
@@ -6573,7 +6386,7 @@ namespace hist_mmorpg
             }
 
             // Remove char as army leader
-            if (!string.IsNullOrWhiteSpace(captive.armyID))
+            if (!string.IsNullOrEmpty(captive.armyID))
             {
                 captive.GetArmy().leader = null;
                 captive.armyID = null;
@@ -6672,13 +6485,13 @@ namespace hist_mmorpg
         {
             // VALIDATION
             // EMPL
-            if (!String.IsNullOrWhiteSpace(empl))
+            if (!String.IsNullOrEmpty(empl))
             {
                 //TODO exception handling
                 // trim and ensure 1st is uppercase
                 empl = Utility_Methods.FirstCharToUpper(empl.Trim());
 
-                if (!String.IsNullOrWhiteSpace(famID))
+                if (!String.IsNullOrEmpty(famID))
                 {
                     throw new InvalidDataException("A NonPlayerCharacter with a familyID cannot have an employer ID");
                 }
@@ -6713,7 +6526,7 @@ namespace hist_mmorpg
 		public NonPlayerCharacter(NonPlayerCharacter_Serialised npcs)
 			: base(npcs: npcs)
 		{
-            if ((!String.IsNullOrWhiteSpace(npcs.employer)) && (npcs.employer.Length > 0))
+            if ((!String.IsNullOrEmpty(npcs.employer)) && (npcs.employer.Length > 0))
 			{
 				this.employer = npcs.employer;
 			}
@@ -6749,7 +6562,7 @@ namespace hist_mmorpg
             string npcText = "";
 
             // boss
-            if (!String.IsNullOrWhiteSpace(this.employer))
+            if (!String.IsNullOrEmpty(this.employer))
             {
                 npcText += "Employer (ID): " + this.employer + "\r\n";
             }
@@ -6818,7 +6631,7 @@ namespace hist_mmorpg
         {
             bool suitableHeir = true;
             error = null;
-            if (String.IsNullOrWhiteSpace(this.familyID) || this.familyID != pc.familyID || !this.isMale)
+            if (String.IsNullOrEmpty(this.familyID) || this.familyID != pc.familyID || !this.isMale)
             {
                 suitableHeir = false;
                 error = new ProtoMessage();
@@ -6893,7 +6706,7 @@ namespace hist_mmorpg
             String myFunction = "";
 
             // check for employees
-            if (!String.IsNullOrWhiteSpace(this.employer))
+            if (!String.IsNullOrEmpty(this.employer))
             {
                 if (this.employer.Equals(pc.charID))
                 {
@@ -6902,7 +6715,7 @@ namespace hist_mmorpg
            }
 
             // check for family function
-            else if ((!String.IsNullOrWhiteSpace(this.familyID)) && (this.familyID.Equals(pc.familyID)))
+            else if ((!String.IsNullOrEmpty(this.familyID)) && (this.familyID.Equals(pc.familyID)))
             {
                 // default value
                 myFunction = "Family Member";
@@ -6944,7 +6757,7 @@ namespace hist_mmorpg
                     }
 
                     // uncles and aunts
-                    if ((pcFather != null) && (!String.IsNullOrWhiteSpace(pcFather.father)))
+                    if ((pcFather != null) && (!String.IsNullOrEmpty(pcFather.father)))
                     {
                         if (this.father == pcFather.father)
                         {
@@ -6959,7 +6772,7 @@ namespace hist_mmorpg
                         }
                     }
 
-                    if (!String.IsNullOrWhiteSpace(thisFather.father))
+                    if (!String.IsNullOrEmpty(thisFather.father))
                     {
                         // grandsons & granddaughters
                         if (thisFather.father.Equals(pc.charID))
@@ -6980,7 +6793,7 @@ namespace hist_mmorpg
                 if (myFunction.Equals("Family Member"))
                 {
                     // sons and daughters (just in case only mother recorded)
-                    if ((!String.IsNullOrWhiteSpace(this.mother)) && (!String.IsNullOrWhiteSpace(pc.spouse)))
+                    if ((!String.IsNullOrEmpty(this.mother)) && (!String.IsNullOrEmpty(pc.spouse)))
                     {
                         if (this.mother == pc.spouse)
                         {
@@ -6998,20 +6811,20 @@ namespace hist_mmorpg
                     // grandmother
                     if (pcFather != null)
                     {
-                        if ((!String.IsNullOrWhiteSpace(pcFather.mother)) && (pcFather.mother.Equals(this.charID)))
+                        if ((!String.IsNullOrEmpty(pcFather.mother)) && (pcFather.mother.Equals(this.charID)))
                         {
                             myFunction = "Grandmother";
                         }
                     }
 
-                    if ((!String.IsNullOrWhiteSpace(pc.mother)) && (pc.mother.Equals(this.charID)))
+                    if ((!String.IsNullOrEmpty(pc.mother)) && (pc.mother.Equals(this.charID)))
                     {
                         // mother
                         myFunction = "Mother";
                     }
 
                     // wife
-                    if ((!String.IsNullOrWhiteSpace(this.spouse)) && (this.spouse.Equals(pc.charID)))
+                    if ((!String.IsNullOrEmpty(this.spouse)) && (this.spouse.Equals(pc.charID)))
                     {
                         if (this.isMale)
                         {
@@ -7055,8 +6868,8 @@ namespace hist_mmorpg
             List<Fief> bailiffDuties = new List<Fief>();
 
             // check for employment function
-            if (((!String.IsNullOrWhiteSpace(this.employer)) && (this.employer.Equals(pc.charID)))
-                || ((!String.IsNullOrWhiteSpace(this.familyID)) && (this.familyID.Equals(pc.charID))))
+            if (((!String.IsNullOrEmpty(this.employer)) && (this.employer.Equals(pc.charID)))
+                || ((!String.IsNullOrEmpty(this.familyID)) && (this.familyID.Equals(pc.charID))))
             {
                 // check PC's fiefs for bailiff
                 foreach (Fief thisFief in pc.ownedFiefs)
@@ -7083,9 +6896,9 @@ namespace hist_mmorpg
                 }
 
                 // check for army leadership
-                if (!String.IsNullOrWhiteSpace(this.armyID))
+                if (!String.IsNullOrEmpty(this.armyID))
                 {
-                    if (!String.IsNullOrWhiteSpace(myResponsibilities))
+                    if (!String.IsNullOrEmpty(myResponsibilities))
                     {
                         myResponsibilities += ". ";
                     }
@@ -7093,9 +6906,9 @@ namespace hist_mmorpg
                 }
 
                 // if employee who isn't bailiff or army leader = 'Unspecified'
-                if (String.IsNullOrWhiteSpace(myResponsibilities))
+                if (String.IsNullOrEmpty(myResponsibilities))
                 {
-                    if (!String.IsNullOrWhiteSpace(this.employer))
+                    if (!String.IsNullOrEmpty(this.employer))
                     {
                         if (this.employer.Equals(pc.charID))
                         {
@@ -7239,7 +7052,7 @@ namespace hist_mmorpg
         {
             PlayerCharacter myHeadOfFamily = null;
 
-            if (!String.IsNullOrWhiteSpace(this.familyID))
+            if (!String.IsNullOrEmpty(this.familyID))
             {
                 if (Globals_Game.pcMasterList.ContainsKey(this.familyID))
                 {
@@ -7261,13 +7074,13 @@ namespace hist_mmorpg
 
             // get nationality source
             // head of family
-            if (!String.IsNullOrWhiteSpace(this.familyID))
+            if (!String.IsNullOrEmpty(this.familyID))
             {
                 nationalitySource = this.GetHeadOfFamily();
             }
 
             // employer
-            else if (!String.IsNullOrWhiteSpace(this.employer))
+            else if (!String.IsNullOrEmpty(this.employer))
             {
                 nationalitySource = this.GetEmployer();
             }
@@ -7328,7 +7141,7 @@ namespace hist_mmorpg
             if (myKing != null)
             {
                 // get queen
-                if (!String.IsNullOrWhiteSpace(myKing.spouse))
+                if (!String.IsNullOrEmpty(myKing.spouse))
                 {
                     if (Globals_Game.npcMasterList.ContainsKey(myKing.spouse))
                     {
@@ -7348,7 +7161,7 @@ namespace hist_mmorpg
         {
             PlayerCharacter myEmployer = null;
 
-            if (!String.IsNullOrWhiteSpace(this.employer))
+            if (!String.IsNullOrEmpty(this.employer))
             {
                 if (Globals_Game.pcMasterList.ContainsKey(this.employer))
                 {
@@ -7365,7 +7178,7 @@ namespace hist_mmorpg
         public void CheckNeedsNaming()
         {
             // if (age >= 1) && (firstName.Equals("Baby")), character firstname = king's/queen's
-            if (!String.IsNullOrWhiteSpace(this.familyID))
+            if (!String.IsNullOrEmpty(this.familyID))
             {
                 if (this.HasBabyName(1))
                 {
@@ -7740,7 +7553,7 @@ namespace hist_mmorpg
             }
 
             // FAMID
-            if (!String.IsNullOrWhiteSpace(famID))
+            if (!String.IsNullOrEmpty(famID))
             {
                 // trim and ensure 1st is uppercase
                 famID = Utility_Methods.FirstCharToUpper(famID.Trim());
@@ -7752,7 +7565,7 @@ namespace hist_mmorpg
             }
 
             // SP
-            if (!String.IsNullOrWhiteSpace(sp))
+            if (!String.IsNullOrEmpty(sp))
             {
                 // trim and ensure 1st is uppercase
                 sp = Utility_Methods.FirstCharToUpper(sp.Trim());
@@ -7764,7 +7577,7 @@ namespace hist_mmorpg
             }
 
             // FATH
-            if (!String.IsNullOrWhiteSpace(fath))
+            if (!String.IsNullOrEmpty(fath))
             {
                 // trim and ensure 1st is uppercase
                 fath = Utility_Methods.FirstCharToUpper(fath.Trim());
@@ -7776,7 +7589,7 @@ namespace hist_mmorpg
             }
 
             // MOTH
-            if (!String.IsNullOrWhiteSpace(moth))
+            if (!String.IsNullOrEmpty(moth))
             {
                 // trim and ensure 1st is uppercase
                 moth = Utility_Methods.FirstCharToUpper(moth.Trim());
@@ -7800,7 +7613,7 @@ namespace hist_mmorpg
             }
 
             // FIA
-            if (!String.IsNullOrWhiteSpace(fia))
+            if (!String.IsNullOrEmpty(fia))
             {
                 // trim and ensure 1st is uppercase
                 fia = Utility_Methods.FirstCharToUpper(fia.Trim());
@@ -7838,7 +7651,7 @@ namespace hist_mmorpg
             }
 
             // AID
-            if (!String.IsNullOrWhiteSpace(aID))
+            if (!String.IsNullOrEmpty(aID))
             {
                 // trim and ensure 1st is uppercase
                 aID = Utility_Methods.FirstCharToUpper(aID.Trim());
@@ -8147,7 +7960,7 @@ namespace hist_mmorpg
 			: base(npc: npc)
 		{
 
-            if (!String.IsNullOrWhiteSpace(npc.employer))
+            if (!String.IsNullOrEmpty(npc.employer))
 			{
 				this.employer = npc.employer;
 			}
@@ -8173,12 +7986,12 @@ namespace hist_mmorpg
             // VALIDATION
 
             // EMPL
-            if (!String.IsNullOrWhiteSpace(empl))
+            if (!String.IsNullOrEmpty(empl))
             {
                 // trim and ensure 1st is uppercase
                 empl = Utility_Methods.FirstCharToUpper(empl.Trim());
 
-                if (!String.IsNullOrWhiteSpace(famID))
+                if (!String.IsNullOrEmpty(famID))
                 {
                     throw new InvalidDataException("A NonPlayerCharacter with a familyID cannot have an employer ID");
                 }

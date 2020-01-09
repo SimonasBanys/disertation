@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 
-namespace hist_mmorpg
+namespace ProtoMessage
 {
     public static class Birth
     {
@@ -221,7 +221,7 @@ namespace hist_mmorpg
             }
             
             // Husband cannot be a captive
-            if(!string.IsNullOrWhiteSpace(husband.captorID)) {
+            if(!string.IsNullOrEmpty(husband.captorID)) {
                 error = new ProtoMessage();
                 error.ResponseType = DisplayMessages.CharacterHeldCaptive;
                 return false;
@@ -234,7 +234,7 @@ namespace hist_mmorpg
             if (wife != null)
             {
                 // Husband cannot be a captive
-                if (!string.IsNullOrWhiteSpace(wife.captorID))
+                if (!string.IsNullOrEmpty(wife.captorID))
                 {
                     error = new ProtoMessage();
                     error.ResponseType = DisplayMessages.CharacterHeldCaptive;
@@ -268,7 +268,7 @@ namespace hist_mmorpg
                     // check if are kept apart by siege
                     else
                     {
-                        if ((!String.IsNullOrWhiteSpace(husband.location.siege)) && (husband.inKeep != wife.inKeep))
+                        if ((!String.IsNullOrEmpty(husband.location.siege)) && (husband.inKeep != wife.inKeep))
                         {
                             if (isPlayer)
                             {

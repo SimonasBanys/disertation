@@ -5,13 +5,12 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Linq;
 using System.Runtime.Serialization;
-namespace hist_mmorpg
+namespace ProtoMessage
 {
     /// <summary>
     /// Class storing data on fief
     /// </summary>
-    [Serializable()]
-    public class Fief : Place, ISerializable
+    public class Fief : Place
     {
         /// <summary>
         /// Holds fief's Province object
@@ -418,7 +417,7 @@ namespace hist_mmorpg
             }
 
             // SIEGE
-            if (!String.IsNullOrWhiteSpace(sge))
+            if (!String.IsNullOrEmpty(sge))
             {
                 // trim and ensure 1st is uppercase
                 sge = Utility_Methods.FirstCharToUpper(sge.Trim());
@@ -661,7 +660,7 @@ namespace hist_mmorpg
             int fiefIncome = 0;
 
             // check for siege
-            if (String.IsNullOrWhiteSpace(this.siege))
+            if (String.IsNullOrEmpty(this.siege))
             {
                 // no siege = use next season's expenditure and tax rate
                 fiefBaseIncome = Convert.ToInt32(this.CalcNewGDP() * (this.taxRateNext / 100));
@@ -879,7 +878,7 @@ namespace hist_mmorpg
             if (this.bailiff != null)
             {
                 // ensure isn't family member (they don't get paid)
-                if (String.IsNullOrWhiteSpace(this.bailiff.familyID))
+                if (String.IsNullOrEmpty(this.bailiff.familyID))
                 {
                     int bailiffSalary = Convert.ToInt32((this.bailiff as NonPlayerCharacter).salary);
 
@@ -901,7 +900,7 @@ namespace hist_mmorpg
             if (this == this.owner.GetHomeFief())
             {
                 // get whoever has highest management rating
-                if ((!String.IsNullOrWhiteSpace(this.owner.spouse)) && (this.owner.management < this.owner.GetSpouse().management))
+                if ((!String.IsNullOrEmpty(this.owner.spouse)) && (this.owner.management < this.owner.GetSpouse().management))
                 {
                     thisController = this.owner.GetSpouse();
                 }
@@ -915,7 +914,7 @@ namespace hist_mmorpg
                     if (!((element.GetResponsibilities(this.owner).ToLower()).Contains("bailiff")))
                     {
                         // add wage of non-bailiff employees
-                        if (String.IsNullOrWhiteSpace(element.familyID))
+                        if (String.IsNullOrEmpty(element.familyID))
                         {
                             famExpenses += Convert.ToInt32(element.salary);
                         }
@@ -926,7 +925,7 @@ namespace hist_mmorpg
                             int thisExpense = Convert.ToInt32(element.CalcFamilyAllowance(element.GetFunction(this.owner)));
 
                             // check for siege
-                            if (!String.IsNullOrWhiteSpace(this.siege))
+                            if (!String.IsNullOrEmpty(this.siege))
                             {
                                 // siege = half allowance
                                 thisExpense = thisExpense / 2;
@@ -2177,7 +2176,7 @@ namespace hist_mmorpg
         {
             PlayerCharacter myOverlord = null;
 
-            if (!String.IsNullOrWhiteSpace(this.province.titleHolder))
+            if (!String.IsNullOrEmpty(this.province.titleHolder))
             {
                 if (Globals_Game.pcMasterList.ContainsKey(this.province.titleHolder))
                 {
@@ -2196,7 +2195,7 @@ namespace hist_mmorpg
         {
             Siege mySiege = null;
 
-            if (!String.IsNullOrWhiteSpace(this.siege))
+            if (!String.IsNullOrEmpty(this.siege))
             {
                 // get siege
                 if (Globals_Game.siegeMasterList.ContainsKey(this.siege))
@@ -2553,7 +2552,7 @@ namespace hist_mmorpg
 
             foreach (Character thisChar in this.charactersInFief)
             {
-                if ((!String.IsNullOrWhiteSpace(thisChar.armyID)) && (thisChar.inKeep))
+                if ((!String.IsNullOrEmpty(thisChar.armyID)) && (thisChar.inKeep))
                 {
                     armyInKeep = true;
                     break;
@@ -2711,7 +2710,7 @@ namespace hist_mmorpg
             cost = cost * Globals_Game.clock.CalcSeasonTravMod();
 
             // if necessary, apply army modifier
-            if (!String.IsNullOrWhiteSpace(armyID))
+            if (!String.IsNullOrEmpty(armyID))
             {
                 cost = cost * Globals_Game.armyMasterList[armyID].CalcMovementModifier();
             }
@@ -2727,7 +2726,7 @@ namespace hist_mmorpg
             {
                 fiefstats.includeAll(this);
                 bool displayData = true;
-                if (!String.IsNullOrWhiteSpace(this.siege))
+                if (!String.IsNullOrEmpty(this.siege))
                 {
                     Siege thisSiege = this.GetSiege();
                     displayData = this.CheckToShowFinancialData(-1, thisSiege);
@@ -3044,7 +3043,7 @@ namespace hist_mmorpg
             bool success = true;
 
             // check for empty string
-            if (!String.IsNullOrWhiteSpace(toBeUnbarred))
+            if (!String.IsNullOrEmpty(toBeUnbarred))
             {
                 // remove ID from barred characters
                 if (this.barredCharacters.Contains(toBeUnbarred))
@@ -3093,7 +3092,7 @@ namespace hist_mmorpg
             bool success = true;
 
             // check for empty string
-            if (!String.IsNullOrWhiteSpace(toBeUnbarred))
+            if (!String.IsNullOrEmpty(toBeUnbarred))
             {
                 // remove ID from barred nationalities
                 if (this.barredNationalities.Contains(toBeUnbarred))
@@ -3133,7 +3132,7 @@ namespace hist_mmorpg
                 if (this.charactersInFief[i].inKeep == ifInKeep)
                 {
                     // don't show the player
-                    if (this.charactersInFief[i] != pc&&string.IsNullOrWhiteSpace(charactersInFief[i].captorID))
+                    if (this.charactersInFief[i] != pc&&string.IsNullOrEmpty(charactersInFief[i].captorID))
                     {
                         switch (place)
                         {
@@ -3162,7 +3161,7 @@ namespace hist_mmorpg
             return charsToView.ToArray();
         }
 
-
+        /*
         //temp for serializing to Client side Fief object
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
@@ -3181,15 +3180,16 @@ namespace hist_mmorpg
             this.terrain = Globals_Game.terrainMasterList[tmpTerr];
             this.province = Globals_Game.provinceMasterList[tmpProv];
             this.language = Globals_Game.languageMasterList[tmpLang];
-        }
+        }*/
+
     }
 
-    
 
-	/// <summary>
+
+    /// <summary>
     /// Class used to convert Fief to/from serialised format (JSON)
-	/// </summary>
-	public class Fief_Serialised : Place_Serialised
+    /// </summary>
+    public class Fief_Serialised : Place_Serialised
 	{
         /// <summary>
 		/// Holds fief's Province object (provinceID)
@@ -3679,7 +3679,7 @@ namespace hist_mmorpg
             }
 
             // BAIL
-            if (!String.IsNullOrWhiteSpace(bail))
+            if (!String.IsNullOrEmpty(bail))
             {
                 // trim and ensure 1st is uppercase
                 bail = Utility_Methods.FirstCharToUpper(bail.Trim());
@@ -3691,7 +3691,7 @@ namespace hist_mmorpg
             }
 
             // SIEGE
-            if (!String.IsNullOrWhiteSpace(sge))
+            if (!String.IsNullOrEmpty(sge))
             {
                 // trim and ensure 1st is uppercase
                 sge = Utility_Methods.FirstCharToUpper(sge.Trim());

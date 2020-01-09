@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace hist_mmorpg
+namespace ProtoMessage
 {
     /// <summary>
     /// Methods used throughout the JominiEngine- includes ID verification and retrieving objects from IDs
@@ -568,7 +568,7 @@ namespace hist_mmorpg
 
             if (!String.IsNullOrEmpty(input))
             {
-                input = input.First().ToString().ToUpper() + input.Substring(1);
+                //input = input.First().ToString().ToUpper() + input.Substring(1);
             }
 
             output = input;
@@ -636,7 +636,7 @@ namespace hist_mmorpg
         /// <returns>Army as indicated by armyID, or null</returns>
         public static Army GetArmy(string armyID, out DisplayMessages error)
         {
-            if (string.IsNullOrWhiteSpace(armyID) || !ValidateArmyID((armyID)))
+            if (string.IsNullOrEmpty(armyID) || !ValidateArmyID((armyID)))
             {
                 error = DisplayMessages.ErrorGenericMessageInvalid;
                 return null;
@@ -660,7 +660,7 @@ namespace hist_mmorpg
         /// <returns>Fief as indicated by fiefID, or null</returns>
         public static Fief GetFief(string fiefID, out DisplayMessages error)
         {
-            if (string.IsNullOrWhiteSpace(fiefID))
+            if (string.IsNullOrEmpty(fiefID))
             {
                 error = DisplayMessages.ErrorGenericMessageInvalid;
                 return null;
@@ -684,7 +684,7 @@ namespace hist_mmorpg
         /// <returns></returns>
         public static Character GetCharacter(string charID, out DisplayMessages error)
         {
-            if (string.IsNullOrWhiteSpace(charID) || !ValidateCharacterID(charID))
+            if (string.IsNullOrEmpty(charID) || !ValidateCharacterID(charID))
             {
                 error = DisplayMessages.ErrorGenericMessageInvalid;
                 return null;

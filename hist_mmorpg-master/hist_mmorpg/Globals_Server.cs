@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using RiakClient;
+
 using Lidgren.Network;
-namespace hist_mmorpg
+namespace ProtoMessage
 {
     /// <summary>
     /// Class storing any required static variables for server-side
@@ -21,11 +21,11 @@ namespace hist_mmorpg
         /// <summary>
         /// Holds target RiakCluster 
         /// </summary>
-        public static IRiakEndPoint rCluster;
+       // public static IRiakEndPoint rCluster;
         /// <summary>
         /// Holds RiakClient to communicate with RiakCluster
         /// </summary>
-        public static IRiakClient rClient;
+       // public static IRiakClient rClient;
         /// <summary>
         /// Holds next value for game ID
         /// </summary>
@@ -80,7 +80,7 @@ namespace hist_mmorpg
         {
             LogFile.WriteLine("Run-time error: " + error);
 #if DEBUG
-			Console.WriteLine ("Run-time error: " + error);
+			//Console.WriteLine ("Run-time error: " + error);
 #endif
         }
 
@@ -92,7 +92,7 @@ namespace hist_mmorpg
         {
             LogFile.WriteLine(eventDetails);
 #if DEBUG
-            Console.WriteLine(eventDetails);
+            //Console.WriteLine(eventDetails);
 #endif
         }
     }
