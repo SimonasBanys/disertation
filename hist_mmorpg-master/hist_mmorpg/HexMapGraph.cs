@@ -7,7 +7,7 @@ using QuickGraph.Algorithms;
 using QuickGraph.Serialization;
 using System.Xml;
 using System.Diagnostics;
-namespace hist_mmorpg
+namespace ProtoMessage
 {
     /// <summary>
     /// Class defining HexMapGraph
@@ -15,10 +15,10 @@ namespace hist_mmorpg
 	public class HexMapGraph
     {
 
-		/// <summary>
-		/// Holds map ID
-		/// </summary>
-		public String mapID { get; set; }
+        /// <summary>
+        /// Holds map ID
+        /// </summary>
+        public String mapID { get; set; }
         /// <summary>
         /// Holds map object AdjacencyGraph (from QuickGraph library), 
         /// specifying edge type (tagged)
@@ -29,13 +29,13 @@ namespace hist_mmorpg
         /// </summary>
         private Dictionary<TaggedEdge<Fief, string>, double> costs { get; set; }
 
-		/// <summary>
+        /// <summary>
         /// Constructor for HexMapGraph
         /// </summary>
-		/// <param name="id">String holding map ID</param>
-		public HexMapGraph(String id)
+        /// <param name="id">String holding map ID</param>
+        public HexMapGraph(String id)
         {
-			this.mapID = id;
+            this.mapID = id;
             myMap = new AdjacencyGraph<Fief, TaggedEdge<Fief, string>>();
             costs = new Dictionary<TaggedEdge<Fief, string>, double>();
         }
@@ -46,25 +46,25 @@ namespace hist_mmorpg
         /// <param name="id">String holding map ID</param>
         /// <param name="id">Array of edges</param>
         public HexMapGraph(String id, TaggedEdge<Fief, string>[] myEdges)
-		{
-			this.mapID = id;
+        {
+            this.mapID = id;
             // construct new graph from array of edges
-			myMap = myEdges.ToAdjacencyGraph<Fief, TaggedEdge<Fief, string>>();
-			costs = new Dictionary<TaggedEdge<Fief, string>, double>();
+            myMap = myEdges.ToAdjacencyGraph<Fief, TaggedEdge<Fief, string>>();
+            costs = new Dictionary<TaggedEdge<Fief, string>, double>();
             // populate costs, based on target and source terrain costs of each edge
             foreach (var e in this.myMap.Edges)
-			{
-				this.AddCost (e, (e.Source.terrain.travelCost + e.Target.terrain.travelCost) / 2);
-			}
-		}
+            {
+                this.AddCost(e, (e.Source.terrain.travelCost + e.Target.terrain.travelCost) / 2);
+            }
+        }
 
         /// <summary>
         /// Constructor for HexMapGraph taking no parameters.
         /// For use when de-serialising.
         /// </summary>
         public HexMapGraph()
-		{
-		}
+        {
+        }
 
         /// <summary>
         /// Adds hex (vertex) and route (edge) in one operation.
@@ -209,7 +209,7 @@ namespace hist_mmorpg
         public TaggedEdge<Fief, string> CreateEdge(Fief s, Fief t, string tag)
         {
             // create route
-            Trace.WriteLine("The edge tag is: " + tag);
+            //Trace.WriteLine("The edge tag is: " + tag);
             TaggedEdge<Fief, string> myEdge = new TaggedEdge<Fief, string>(s, t, tag);
             return myEdge;
         }
@@ -311,7 +311,7 @@ namespace hist_mmorpg
             Fief myFief = null;
 
             // check for correct direction codes
-            string[] correctDirections = new string[8] { "E", "W", "SE", "SW", "NE", "NW","N","S" };
+            string[] correctDirections = new string[6] { "E", "W", "SE", "SW", "NE", "NW" };
             bool dirCorrect = false;
             foreach (string correctDir in correctDirections)
             {
@@ -420,12 +420,12 @@ namespace hist_mmorpg
         /// </summary>
         public void serialize()
         {
-            using (var xwriter = XmlWriter.Create("graphTest.bin"))
+            /*using (var xwriter = XmlWriter.Create("graphTest.bin"))
             {
                 VertexIdentity<Fief> vIds = new VertexIdentity<Fief>(getIdFromFief);
                 EdgeIdentity<Fief, TaggedEdge<Fief, string>> eIds = new EdgeIdentity<Fief, TaggedEdge<Fief, string>>(getStringFromEdge);
                 this.myMap.SerializeToGraphML<Fief, TaggedEdge<Fief, string>, AdjacencyGraph<Fief, TaggedEdge<Fief, string>>>(xwriter, vIds, eIds);
-            }
+            }*/
 
         }
 
@@ -464,10 +464,10 @@ namespace hist_mmorpg
             AdjacencyGraph<Fief, TaggedEdge<Fief, string>> tmpGraph = new AdjacencyGraph<Fief, TaggedEdge<Fief, string>>();
             IdentifiableVertexFactory<Fief> fiefFactory = new IdentifiableVertexFactory<Fief>(getFiefFromID);
             IdentifiableEdgeFactory<Fief, TaggedEdge<Fief, string>> edgeFactory = new IdentifiableEdgeFactory<Fief, TaggedEdge<Fief, string>>(CreateEdge);
-            using (var xwriter =  XmlReader.Create("graphTest.bin"))
+            using (var xwriter = XmlReader.Create("graphTest.bin"))
             {
-                tmpGraph.DeserializeFromGraphML<Fief,TaggedEdge<Fief,string>,AdjacencyGraph<Fief, TaggedEdge<Fief, string>>>(xwriter,fiefFactory,edgeFactory);
-                
+                tmpGraph.DeserializeFromGraphML<Fief, TaggedEdge<Fief, string>, AdjacencyGraph<Fief, TaggedEdge<Fief, string>>>(xwriter, fiefFactory, edgeFactory);
+
             }
             this.myMap = tmpGraph;
         }

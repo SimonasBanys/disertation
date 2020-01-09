@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using ProtoBuf;
 using ProtoBuf.Meta;
-namespace hist_mmorpg
+using ProtoMessage;
+
+namespace ProtoMessage
 {
     /**************A Note on ProtoBufs ************
      * This class is used to transmit information to players. As such, it is responsible for deciding which information a client can see
@@ -31,11 +33,11 @@ namespace hist_mmorpg
     /// </summary>
     // Subtypes need to be declared in order for serialization to work
     [ProtoInclude(5, typeof(ProtoLogIn))]
-    [ProtoInclude(6,typeof(ProtoPlayer))]
-    [ProtoInclude(7,typeof(ProtoClient))]
+    [ProtoInclude(6, typeof(ProtoPlayer))]
+    [ProtoInclude(7, typeof(ProtoClient))]
     [ProtoInclude(8, typeof(ProtoGenericArray<ProtoPlayer>))]
     [ProtoInclude(9, typeof(ProtoGenericArray<ProtoFief>))]
-    [ProtoInclude(10,typeof(ProtoGenericArray<string>))]
+    [ProtoInclude(10, typeof(ProtoGenericArray<string>))]
     [ProtoInclude(11, typeof(ProtoGenericArray<double>))]
     [ProtoInclude(12, typeof(ProtoGenericArray<ProtoCharacterOverview>))]
     [ProtoInclude(13, typeof(ProtoGenericArray<ProtoDetachment>))]
@@ -133,7 +135,7 @@ namespace hist_mmorpg
         /// <summary>
         /// The session salt, used to salt the password hash
         /// </summary>
-        public byte[] sessionSalt {get;set;}
+        public byte[] sessionSalt { get; set; }
         /// <summary>
         /// The user's salt, used to salt the password hash
         /// </summary>
@@ -145,7 +147,7 @@ namespace hist_mmorpg
         /// <summary>
         /// Challenge text to be signed by server
         /// </summary>
-        public string Text { get;set; }
+        public string Text { get; set; }
         /// <summary>
         /// Result of server signing certificate
         /// </summary>
@@ -198,7 +200,7 @@ namespace hist_mmorpg
         {
             this.purse = c.myPlayerCharacter.purse;
             travelModifier = Globals_Game.clock.CalcSeasonTravMod();
-            if (c.activeChar.GetArmy()!=null)
+            if (c.activeChar.GetArmy() != null)
             {
                 travelModifier = travelModifier * c.activeChar.GetArmy().CalcMovementModifier();
             }
@@ -220,8 +222,8 @@ namespace hist_mmorpg
     /// Class for serializing an Ailment
     /// (At present, only minimumEffect is hidden)
     /// </summary>
-    [ProtoContract(ImplicitFields=ImplicitFields.AllPublic)]
-    public class ProtoAilment: ProtoMessage
+    [ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
+    public class ProtoAilment : ProtoMessage
     {
         /// <summary>
         /// Holds ailmentID
@@ -256,12 +258,13 @@ namespace hist_mmorpg
             this._effect = a.effect;
             this._minimumEffect = 0;
         }
-        public ProtoAilment():base()
+        public ProtoAilment() : base()
         {
 
         }
-        public bool ShouldSerializeminimumEffect() {
-            return (_minimumEffect!=0);
+        public bool ShouldSerializeminimumEffect()
+        {
+            return (_minimumEffect != 0);
         }
     }
     /// <summary>
@@ -342,11 +345,11 @@ namespace hist_mmorpg
         /// </summary>
         public string siegeStatus { get; set; }
 
-        public ProtoArmy():base()
+        public ProtoArmy() : base()
         {
 
         }
-        public ProtoArmy(Army a, Character observer) 
+        public ProtoArmy(Army a, Character observer)
         {
             this.ownerID = a.owner;
             this.armyID = a.armyID;
@@ -355,20 +358,20 @@ namespace hist_mmorpg
                 this.leader = a.GetLeader().firstName + " " + a.GetLeader().familyName;
             }
             this.leaderID = a.leader;
-            this.owner = a.GetOwner().firstName+" "+a.GetOwner().familyName;
+            this.owner = a.GetOwner().firstName + " " + a.GetOwner().familyName;
             this.location = a.GetLocation().name + ", " + a.GetLocation().province.name + ", " + a.GetLocation().province.kingdom.name;
             this.nationality = a.GetOwner().nationality.natID;
             // check if is garrison in a siege
             string siegeID = a.CheckIfSiegeDefenderGarrison();
 
-            if (String.IsNullOrWhiteSpace(siegeID))
+            if (String.IsNullOrEmpty(siegeID))
             {
                 // check if is additional defender in a siege
                 siegeID = a.CheckIfSiegeDefenderAdditional();
             }
 
             // if is defender in a siege, indicate
-            if (!String.IsNullOrWhiteSpace(siegeID))
+            if (!String.IsNullOrEmpty(siegeID))
             {
                 siegeStatus = "BESIEGED";
             }
@@ -379,7 +382,7 @@ namespace hist_mmorpg
                 siegeID = a.CheckIfBesieger();
 
                 // if is besieger in a siege, indicate
-                if (!String.IsNullOrWhiteSpace(siegeID))
+                if (!String.IsNullOrEmpty(siegeID))
                 {
                     siegeStatus = "BESIEGER";
                 }
@@ -387,7 +390,7 @@ namespace hist_mmorpg
                 // check if is siege in fief (but army not involved)
                 else
                 {
-                    if (!String.IsNullOrWhiteSpace(a.GetLocation().siege))
+                    if (!String.IsNullOrEmpty(a.GetLocation().siege))
                     {
                         siegeStatus = "FIEF";
                     }
@@ -414,8 +417,8 @@ namespace hist_mmorpg
     /// Class for sending details of a character
     /// </summary>
     [ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
-    [ProtoInclude(35,typeof(ProtoPlayerCharacter))]
-    [ProtoInclude(36,typeof(ProtoNPC))]
+    [ProtoInclude(35, typeof(ProtoPlayerCharacter))]
+    [ProtoInclude(36, typeof(ProtoNPC))]
     public class ProtoCharacter : ProtoMessage
     {
         /* BASIC CHARACTER DETAILS */
@@ -434,11 +437,11 @@ namespace hist_mmorpg
         /// <summary>
         /// Character's year of birth
         /// </summary>
-        public uint birthYear{ get; set; }
+        public uint birthYear { get; set; }
         /// <summary>
         /// Character's birth season
         /// </summary>
-        public byte birthSeason {get;set;}
+        public byte birthSeason { get; set; }
         /// <summary>
         /// Holds if character male
         /// </summary>
@@ -474,7 +477,7 @@ namespace hist_mmorpg
         /// <summary>
         /// Character's language ID
         /// </summary>
-        public string language {get;set;}
+        public string language { get; set; }
         /// <summary>
         /// number of days left in season
         /// </summary>
@@ -544,15 +547,15 @@ namespace hist_mmorpg
         /// </summary>
         public string captor { get; set; }
         // Holds information as to whether character is involved in a siege
-        public enum SiegeRole { None=0, Besieger, Defender, DefenderAdd };
+        public enum SiegeRole { None = 0, Besieger, Defender, DefenderAdd };
         public SiegeRole siegeRole;
-        public ProtoCharacter():base()
+        public ProtoCharacter() : base()
         {
 
         }
         public ProtoCharacter(Character c)
         {
-           
+
             this.charID = c.charID;
             this.firstName = c.firstName;
             this.familyName = c.familyName;
@@ -570,7 +573,7 @@ namespace hist_mmorpg
             this.isPregnant = c.isPregnant;
             this.titles = c.myTitles.ToArray();
             this.armyID = c.armyID;
-            if (c.GetArmy()!=null)
+            if (c.GetArmy() != null)
             {
                 if (c.GetArmy().CheckIfBesieger() != null)
                 {
@@ -592,29 +595,33 @@ namespace hist_mmorpg
             this.captor = c.captorID;
         }
 
-        public void includeAll(Character c) {
+        public void includeAll(Character c)
+        {
             this.inKeep = c.inKeep;
             this.virility = c.virility;
             this.maxHealth = c.maxHealth;
             this.health = c.CalculateHealth();
-            this.stature=c.CalculateStature();
+            this.stature = c.CalculateStature();
             this.days = c.days;
             this.location = c.location.id;
             this.statureModifier = c.statureModifier;
             this.management = c.management;
             this.combat = c.combat;
             this.traits = new Pair[c.traits.Length];
-            for(int i = 0;i<c.traits.Length;i++) {
-                Tuple<Trait,int> t = c.traits[i];
-                traits[i] = new Pair(t.Item1.name,t.Item2.ToString());
+            for (int i = 0; i < c.traits.Length; i++)
+            {
+                Tuple<Trait, int> t = c.traits[i];
+                traits[i] = new Pair(t.Item1.name, t.Item2.ToString());
             }
             List<Pair> tmpAilments = new List<Pair>();
-            foreach(KeyValuePair<string,Ailment> pair in c.ailments) {
-                tmpAilments.Add(new Pair(pair.Key,pair.Value.description));
+            foreach (KeyValuePair<string, Ailment> pair in c.ailments)
+            {
+                tmpAilments.Add(new Pair(pair.Key, pair.Value.description));
             }
             this.ailments = tmpAilments.ToArray();
             List<string> tmpGoTo = new List<string>();
-            foreach(var item in c.goTo) {
+            foreach (var item in c.goTo)
+            {
                 tmpGoTo.Add(item.id);
             }
             this.goTo = tmpGoTo.ToArray();
@@ -656,15 +663,15 @@ namespace hist_mmorpg
         }
         public void includeLocation(Character c)
         {
-            this.location = c.location.id ;
+            this.location = c.location.id;
             this.inKeep = c.inKeep;
         }
-        
+
         /// <summary>
         /// Method to ensure message incudes all information from inheriting classes
         /// </summary>
         /// <param name="c">Character whose details to include</param>
-        public virtual void onIncludeAll(Character c )
+        public virtual void onIncludeAll(Character c)
         {
         }
         /// <summary>
@@ -822,15 +829,17 @@ namespace hist_mmorpg
 
         public ProtoNPC(NonPlayerCharacter npc) : base(npc)
         {
-            
-        }
-
-        public ProtoNPC() :base(){
 
         }
-        public override void onIncludeAll(Character character) {
+
+        public ProtoNPC() : base()
+        {
+
+        }
+        public override void onIncludeAll(Character character)
+        {
             NonPlayerCharacter npc = character as NonPlayerCharacter;
-            if (!string.IsNullOrWhiteSpace(npc.employer))
+            if (!string.IsNullOrEmpty(npc.employer))
             {
                 this.employer = new ProtoCharacterOverview(npc.GetEmployer());
             }
@@ -842,7 +851,7 @@ namespace hist_mmorpg
         public override void onIncludeSpy(Character character)
         {
             NonPlayerCharacter npc = character as NonPlayerCharacter;
-            if (!string.IsNullOrWhiteSpace(npc.employer))
+            if (!string.IsNullOrEmpty(npc.employer))
             {
                 this.employer = new ProtoCharacterOverview(npc.GetEmployer());
             }
@@ -853,7 +862,7 @@ namespace hist_mmorpg
         public void IncludeHire(NonPlayerCharacter character, string observerID)
         {
             this.lastOfferID = observerID;
-            uint lastoffer=0;
+            uint lastoffer = 0;
             character.lastOffer.TryGetValue(observerID, out lastoffer);
             this.lastOfferAmount = lastoffer;
         }
@@ -970,7 +979,7 @@ namespace hist_mmorpg
         /// <summary>
         /// Holds overviews of characters present in fief
         /// </summary>
-        public ProtoCharacterOverview[] charactersInFief { get;set; }
+        public ProtoCharacterOverview[] charactersInFief { get; set; }
         /// <summary>
         /// Holds characters banned from keep (charIDs)
         /// </summary>
@@ -1034,7 +1043,7 @@ namespace hist_mmorpg
                 Globals_Server.logError("Title holder is null for fief " + f.id);
                 this.titleHolder = "None";
             }
-            this.owner = f.owner.firstName + " "+f.owner.familyName;
+            this.owner = f.owner.firstName + " " + f.owner.familyName;
             this.ownerID = f.owner.charID;
             this.rank = f.rank.GetName(f.language);
             this.population = f.population;
@@ -1060,14 +1069,15 @@ namespace hist_mmorpg
             i = 0;
             this.ancestralOwner = new ProtoCharacterOverview(f.ancestralOwner);
             if (f.bailiff != null) { this.bailiff = new ProtoCharacterOverview(f.bailiff); }
-            
+
             this.isPillaged = f.isPillaged;
             this.siege = f.siege;
             this.armies = new ProtoArmyOverview[f.armies.Count];
             foreach (var a in f.armies)
             {
                 var army = Globals_Game.armyMasterList[a];
-                if(army!=null) {
+                if (army != null)
+                {
                     this.armies[i] = new ProtoArmyOverview(army);
                 }
                 i++;
@@ -1094,8 +1104,9 @@ namespace hist_mmorpg
         /// Includes all data in the ProtoMessage (useful for fief 
         /// </summary>
         /// <param name="f"></param>
-        public void includeAll(Fief f) {
-            this.keyStatsCurrent=new double[14];
+        public void includeAll(Fief f)
+        {
+            this.keyStatsCurrent = new double[14];
             this.keyStatsNext = new double[14]; ;
             this.keyStatsPrevious = new double[14];
             this.fields = f.fields;
@@ -1118,13 +1129,13 @@ namespace hist_mmorpg
             this.keyStatsNext[11] = f.CalcNewOlordTaxes();
             this.keyStatsNext[12] = f.province.taxRate;
             this.keyStatsNext[13] = f.CalcNewBottomLine();
-     
+
             this.keyStatsCurrent = f.keyStatsCurrent;
             this.keyStatsPrevious = f.keyStatsPrevious;
             this.loyalty = f.loyalty;
             this.bailiffDaysInFief = f.bailiffDaysInFief;
             this.treasury = f.GetAvailableTreasury(true);
-            
+
         }
 
         public void includeSpy(Fief f)
@@ -1186,7 +1197,7 @@ namespace hist_mmorpg
             this.locationID = a.location;
             this.armySize = a.CalcArmySize();
         }
-                
+
     }
     /// <summary>
     /// Class for summarising the basic details of a character
@@ -1236,26 +1247,33 @@ namespace hist_mmorpg
                     this.role = (c as NonPlayerCharacter).GetFunction(pc);
                 }
             }
-            else {
-                if(c is PlayerCharacter) {
+            else
+            {
+                if (c is PlayerCharacter)
+                {
                     PlayerCharacter pc = (c as PlayerCharacter);
-                    if(pc.CheckIfOverlord()) {
+                    if (pc.CheckIfOverlord())
+                    {
                         this.role = "Overlord";
                     }
-                    if(pc.CheckIsKing()) {
+                    if (pc.CheckIsKing())
+                    {
                         this.role = "King";
                     }
-                    if(pc.CheckIsSysAdmin()) {
+                    if (pc.CheckIsSysAdmin())
+                    {
                         this.role = "Admin";
                     }
-                    if(pc.CheckIsPrince()) {
+                    if (pc.CheckIsPrince())
+                    {
                         this.role = "Prince";
                     }
-                    if(pc.CheckIsHerald()) {
+                    if (pc.CheckIsHerald())
+                    {
                         this.role = "Herald";
                     }
                 }
-            }    
+            }
         }
         public void showLocation(Character c)
         {
@@ -1289,7 +1307,7 @@ namespace hist_mmorpg
 
 
 
-        public ProtoPillageResult(): base()
+        public ProtoPillageResult() : base()
         {
 
         }
@@ -1627,7 +1645,8 @@ namespace hist_mmorpg
     /// ProtoMessage for sending an entire Journal
     /// </summary>
     [ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
-    public class ProtoJournal : ProtoMessage  {
+    public class ProtoJournal : ProtoMessage
+    {
         /// <summary>
         /// Holds entries
         /// </summary>
@@ -1656,7 +1675,7 @@ namespace hist_mmorpg
             }
             this.entries = entries.ToArray();
         }
-        public ProtoJournal() :base()
+        public ProtoJournal() : base()
         {
 
         }
@@ -1696,7 +1715,7 @@ namespace hist_mmorpg
         /// Days left of person who created detachment at time of creation
         /// </summary>
         public int days { get; set; }
-        
+
         public ProtoDetachment(string id, uint[] troops, string leftFor, string armyID)
         {
             this.id = id;
@@ -1723,7 +1742,7 @@ namespace hist_mmorpg
         // amount being transferred
         public int amount { get; set; }
 
-        public ProtoTransfer(): base()
+        public ProtoTransfer() : base()
         {
             this.ActionType = Actions.TransferFunds;
         }
@@ -1822,7 +1841,7 @@ namespace hist_mmorpg
             this.armyID = armyID;
         }
 
-        public ProtoCombatValues():base()
+        public ProtoCombatValues() : base()
         {
             this.ActionType = Actions.AdjustCombatValues;
         }
@@ -1843,7 +1862,8 @@ namespace hist_mmorpg
         {
         }
 
-        public ProtoPlayer(PlayerCharacter pc) {
+        public ProtoPlayer(PlayerCharacter pc)
+        {
             this.pcID = pc.charID;
             this.pcName = pc.firstName + " " + pc.familyName;
             this.playerID = pc.playerID;

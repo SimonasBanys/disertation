@@ -4,7 +4,7 @@ using System.Diagnostics.Contracts;
 using System.Text;
 using System.IO;
 using System.Threading;
-namespace hist_mmorpg 
+namespace ProtoMessage 
 {
     /// <summary>
     /// Class storing data on army 
@@ -78,7 +78,7 @@ namespace hist_mmorpg
         /// <param name="trp">uint[] holding troops in army</param>
         public Army(String id, string ldr, string own, double day, string loc, bool maint = false, byte aggr = 1, byte odds = 9, uint[] trp = null)
         {
-            Contract.Requires(!string.IsNullOrWhiteSpace(id) && !string.IsNullOrWhiteSpace(own) && !string.IsNullOrWhiteSpace(loc));
+            Contract.Requires(!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(own) && !string.IsNullOrEmpty(loc));
             // VALIDATION
 
             // ID
@@ -91,7 +91,7 @@ namespace hist_mmorpg
             }
 
             // LDR
-            if (!String.IsNullOrWhiteSpace(ldr))
+            if (!String.IsNullOrEmpty(ldr))
             {
                 // trim and ensure 1st is uppercase
                 ldr = Utility_Methods.FirstCharToUpper(ldr.Trim());
@@ -291,7 +291,7 @@ namespace hist_mmorpg
         {
             // check if already leader of another army and remove if necessary
             Army otherArmy = null;
-            if (!String.IsNullOrWhiteSpace(newLeader.armyID))
+            if (!String.IsNullOrEmpty(newLeader.armyID))
             {
                 otherArmy = newLeader.GetArmy();
 
@@ -833,7 +833,6 @@ namespace hist_mmorpg
         public uint[] GetTroopsEstimate(Character observer)
         {
             uint[] troopNumbers = new uint[7] {0, 0, 0, 0, 0, 0, 0};
-            Console.WriteLine("___TEST: Number of troop types: " + troops.Length +", length in Troops Estimate: "+troopNumbers.Length);
             if (observer != null)
             {
                 // get random int (0-2) to decide whether to over- or under-estimate troop number
@@ -876,7 +875,7 @@ namespace hist_mmorpg
             Contract.Ensures(Contract.Result<Fief>()!=null);
             Fief thisFief = null;
 
-            if (!String.IsNullOrWhiteSpace(this.location))
+            if (!String.IsNullOrEmpty(this.location))
             {
                 if (Globals_Game.fiefMasterList.ContainsKey(this.location))
                 {
@@ -897,7 +896,7 @@ namespace hist_mmorpg
             PlayerCharacter myOwner = null;
 
             // get leader from PC master list
-            if (!String.IsNullOrWhiteSpace(this.owner))
+            if (!String.IsNullOrEmpty(this.owner))
             {
                 if (Globals_Game.pcMasterList.ContainsKey(this.owner))
                 {
@@ -917,7 +916,7 @@ namespace hist_mmorpg
             Contract.Ensures(Contract.Result<Character>()==null||Contract.Result<Character>()!=null);
             Character myLeader = null;
 
-            if (!String.IsNullOrWhiteSpace(this.leader))
+            if (!String.IsNullOrEmpty(this.leader))
             {
                 // get leader from appropriate master list
                 if (Globals_Game.npcMasterList.ContainsKey(this.leader))
@@ -989,7 +988,7 @@ namespace hist_mmorpg
             // get fief
             Fief thisFief = this.GetLocation();
 
-            if (!String.IsNullOrWhiteSpace(thisFief.siege))
+            if (!String.IsNullOrEmpty(thisFief.siege))
             {
                 Siege thisSiege = thisFief.GetSiege();
 
@@ -1014,7 +1013,7 @@ namespace hist_mmorpg
             // get fief
             Fief thisFief = this.GetLocation();
 
-            if (!String.IsNullOrWhiteSpace(thisFief.siege))
+            if (!String.IsNullOrEmpty(thisFief.siege))
             {
                 Siege thisSiege = thisFief.GetSiege();
                 if (thisSiege.GetDefenderGarrison() == this)
@@ -1037,7 +1036,7 @@ namespace hist_mmorpg
             // get fief
             Fief thisFief = this.GetLocation();
 
-            if (!String.IsNullOrWhiteSpace(thisFief.siege))
+            if (!String.IsNullOrEmpty(thisFief.siege))
             {
                 Siege thisSiege = thisFief.GetSiege();
                 if (thisSiege.defenderAdditional != null)
@@ -1063,12 +1062,12 @@ namespace hist_mmorpg
             // check if army is a defending garrison in a siege
             thisSiegeID = this.CheckIfSiegeDefenderGarrison();
 
-            if (String.IsNullOrWhiteSpace(thisSiegeID))
+            if (String.IsNullOrEmpty(thisSiegeID))
             {
                 // check if army is an additional defending army in a siege
                 thisSiegeID = this.CheckIfSiegeDefenderAdditional();
 
-                if (String.IsNullOrWhiteSpace(thisSiegeID))
+                if (String.IsNullOrEmpty(thisSiegeID))
                 {
                     // check if army is besieger in a siege
                     thisSiegeID = this.CheckIfBesieger();
@@ -1090,7 +1089,7 @@ namespace hist_mmorpg
             string siegeID = this.CheckForSiegeRole();
 
             // get siege
-            if (!String.IsNullOrWhiteSpace(siegeID))
+            if (!String.IsNullOrEmpty(siegeID))
             {
                 if (Globals_Game.siegeMasterList.ContainsKey(siegeID))
                 {
@@ -1117,7 +1116,7 @@ namespace hist_mmorpg
             // check for SIEGE INVOLVEMENT
             // check that army is a defending garrison in a siege
             siegeID = this.CheckIfSiegeDefenderGarrison();
-            if (!String.IsNullOrWhiteSpace(siegeID))
+            if (!String.IsNullOrEmpty(siegeID))
             {
                 isSiegeDefGarr = true;
                 thisSiege = this.GetSiege();
@@ -1126,7 +1125,7 @@ namespace hist_mmorpg
             {
                 siegeID = this.CheckIfSiegeDefenderAdditional();
                 // check that army is an additional defending army in a siege
-                if (!String.IsNullOrWhiteSpace(siegeID))
+                if (!String.IsNullOrEmpty(siegeID))
                 {
                     isSiegeDefAdd = true;
                     thisSiege = this.GetSiege();
@@ -1228,7 +1227,7 @@ namespace hist_mmorpg
                 // SIEGE INVOLVEMENT (DEFENDER)
                 // check if defending army is the garrison in a siege
                 string siegeID = targetArmy.CheckIfSiegeDefenderGarrison();
-                if (!String.IsNullOrWhiteSpace(siegeID))
+                if (!String.IsNullOrEmpty(siegeID))
                 {
                     result = new ProtoMessage();
                     result.ResponseType = DisplayMessages.ArmyBesieged;
@@ -1238,7 +1237,7 @@ namespace hist_mmorpg
                 {
                     // check if defending army is the additional defender in a siege
                     siegeID = targetArmy.CheckIfSiegeDefenderAdditional();
-                    if (!String.IsNullOrWhiteSpace(siegeID))
+                    if (!String.IsNullOrEmpty(siegeID))
                     {
                         result = new ProtoMessage();
                         result.ResponseType = DisplayMessages.ArmyBesieged;
@@ -1265,7 +1264,7 @@ namespace hist_mmorpg
 
                 //TODO client side confirmation of end siege if besieging
                 string siegeID = this.CheckIfBesieger();
-                if (!String.IsNullOrWhiteSpace(siegeID))
+                if (!String.IsNullOrEmpty(siegeID))
                 {
                     Siege thisSiege = null;
                     thisSiege = Globals_Game.siegeMasterList[siegeID];
@@ -1293,7 +1292,7 @@ namespace hist_mmorpg
             {
                 // check if are additional defending army
                 string whichRole = this.CheckIfSiegeDefenderAdditional();
-                if (!String.IsNullOrWhiteSpace(whichRole))
+                if (!String.IsNullOrEmpty(whichRole))
                 {
                     thisSiege.defenderAdditional = null;
                 }
@@ -1302,7 +1301,7 @@ namespace hist_mmorpg
                 else
                 {
                     whichRole = this.CheckIfBesieger();
-                    if (!String.IsNullOrWhiteSpace(whichRole))
+                    if (!String.IsNullOrEmpty(whichRole))
                     {
                         // end siege
                         thisSiege.SiegeEnd(false);
@@ -1432,63 +1431,7 @@ namespace hist_mmorpg
         /// Process the retreat of the army
         /// </summary>
         /// <param name="retreatDistance">The retreat distance</param>
-        public void ProcessRetreat(int retreatDistance)
-        {
-            // get starting fief
-            Fief startingFief = this.GetLocation();
-
-            // get army leader
-            Character thisLeader = this.GetLeader();
-
-            // get army owner
-            PlayerCharacter thisOwner = this.GetOwner();
-
-            // for each hex in retreatDistance, process retreat
-            for (int i = 0; i < retreatDistance; i++)
-            {
-                // get current location
-                Fief from = this.GetLocation();
-
-                // get fief to retreat to
-                Fief target = Globals_Game.gameMap.chooseRandomHex(from, true, thisOwner, startingFief);
-
-                if (target != null)
-                {
-                    // get travel cost
-                    double travelCost = from.getTravelCost(target);
-
-                    // check for army leader (defender may not have had one)
-                    if (thisLeader != null)
-                    {
-                        // ensure leader has enough days (retreats are immune to running out of days)
-                        if (thisLeader.days < travelCost)
-                        {
-                            thisLeader.AdjustDays(thisLeader.days - travelCost);
-                        }
-
-                        // perform retreat
-                        ProtoMessage moveResult;
-                        bool success = thisLeader.MoveCharacter(target, travelCost,out moveResult, false);
-                    }
-
-                    // if no leader
-                    else
-                    {
-                        // ensure army has enough days (retreats are immune to running out of days)
-                        if (this.days < travelCost)
-                        {
-                            this.days = travelCost;
-                        }
-
-                        // perform retreat
-                        ProtoMessage message;
-                        this.MoveWithoutLeader(target, travelCost,out message);
-                    }
-                }
-            }
-            Globals_Game.UpdatePlayer(thisOwner.playerID, DisplayMessages.ArmyRetreat, new string[] { this.armyID, this.location });
-
-        }
+     
 
         /// <summary>
         /// Processes the addition of one or more detachments to the army

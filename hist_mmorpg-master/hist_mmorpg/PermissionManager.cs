@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
-namespace hist_mmorpg
+namespace ProtoMessage
 {
     /// <summary>
     /// Class for permission handling
@@ -43,7 +43,7 @@ namespace hist_mmorpg
 
         public static bool isAdmin(PlayerCharacter pc, object o = null)
         {
-            Trace.WriteLine("Is admin: " + pc.CheckIsSysAdmin());
+            //Trace.WriteLine("Is admin: " + pc.CheckIsSysAdmin());
             return pc.CheckIsSysAdmin();
         }
         public static bool isKing(PlayerCharacter pc, object o = null)
@@ -96,10 +96,10 @@ namespace hist_mmorpg
             }
             bool isInFief = (pc.location == f);
             // Note: Captives cannot see anything
-            if (isInFief&&string.IsNullOrWhiteSpace(pc.captorID)) return true;
+            if (isInFief&&string.IsNullOrEmpty(pc.captorID)) return true;
             foreach (Character character in pc.myNPCs)
             {
-                if (character.location == f && string.IsNullOrWhiteSpace(character.captorID))
+                if (character.location == f && string.IsNullOrEmpty(character.captorID))
                 {
                     return true;
                 }
@@ -142,12 +142,12 @@ namespace hist_mmorpg
             if (character is PlayerCharacter)
             {
                 bool owns = (character as PlayerCharacter) == pc;
-                Trace.WriteLine(owns);
+                //Trace.WriteLine(owns);
                 return owns;
             }
             else{
                 bool owns =  (character as NonPlayerCharacter).GetHeadOfFamily() == pc || (character as NonPlayerCharacter).GetEmployer() == pc;
-                Trace.WriteLine(owns);
+                //Trace.WriteLine(owns);
                 return owns;
             }
         }
@@ -159,7 +159,7 @@ namespace hist_mmorpg
             {
                 return false;
             }
-            else if (!string.IsNullOrWhiteSpace(character.captorID)) return false;
+            else if (!string.IsNullOrEmpty(character.captorID)) return false;
             else return true;
         }
 

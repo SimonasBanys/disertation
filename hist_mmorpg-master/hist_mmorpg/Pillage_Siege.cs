@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace hist_mmorpg
+namespace ProtoMessage
 {
     public static class Pillage_Siege
     {
@@ -267,70 +267,6 @@ namespace hist_mmorpg
         /// </summary>
         /// <param name="a">The pillaging army</param>
         /// <param name="f">The fief being pillaged</param>
-        public static ProtoMessage PillageFief(Army a, Fief f)
-        {
-            ProtoMessage result = new ProtoMessage();
-            bool pillageCancelled = false;
-            bool bailiffPresent = false;
-            Army fiefArmy = null;
-
-            // check if bailiff present in fief (he'll lead the army)
-            if (f.bailiff != null)
-            {
-                for (int i = 0; i < f.charactersInFief.Count; i++)
-                {
-                    if (f.charactersInFief[i] == f.bailiff)
-                    {
-                        bailiffPresent = true;
-                        break;
-                    }
-                }
-            }
-
-            // if bailiff is present, create an army and attempt to give battle
-            // no bailiff = no leader = pillage is unopposed by defending forces
-            if (bailiffPresent)
-            {
-                // create temporary army for battle
-                fiefArmy = f.CreateDefendingArmy();
-
-                // give battle and get result
-                ProtoBattle battleResults;
-                pillageCancelled = Battle.GiveBattle(fiefArmy, a, out battleResults, circumstance: "pillage");
-
-                if (pillageCancelled)
-                {
-                    string toDisplay = "The pillaging force has been forced to retreat by the fief's defenders!";
-                    result.ResponseType = DisplayMessages.PillageRetreat;
-                    // Let owner know that pillage attempt has been thwarted
-                    Globals_Game.UpdatePlayer(f.owner.playerID, DisplayMessages.PillageRetreat);
-                    return result;
-                }
-
-                else
-                {
-                    // check still have enough days left
-                    if (a.days < 7)
-                    {
-                        // Inform fief owner pillage attempt thwarted
-                        Globals_Game.UpdatePlayer(f.owner.playerID, DisplayMessages.PillageDays);
-                        result.ResponseType = DisplayMessages.PillageDays;
-                        pillageCancelled = true;
-                        return result;
-                    }
-                }
-
-            }
-
-            if (!pillageCancelled)
-            {
-                // process pillage
-                return Pillage_Siege.ProcessPillage(f, a);
-            }
-            result.ResponseType = DisplayMessages.Success;
-            result.Message = "The pillage was successful";
-            return result;
-        }
 
 
         /// <summary>
@@ -372,7 +308,7 @@ namespace hist_mmorpg
             // note: not necessary for quell rebellion
             if (!circumstance.Equals("quellRebellion"))
             {
-                if ((!String.IsNullOrWhiteSpace(f.siege)) && (proceed))
+                if ((!String.IsNullOrEmpty(f.siege)) && (proceed))
                 {
                     proceed = false;
                     if (circumstance.Equals("pillage"))

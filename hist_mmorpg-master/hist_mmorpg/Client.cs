@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using Lidgren.Network;
-namespace hist_mmorpg
+namespace ProtoMessage
 {
     /// <summary>
     /// Represents a client, their details and the information about their objects
@@ -51,7 +51,7 @@ namespace hist_mmorpg
         /// <summary>
         /// Holds current set of events being displayed in UI
         /// </summary>
-        public SortedList<uint, JournalEntry> eventSetToView;
+        public SortedDictionary<uint, JournalEntry> eventSetToView;
         /// <summary>
         /// Holds index position of currently displayed entry in eventSetToView
         /// </summary>
@@ -99,7 +99,7 @@ namespace hist_mmorpg
             // Set up journal
             myPastEvents = new Journal();
             // Set up journal events
-            eventSetToView = new SortedList<uint, JournalEntry>();
+            eventSetToView = new SortedDictionary<uint, JournalEntry>();
 
             Globals_Game.ownedPlayerCharacters.Add(user,myPlayerCharacter);
         }
@@ -118,8 +118,7 @@ namespace hist_mmorpg
             if (conn != null)
             {
                 Globals_Server.logEvent("Update " + this.username + ": " + message.ToString());
-                Console.WriteLine("Sending update " + message.ToString() + " to " + this.username);
-                Server.SendViaProto(m, conn,alg);
+                //Server.SendViaProto(m, conn,alg);
             }
         }
 
@@ -134,8 +133,7 @@ namespace hist_mmorpg
             if (conn != null)
             {
                 Globals_Server.logEvent("Update " + this.username + ": " + message.ResponseType.ToString());
-                Console.WriteLine("Sending update " + message.ResponseType.ToString() + " to " + this.username);
-                Server.SendViaProto(message, conn, alg);
+                //Server.SendViaProto(message, conn, alg);
             }
         }
 

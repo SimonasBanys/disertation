@@ -7,7 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace hist_mmorpg
+namespace ProtoMessage
 {
 
     static class Program
@@ -16,15 +16,15 @@ namespace hist_mmorpg
         /// <summary>
         /// The Game object for this test (contains and handles all game data)
         /// </summary>
-        public static Game game;
+        //public static Game game;
         /// <summary>
         /// The Server object used for this test (contains connected client information
         /// </summary>
-        public static Server server;
+        //public static Server server;
         /// <summary>
         /// The dummy Client to be used for this test
         /// </summary>
-        public static TestClient client;
+        //public static TestClient client;
         /// <summary>
         /// The location of the log file
         /// </summary>
@@ -49,9 +49,10 @@ namespace hist_mmorpg
         /// </summary>
         public static void InitialiseGameState()
         {
-            game = new Game();
-            server = new Server();
-            client = new TestClient();
+                        
+            //game = new Game();
+            //server = new Server();
+            //client = new TestClient();
 
             Username = "helen";
             Pass = "potato";
@@ -105,10 +106,9 @@ namespace hist_mmorpg
         public static void FinaliseGameState()
         {
 
-            client.LogOut();
-            server.Shutdown();
+            //client.LogOut();
+            //server.Shutdown();
 #if DEBUG
-            Console.WriteLine("A log file was written to "+logFilePath);
 #endif
         }
 
@@ -121,7 +121,7 @@ namespace hist_mmorpg
             string datePatern = "MM_dd_H_mm";
             logFilePath = "TestRun_NoSessions"+encryptString + DateTime.Now.ToString(datePatern) + ".txt";
 
-            Globals_Server.LogFile = new System.IO.StreamWriter(logFilePath); 
+            //Globals_Server.LogFile = new System.IO.StreamWriter(logFilePath); 
             InitialiseGameState();
             SetUpForDemo();
             //TestRun(true);                
@@ -132,9 +132,9 @@ namespace hist_mmorpg
         /// </summary>
         /// <param name="encrypt">Whether or not to use encryption</param>
         [STAThread]
-        public static void TestRun(bool encrypt = true)
+        /*public static void TestRun(bool encrypt = true)
         {
-            Process currentProcess = Process.GetCurrentProcess();
+            //Process currentProcess = Process.GetCurrentProcess();
             if (encrypt)
             {
                 Globals_Server.logEvent("Running test with encryption");
@@ -153,36 +153,36 @@ namespace hist_mmorpg
             client.LogInAndConnect(Username, Pass, encryptionKey);
             while (!client.IsConnectedAndLoggedIn())
             {
-                Thread.Sleep(0);
+                //Thread.Sleep(0);
             }
             LoginTime = DateTime.Now.TimeOfDay.TotalMilliseconds - start;
             client.RecruitTroops(OwnedArmy.armyID, 70, true);
-            RecruitTime = ProcessNextAction(Actions.RecruitTroops,currentProcess);
+            //RecruitTime = ProcessNextAction(Actions.RecruitTroops,currentProcess);
             // Move to another fief
             client.Move(MyPlayerCharacter.charID, NotOwnedFief.id, null);
-            MoveTime = ProcessNextAction(Actions.TravelTo,currentProcess);
+            //MoveTime = ProcessNextAction(Actions.TravelTo,currentProcess);
             // Spy
             client.SpyOnFief(MyPlayerCharacter.charID, MyPlayerCharacter.location.id);
-            SpyTime = ProcessNextAction(Actions.SpyFief,currentProcess);
+            //SpyTime = ProcessNextAction(Actions.SpyFief,currentProcess);
             // Confirm spy
             Globals_Server.logEvent("Time taken to run test (ms): " + (DateTime.Now.TimeOfDay.TotalMilliseconds - start));
             Globals_Server.logEvent("LogIn time: " + LoginTime);
-            Globals_Server.logEvent("Recruit time: " + (RecruitTime));
-            Globals_Server.logEvent("Travel time: " + MoveTime);
-            Globals_Server.logEvent("Spy time: " + SpyTime);
+            //Globals_Server.logEvent("Recruit time: " + (RecruitTime));
+            //Globals_Server.logEvent("Travel time: " + MoveTime);
+            //Globals_Server.logEvent("Spy time: " + SpyTime);
             Globals_Server.logEvent("Max memory measured: " + maxMemoryUseage);
-        }
+        }*/
 
         /// <summary>
         /// Logs the memory useage using GC.GetTotalMemory and returns the memory useage
         /// </summary>
         /// <param name="p">Process to use to calculate memory</param>
-        public static void LogMemory(Process p)
+        /*public static void LogMemory(Process p)
         {
             long mem = +GC.GetTotalMemory(false);
             if (mem > maxMemoryUseage) maxMemoryUseage = mem;
             Globals_Server.logEvent("GC memory: " + mem);
-        }
+        }*/
 
         /// <summary>
         /// Waits for the response to a client's action, gets the time taken to receive reply, and logs memory
@@ -190,7 +190,7 @@ namespace hist_mmorpg
         /// <param name="action">Action which was taken- will wait until a response with the same action has been received</param>
         /// <param name="p">Process used to get memory</param>
         /// <returns>Time taken (milliseconds)</returns>
-        private static double ProcessNextAction(Actions action, Process p)
+        /*private static double ProcessNextAction(Actions action, Process p)
         {
             double start = DateTime.Now.TimeOfDay.TotalMilliseconds;
             Task<ProtoMessage> responseTask = client.GetReply();
@@ -204,7 +204,7 @@ namespace hist_mmorpg
             client.ClearMessageQueues();
             LogMemory(p);
             return end - start;
-        }
+        }*/
 
         ///// <summary>
         ///// The main entry point for the application.

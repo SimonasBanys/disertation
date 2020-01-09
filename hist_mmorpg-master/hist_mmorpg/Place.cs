@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Runtime.Serialization;
-namespace hist_mmorpg
+namespace ProtoMessage
 {
     public abstract class Place
     {
@@ -59,7 +59,7 @@ namespace hist_mmorpg
             }
 
             // TIHO
-            if (!String.IsNullOrWhiteSpace(tiHo))
+            if (!String.IsNullOrEmpty(tiHo))
             {
                 // trim and ensure 1st is uppercase
                 tiHo = Utility_Methods.FirstCharToUpper(tiHo.Trim());
@@ -130,7 +130,7 @@ namespace hist_mmorpg
         {
             Character myTitleHolder = null;
 
-            if (!String.IsNullOrWhiteSpace(this.titleHolder))
+            if (!String.IsNullOrEmpty(this.titleHolder))
             {
                 // get title holder from appropriate master list
                 if (Globals_Game.npcMasterList.ContainsKey(this.titleHolder))
@@ -147,7 +147,7 @@ namespace hist_mmorpg
         }
 
         // Serialise Place for client
-        public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+        /*public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
 
             // Use the AddValue method to specify serialized values.
@@ -162,7 +162,7 @@ namespace hist_mmorpg
             this.name = info.GetString("nam");
             var tmpRank = info.GetByte("rank");
             this.rank = Globals_Game.rankMasterList[tmpRank];
-        }
+        }*/
 
     }
 
@@ -256,7 +256,7 @@ namespace hist_mmorpg
             }
 
             // TIHO
-            if (!String.IsNullOrWhiteSpace(tiHo))
+            if (!String.IsNullOrEmpty(tiHo))
             {
                 // trim and ensure 1st is uppercase
                 tiHo = Utility_Methods.FirstCharToUpper(tiHo.Trim());
@@ -268,7 +268,7 @@ namespace hist_mmorpg
             }
 
             // OWNER
-            if (!String.IsNullOrWhiteSpace(owner))
+            if (!String.IsNullOrEmpty(owner))
             {
                 // trim and ensure 1st is uppercase
                 owner = Utility_Methods.FirstCharToUpper(owner.Trim());

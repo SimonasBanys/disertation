@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace hist_mmorpg
+namespace ProtoMessage
 {
     /// <summary>
     /// Class allowing storage of game events (past and future)
@@ -14,7 +14,8 @@ namespace hist_mmorpg
         /// <summary>
         /// Holds entries
         /// </summary>
-        public SortedList<uint, JournalEntry> entries = new SortedList<uint, JournalEntry>();
+        
+        public SortedDictionary<uint, JournalEntry> entries = new SortedDictionary<uint, JournalEntry>();
         /// <summary>
         /// Indicates presence of new (unread) entries
         /// </summary>
@@ -28,7 +29,7 @@ namespace hist_mmorpg
         /// Constructor for Journal
         /// </summary>
         /// <param name="entList">SortedList(uint, JournalEntry) holding entries</param>
-        public Journal(SortedList<uint, JournalEntry> entList = null)
+        public Journal(SortedDictionary<uint, JournalEntry> entList = null)
         {
             if (entList != null)
             {
@@ -62,9 +63,9 @@ namespace hist_mmorpg
         /// <returns>SortedList of JournalEntrys</returns>
         /// <param name="yr">Year to search for</param>
         /// <param name="seas">Season to search for</param>
-        public SortedList<uint, JournalEntry> GetEventsOnDate(uint yr = 9999, Byte seas = 99)
+        public SortedDictionary<uint, JournalEntry> GetEventsOnDate(uint yr = 9999, Byte seas = 99)
         {
-            SortedList<uint, JournalEntry> matchingEntries = new SortedList<uint, JournalEntry>();
+            SortedDictionary<uint, JournalEntry> matchingEntries = new SortedDictionary<uint, JournalEntry>();
 
             // determine scope of search
             String scope = "";
@@ -129,9 +130,9 @@ namespace hist_mmorpg
         /// Retrieves all unviewed JournalEntrys
         /// </summary>
         /// <returns>SortedList(uint, JournalEntry) containing relevant entries</returns>
-        public SortedList<uint, JournalEntry> GetUnviewedEntries()
+        public SortedDictionary<uint, JournalEntry> GetUnviewedEntries()
         {
-            SortedList<uint, JournalEntry> foundEntries = new SortedList<uint,JournalEntry>();
+            SortedDictionary<uint, JournalEntry> foundEntries = new SortedDictionary<uint,JournalEntry>();
 
             foreach (KeyValuePair<uint, JournalEntry> jEntry in this.entries)
             {
@@ -245,9 +246,9 @@ namespace hist_mmorpg
         /// </summary>
         /// <returns>SortedList containing JournalEntrys</returns>
         /// <param name="setScope">The type of JournalEvent set to fetch</param>
-        public SortedList<uint, JournalEntry> getJournalEntrySet(string setScope, uint thisYear, byte thisSeason)
+        public SortedDictionary<uint, JournalEntry> getJournalEntrySet(string setScope, uint thisYear, byte thisSeason)
         {
-            SortedList<uint, JournalEntry> jEntrySet = new SortedList<uint, JournalEntry>();
+            SortedDictionary<uint, JournalEntry> jEntrySet = new SortedDictionary<uint, JournalEntry>();
 
             // get appropriate jEntry set
             switch (setScope)
@@ -366,13 +367,13 @@ namespace hist_mmorpg
             }
 
             // TYPE
-            if (String.IsNullOrWhiteSpace(typ))
+            if (String.IsNullOrEmpty(typ))
             {
                 throw new InvalidDataException("JournalEntry type must be a string > 0 characters in length");
             }
 
             // LOC
-            if (!String.IsNullOrWhiteSpace(loc))
+            if (!String.IsNullOrEmpty(loc))
             {
                 // trim and ensure is uppercase
                 loc = loc.Trim().ToUpper();
@@ -388,7 +389,7 @@ namespace hist_mmorpg
             this.season = seas;
             this.personae = pers;
             this.type = typ;
-            if (!String.IsNullOrWhiteSpace(loc))
+            if (!String.IsNullOrEmpty(loc))
             {
                 this.location = loc;
             }
@@ -448,13 +449,13 @@ namespace hist_mmorpg
             }
 
             // TYPE
-            if (String.IsNullOrWhiteSpace(typ))
+            if (String.IsNullOrEmpty(typ))
             {
                 throw new InvalidDataException("JournalEntry type must be a string > 0 characters in length");
             }
 
             // LOC
-            if (!String.IsNullOrWhiteSpace(loc))
+            if (!String.IsNullOrEmpty(loc))
             {
                 // trim and ensure is uppercase
                 loc = loc.Trim().ToUpper();
@@ -470,7 +471,7 @@ namespace hist_mmorpg
             this.season = seas;
             this.personae = pers;
             this.type = typ;
-            if (!String.IsNullOrWhiteSpace(loc))
+            if (!String.IsNullOrEmpty(loc))
             {
                 this.location = loc;
             }
@@ -528,7 +529,7 @@ namespace hist_mmorpg
             entryText += "\r\n";
 
             // location
-            if (!String.IsNullOrWhiteSpace(this.location))
+            if (!String.IsNullOrEmpty(this.location))
             {
                 Place thisPlace = null;
                 if (Globals_Game.fiefMasterList.ContainsKey(this.location))

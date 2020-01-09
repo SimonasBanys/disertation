@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Runtime.Serialization;
-namespace hist_mmorpg
+namespace ProtoMessage
 {
     /// <summary>
     /// Class storing data on province
     /// </summary>
-    [Serializable()]
-    public class Province : Place, ISerializable
+    public class Province : Place
     {
         /// <summary>
         /// Holds province tax rate
@@ -210,7 +209,7 @@ namespace hist_mmorpg
         }
 
         //temp for serializing to Client side Fief object
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        /*public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
             info.AddValue("king", this.kingdom.id, typeof(string));
@@ -220,7 +219,7 @@ namespace hist_mmorpg
         {
             var tmpKing = info.GetString("king");
             this.kingdom = Globals_Game.kingdomMasterList[tmpKing];
-        }
+        }*/
 
     }
 
