@@ -1,0 +1,79 @@
+Server started- host: localhost, port: 8000, appID: test, max connections: 2000
+Accepted connection from helen
+helen logs in from 127.0.0.1:53786
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:58427
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:54955
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = SiegeList, reply = None
+From hist_mmorpg.Client: request = SiegeList, reply = None
+From hist_mmorpg.Client: request = SiegeList, reply = None
+From hist_mmorpg.Client: request = SiegeList, reply = None
+From hist_mmorpg.Client: request = SiegeList, reply = None
+From hist_mmorpg.Client: request = SiegeList, reply = None
+From hist_mmorpg.Client: request = SiegeList, reply = None
+Accepted connection from helen
+helen logs in from 127.0.0.1:63613
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+Client helen disconnects
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:63590
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+Accepted connection from helen
+helen logs in from 127.0.0.1:64994
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+Client helen disconnects
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:57736
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = RecruitTroops, reply = Success
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:61545
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From 

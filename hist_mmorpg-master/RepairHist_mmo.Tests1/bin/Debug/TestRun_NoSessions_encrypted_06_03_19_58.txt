@@ -1,0 +1,225 @@
+Server started- host: localhost, port: 8000, appID: test, max connections: 2000
+Accepted connection from helen
+helen logs in from 127.0.0.1:49473
+From hist_mmorpg.Client: request = ListArmies, reply = None
+Accepted connection from helen
+helen logs in from 127.0.0.1:61777
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Accepted connection from helen
+helen logs in from 127.0.0.1:60263
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+Client helen disconnects
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:56504
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:61116
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+Accepted connection from helen
+helen logs in from 127.0.0.1:57827
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+Client helen disconnects
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+Client helen disconnects
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = BesiegeFief, reply = PillageOwnFief
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = BesiegeFief, reply = Success
+From hist_mmorpg.Client: request = ViewMyFiefs, reply = None
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = RecruitTroops, reply = Success
+From hist_mmorpg.Client: request = ListArmies, reply = None
+Accepted connection from helen
+helen logs in from 127.0.0.1:54154
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = BesiegeFief, reply = PillageOwnFief
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = BesiegeFief, reply = PillageOwnFief
+Accepted connection from helen
+helen logs in from 127.0.0.1:55761
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = BesiegeFief, reply = PillageOwnFief
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:54835
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = BesiegeFief, reply = PillageOwnFief
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = RecruitTroops, reply = CharacterRecruitAlready
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = BesiegeFief, reply = PillageOwnFief
+Client helen disconnects
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = BesiegeFief, reply = PillageOwnFief
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:56148
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterDaysJourney
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+Update helen: CharacterDaysJourney
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterDaysJourney
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+Update helen

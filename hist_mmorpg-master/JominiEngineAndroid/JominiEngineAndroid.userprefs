@@ -1,0 +1,16 @@
+﻿<Properties StartupConfiguration="{A2A07F59-0329-440C-83C0-5E6DB92C7AAC}|Default">
+  <MonoDevelop.Ide.Workbench>
+    <Files>
+      <File FileName="JominiEngineAndroid/MainActivity.cs" Line="4" Column="1" />
+      <File FileName="JominiEngineAndroid/PlayerOperations.cs" Line="158" Column="73" />
+      <File FileName="JominiEngineAndroid/TestTextClient.cs" Line="443" Column="10" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.JominiEngineAndroid PreferredExecutionTarget="Android.Android_Accelerated_x86" />
+</Properties>

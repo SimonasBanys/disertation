@@ -1,0 +1,63 @@
+Server started- host: localhost, port: 8000, appID: test, max connections: 2000
+Accepted connection from helen
+helen logs in from 127.0.0.1:57235
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:51439
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = AcceptRejectProposal, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = AcceptRejectProposal, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = AcceptRejectProposal, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = AcceptRejectProposal, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = AcceptRejectProposal, reply = ErrorGenericMessageInvalid
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:62428
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = TryForChild, reply = CharacterSpousePregnant
+From hist_mmorpg.Client: request = ViewCaptives, reply = ErrorGenericFiefUnidentified
+From hist_mmorpg.Client: request = ViewCaptives, reply = ErrorGenericFiefUnidentified
+From hist_mmorpg.Client: request = ViewCaptives, reply = ErrorGenericFiefUnidentified
+From hist_mmorpg.Client: request = ViewCaptives, reply = ErrorGenericFiefUnidentified
+From hist_mmorpg.Client: request = ViewCaptives, reply = ErrorGenericFiefUnidentified
+From hist_mmorpg.Client: request = ViewCaptives, reply = ErrorGenericFiefUnidentified
+From hist_mmorpg.Client: request = ViewCaptives, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = ViewCaptives, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = ViewCaptives, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = ViewCaptives, reply = ErrorGenericMessageInvalid
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:52498
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ViewCaptives, reply = ErrorGenericMessageInvalid
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:62658
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = Kidnap, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = Kidnap, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = Kidnap, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = Kidnap, reply = ErrorGenericMessageInvalid
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:56990
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = Kidnap, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = Kidnap, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = Kidnap, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = Kidnap, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = Kidnap, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = Kidnap, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = Kidnap, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = Kidnap, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = Kidnap, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = Kidnap, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = Kidnap, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = Kidnap, reply = ErrorGenericMessageInv

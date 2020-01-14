@@ -1,0 +1,71 @@
+Server started- host: localhost, port: 8000, appID: test, max connections: 2000
+Accepted connection from helen
+helen logs in from 127.0.0.1:50375
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ListDetachments, reply = ErrorGenericArmyUnidentified
+From hist_mmorpg.Client: request = ListDetachments, reply = ErrorGenericArmyUnidentified
+From hist_mmorpg.Client: request = ListDetachments, reply = ErrorGenericArmyUnidentified
+From hist_mmorpg.Client: request = ListDetachments, reply = ErrorGenericArmyUnidentified
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = RecruitTroops, reply = Success
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = MaintainArmy, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = AppointLeader, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = AppointLeader, reply = CharacterLeaderLocation
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = AppointLeader, reply = CharacterLeaderLocation
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = AppointLeader, reply = CharacterLeaderLocation
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = AppointLeader, reply = CharacterLeaderLocation
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ProposeMarriage, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = AcceptRejectProposal, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = AcceptRejectProposal, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:65124
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:60912
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:58500
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:53617
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:64393
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+Client helen disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:62819
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply

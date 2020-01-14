@@ -1,0 +1,2 @@
+H:\gdl\DissertationHistMMORPG-master\DissertationHistMMORPG-master\UnityClient\bin\Debug\UnityClient.exe.config
+H:\gdl\DissertationHistMMORPG-master\DissertationHistMMORPG-master\UnityClient\obj\Debug\UnityClient.pdb

@@ -1,0 +1,73 @@
+Server started- host: localhost, port: 8000, appID: test, max connections: 2000
+Accepted connection from helen
+helen logs in from 127.0.0.1:62560
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = RecruitTroops, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = RecruitTroops, reply = CharacterRecruitAlready
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Update helen: CharacterInvalidMovement
+From hist_mmorpg.Client: request = TravelTo, reply = Su
