@@ -1,2 +1,8 @@
 H:\gdl\DissertationHistMMORPG-master\DissertationHistMMORPG-master\UnityClient\bin\Debug\UnityClient.exe.config
 H:\gdl\DissertationHistMMORPG-master\DissertationHistMMORPG-master\UnityClient\obj\Debug\UnityClient.pdb
+C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\UnityClient\bin\Debug\UnityClient.exe.config
+C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\UnityClient\bin\Debug\UnityClient.exe
+C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\UnityClient\bin\Debug\UnityClient.pdb
+C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\UnityClient\obj\Debug\UnityClient.csprojAssemblyReference.cache
+C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\UnityClient\obj\Debug\UnityClient.exe
+C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\UnityClient\obj\Debug\UnityClient.pdb

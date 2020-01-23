@@ -1,0 +1,3 @@
+C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\ClientDLL\obj\Debug\ClientDLL.csprojAssemblyReference.cache
+C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\ClientDLL\obj\Debug\ClientDLL.dll
+C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\ClientDLL\obj\Debug\ClientDLL.pdb
