@@ -1,0 +1,80 @@
+Server started- host: localhost, port: 8000, appID: test, max connections: 2000
+Accepted connection from helen
+helen logs in from 127.0.0.1:64023
+From hist_mmorpg.Client: request = AdjustExpenditure, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = AdjustExpenditure, reply = FiefExpenditureAdjusted
+From hist_mmorpg.Client: request = AdjustExpenditure, reply = ErrorGenericFiefUnidentified
+Accepted connection from test
+Client test disconnects
+Client listening thread ends
+From hist_mmorpg.Client: request = AdjustExpenditure, reply = ErrorGenericUnauthorised
+From hist_mmorpg.Client: request = AdjustExpenditure, reply = FiefExpenditureAdjustment
+From hist_mmorpg.Client: request = Attack, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = Attack, reply = ArmyAttackSelf
+From hist_mmorpg.Client: request = Attack, reply = ErrorGenericUnauthorised
+From hist_mmorpg.Client: request = Attack, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = Attack, reply = ErrorGenericNotInSameFief
+From hist_mmorpg.Client: request = Attack, reply = ErrorGenericMessageInvalid
+Client helen disconnects
+Client listening thread ends
+Client listening thread ends
+Client listening thread ends
+Client listening thread ends
+Client listening thread ends
+Client listening thread ends
+Accepted connection from test
+test logs in from 127.0.0.1:57410
+Client listening thread ends
+Client test disconnects
+Accepted connection from test
+Accepted connection from test
+test logs in from 127.0.0.1:53526
+Accepted connection from test
+Client test disconnects
+Client listening thread ends
+Client listening thread ends
+Client test disconnects
+Accepted connection from helen
+helen logs in from 127.0.0.1:55206
+From hist_mmorpg.Client: request = MaintainArmy, reply = ArmyMaintainedAlready
+From hist_mmorpg.Client: request = MaintainArmy, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = MaintainArmy, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = MaintainArmy, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = MaintainArmy, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = MaintainArmy, reply = ArmyMaintainInsufficientFunds
+From hist_mmorpg.Client: request = MaintainArmy, reply = ErrorGenericUnauthorised
+From hist_mmorpg.Client: request = MaintainArmy, reply = ArmyMaintainConfirm
+From hist_mmorpg.Client: request = RecruitTroops, reply = Success
+From hist_mmorpg.Client: request = RecruitTroops, reply = CharacterRecruitAlready
+From hist_mmorpg.Client: request = RecruitTroops, reply = CharacterRecruitAlready
+From hist_mmorpg.Client: request = RecruitTroops, reply = CharacterRecruitAlready
+From hist_mmorpg.Client: request = SpyArmy, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = SpyArmy, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = SpyArmy, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = SpyCharacter, reply = ErrorGenericUnauthorised
+From hist_mmorpg.Client: request = SpyCharacter, reply = ErrorGenericNotInSameFief
+Char_158 dies; Char_123456 inherits
+Debug: role is  : Son & Heir
+Update helen: YouDied
+Update helen: newEvent
+Update helen: newEvent
+Update helen: SpyFailDead
+From hist_mmorpg.Client: request = SpyCharacter, reply = Success
+From hist_mmorpg.Client: request = SpyFief, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = SpyFief, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = SpyFief, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = SpyArmy, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = SpyCharacter, reply = ErrorGenericUnauthorised
+From hist_mmorpg.Client: request = SpyFief, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = TravelTo, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = TravelTo, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = TravelTo, reply = ErrorGenericMessageInvalid
+From hist_mmorpg.Client: request = TravelTo, reply = ErrorGenericUnauthorised
+From hist_mmorpg.Client: request = TravelTo, reply = ErrorGenericUnauthorised
+From hist_mmorpg.Client: request = TravelTo, reply = ErrorGenericUnauthorised
+From hist_mmorpg.Client: request = TravelTo, reply = ErrorGenericUnauthorised
+From hist_mmorpg.Client: request = TravelTo, reply = ErrorGenericUnauthorised
+From hist_mmorpg.Client: request = TravelTo, reply = ErrorGenericUnauthorised
+From hist_mmorpg.Client: request = TravelTo, reply = ErrorGenericUnauthorised
+Client listening thread ends
+Server listening thread exits

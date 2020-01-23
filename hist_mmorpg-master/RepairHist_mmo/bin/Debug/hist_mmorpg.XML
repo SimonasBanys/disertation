@@ -590,12 +590,20 @@
             Holds the journal entry id of any ransom sent
             </summary>
         </member>
+        <member name="F:hist_mmorpg.Character.allies">
+            <summary>
+            Holds a list of characters allies and how the alliance was achieved
+            0 - inherited alliance
+            1 - achieved through marriage
+            2 - achieved through agreement
+            </summary>
+        </member>
         <member name="P:hist_mmorpg.Character.fixedSuccessChance">
             <summary>
             Fix the success chance- use -1 to calculate success based on traits
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:hist_mmorpg.Character.#ctor(System.String,System.String,System.String,System.Tuple{System.UInt32,System.Byte},System.Boolean,hist_mmorpg.Nationality,System.Boolean,System.Double,System.Double,System.Collections.Generic.Queue{hist_mmorpg.Fief},hist_mmorpg.Language,System.Double,System.Double,System.Double,System.Double,System.Tuple{hist_mmorpg.Trait,System.Int32}[],System.Boolean,System.Boolean,System.String,System.String,System.String,System.String,System.Collections.Generic.List{System.String},System.String,System.Collections.Generic.Dictionary{System.String,hist_mmorpg.Ailment},hist_mmorpg.Fief,System.String)" -->
+        <!-- Badly formed XML comment ignored for member "M:hist_mmorpg.Character.#ctor(System.String,System.String,System.String,System.Tuple{System.UInt32,System.Byte},System.Boolean,hist_mmorpg.Nationality,System.Boolean,System.Double,System.Double,System.Collections.Generic.Queue{hist_mmorpg.Fief},hist_mmorpg.Language,System.Double,System.Double,System.Double,System.Double,System.Tuple{hist_mmorpg.Trait,System.Int32}[],System.Boolean,System.Boolean,System.String,System.String,System.String,System.String,System.Collections.Generic.List{System.String},System.String,System.Collections.Generic.Dictionary{System.String,hist_mmorpg.Ailment},hist_mmorpg.Fief,System.String,System.Collections.Generic.Dictionary{System.String,System.Int32})" -->
         <member name="M:hist_mmorpg.Character.#ctor(hist_mmorpg.PlayerCharacter_Serialised,hist_mmorpg.NonPlayerCharacter_Serialised)">
             <summary>
             Constructor for Character using PlayerCharacter_Serialised or NonPlayerCharacter_Serialised object.
@@ -888,7 +896,12 @@
             </summary>
             <returns>List containing the fiefs</returns>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:hist_mmorpg.Character.GetArmiesLeader" -->
+        <member name="M:hist_mmorpg.Character.GetArmiesLeader">
+            <summary>
+            Gets the armies of which the character is the leader
+            </summary>
+            <returns>List(Army) containing the armies</returns>
+        </member>
         <member name="M:hist_mmorpg.Character.ChecksBefore_ExamineArmies(hist_mmorpg.ProtoMessage@)">
             <summary>
             Preforms conditional checks prior to examining armies in a fief
@@ -1065,7 +1078,7 @@
             Holds a list of all characters that have been taken captive (during battle, siege, kidnapping, failed spy attempts etc)
             </summary>
         </member>
-        <member name="M:hist_mmorpg.PlayerCharacter.#ctor(System.String,System.String,System.String,System.Tuple{System.UInt32,System.Byte},System.Boolean,hist_mmorpg.Nationality,System.Boolean,System.Double,System.Double,System.Collections.Generic.Queue{hist_mmorpg.Fief},hist_mmorpg.Language,System.Double,System.Double,System.Double,System.Double,System.Tuple{hist_mmorpg.Trait,System.Int32}[],System.Boolean,System.Boolean,System.String,System.String,System.String,System.String,System.Boolean,System.UInt32,System.Collections.Generic.List{hist_mmorpg.NonPlayerCharacter},System.Collections.Generic.List{hist_mmorpg.Fief},System.Collections.Generic.List{hist_mmorpg.Province},System.String,System.String,System.Collections.Generic.List{System.String},System.Collections.Generic.List{hist_mmorpg.Army},System.Collections.Generic.List{System.String},System.String,System.Collections.Generic.Dictionary{System.String,hist_mmorpg.Ailment},hist_mmorpg.Fief,System.String,System.String)">
+        <member name="M:hist_mmorpg.PlayerCharacter.#ctor(System.String,System.String,System.String,System.Tuple{System.UInt32,System.Byte},System.Boolean,hist_mmorpg.Nationality,System.Boolean,System.Double,System.Double,System.Collections.Generic.Queue{hist_mmorpg.Fief},hist_mmorpg.Language,System.Double,System.Double,System.Double,System.Double,System.Tuple{hist_mmorpg.Trait,System.Int32}[],System.Boolean,System.Boolean,System.String,System.String,System.String,System.String,System.Boolean,System.UInt32,System.Collections.Generic.List{hist_mmorpg.NonPlayerCharacter},System.Collections.Generic.List{hist_mmorpg.Fief},System.Collections.Generic.List{hist_mmorpg.Province},System.String,System.String,System.Collections.Generic.List{System.String},System.Collections.Generic.List{hist_mmorpg.Army},System.Collections.Generic.List{System.String},System.String,System.Collections.Generic.Dictionary{System.String,hist_mmorpg.Ailment},hist_mmorpg.Fief,System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.Int32})">
             <summary>
             Constructor for PlayerCharacter
             </summary>
@@ -1079,6 +1092,7 @@
             <param name="pID">String holding ID of player who is currently playing this PlayerCharacter</param>
             <param name="myA">List(Army) holding character's armies</param>
             <param name="myS">List(string) holding character's sieges (siegeIDs)</param>
+            <param name="als">Dictionary(string, int) Dictionary holding character allies and alliance type</param>
         </member>
         <member name="M:hist_mmorpg.PlayerCharacter.#ctor">
             <summary>
@@ -1398,7 +1412,7 @@
             Denotes if is player's heir
             </summary>
         </member>
-        <member name="M:hist_mmorpg.NonPlayerCharacter.#ctor(System.String,System.String,System.String,System.Tuple{System.UInt32,System.Byte},System.Boolean,hist_mmorpg.Nationality,System.Boolean,System.Double,System.Double,System.Collections.Generic.Queue{hist_mmorpg.Fief},hist_mmorpg.Language,System.Double,System.Double,System.Double,System.Double,System.Tuple{hist_mmorpg.Trait,System.Int32}[],System.Boolean,System.Boolean,System.String,System.String,System.String,System.String,System.UInt32,System.Boolean,System.Boolean,System.Collections.Generic.List{System.String},System.String,System.Collections.Generic.Dictionary{System.String,hist_mmorpg.Ailment},hist_mmorpg.Fief,System.String,System.String)">
+        <member name="M:hist_mmorpg.NonPlayerCharacter.#ctor(System.String,System.String,System.String,System.Tuple{System.UInt32,System.Byte},System.Boolean,hist_mmorpg.Nationality,System.Boolean,System.Double,System.Double,System.Collections.Generic.Queue{hist_mmorpg.Fief},hist_mmorpg.Language,System.Double,System.Double,System.Double,System.Double,System.Tuple{hist_mmorpg.Trait,System.Int32}[],System.Boolean,System.Boolean,System.String,System.String,System.String,System.String,System.UInt32,System.Boolean,System.Boolean,System.Collections.Generic.List{System.String},System.String,System.Collections.Generic.Dictionary{System.String,hist_mmorpg.Ailment},hist_mmorpg.Fief,System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.Int32})">
             <summary>
             Constructor for NonPlayerCharacter
             </summary>
@@ -1685,6 +1699,14 @@
             Holds jentry id of ransom demand
             </summary>
         </member>
+        <member name="F:hist_mmorpg.Character_Serialised.allies">
+            <summary>
+            Holds a list of characters allies and how the alliance was achieved
+            0 - inherited alliance
+            1 - achieved through marriage
+            2 - achieved through agreement
+            </summary>
+        </member>
         <member name="M:hist_mmorpg.Character_Serialised.#ctor(hist_mmorpg.PlayerCharacter,hist_mmorpg.NonPlayerCharacter)">
             <summary>
             Constructor for Character_Serialised
@@ -1692,7 +1714,7 @@
             <param name="pc">PlayerCharacter object to use as source</param>
             <param name="npc">NonPlayerCharacter object to use as source</param>
         </member>
-        <member name="M:hist_mmorpg.Character_Serialised.#ctor(System.String,System.String,System.String,System.Tuple{System.UInt32,System.Byte},System.Boolean,System.String,System.Boolean,System.Double,System.Double,System.Collections.Generic.List{System.String},System.String,System.Double,System.Double,System.Double,System.Double,System.Tuple{System.String,System.Int32}[],System.Boolean,System.Boolean,System.String,System.String,System.String,System.String,System.Collections.Generic.List{System.String},System.String,System.Collections.Generic.Dictionary{System.String,hist_mmorpg.Ailment},System.String,System.String)">
+        <member name="M:hist_mmorpg.Character_Serialised.#ctor(System.String,System.String,System.String,System.Tuple{System.UInt32,System.Byte},System.Boolean,System.String,System.Boolean,System.Double,System.Double,System.Collections.Generic.List{System.String},System.String,System.Double,System.Double,System.Double,System.Double,System.Tuple{System.String,System.Int32}[],System.Boolean,System.Boolean,System.String,System.String,System.String,System.String,System.Collections.Generic.List{System.String},System.String,System.Collections.Generic.Dictionary{System.String,hist_mmorpg.Ailment},System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.Int32})">
             <summary>
             Constructor for Character_Serialised taking seperate values.
             For creating Character_Serialised from CSV file.
@@ -1724,6 +1746,7 @@
             <param name="myTi">List holding character's titles (fiefIDs)</param>
             <param name="aID">String holding armyID of army character is leading</param>
             <param name="ails">Dictionary (string, Ailment) holding ailments effecting character's health</param>
+            <param name="als">Dictionary (string, int) holding allies and how they were aquired</param>
         </member>
         <member name="T:hist_mmorpg.PlayerCharacter_Serialised">
             <summary>
@@ -1786,7 +1809,7 @@
             </summary>
             <param name="pc">PlayerCharacter object to use as source</param>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:hist_mmorpg.PlayerCharacter_Serialised.#ctor(System.String,System.String,System.String,System.Tuple{System.UInt32,System.Byte},System.Boolean,System.String,System.Boolean,System.Double,System.Double,System.Collections.Generic.List{System.String},System.String,System.Double,System.Double,System.Double,System.Double,System.Tuple{System.String,System.Int32}[],System.Boolean,System.Boolean,System.String,System.String,System.String,System.String,System.Collections.Generic.List{System.String},System.String,System.Boolean,System.UInt32,System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.String},System.String,System.String,System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,hist_mmorpg.Ailment},System.String,System.String,System.String)" -->
+        <!-- Badly formed XML comment ignored for member "M:hist_mmorpg.PlayerCharacter_Serialised.#ctor(System.String,System.String,System.String,System.Tuple{System.UInt32,System.Byte},System.Boolean,System.String,System.Boolean,System.Double,System.Double,System.Collections.Generic.List{System.String},System.String,System.Double,System.Double,System.Double,System.Double,System.Tuple{System.String,System.Int32}[],System.Boolean,System.Boolean,System.String,System.String,System.String,System.String,System.Collections.Generic.List{System.String},System.String,System.Boolean,System.UInt32,System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.String},System.String,System.String,System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,hist_mmorpg.Ailment},System.String,System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.Int32})" -->
         <member name="M:hist_mmorpg.PlayerCharacter_Serialised.#ctor">
             <summary>
             Constructor for PlayerCharacter_Serialised taking no parameters.
@@ -1829,7 +1852,7 @@
             </summary>
             <param name="npc">NonPlayerCharacter object to use as source</param>
         </member>
-        <member name="M:hist_mmorpg.NonPlayerCharacter_Serialised.#ctor(System.String,System.String,System.String,System.Tuple{System.UInt32,System.Byte},System.Boolean,System.String,System.Boolean,System.Double,System.Double,System.Collections.Generic.List{System.String},System.String,System.Double,System.Double,System.Double,System.Double,System.Tuple{System.String,System.Int32}[],System.Boolean,System.Boolean,System.String,System.String,System.String,System.String,System.Collections.Generic.List{System.String},System.String,System.UInt32,System.Boolean,System.Boolean,System.Collections.Generic.Dictionary{System.String,hist_mmorpg.Ailment},System.String,System.String,System.String)">
+        <member name="M:hist_mmorpg.NonPlayerCharacter_Serialised.#ctor(System.String,System.String,System.String,System.Tuple{System.UInt32,System.Byte},System.Boolean,System.String,System.Boolean,System.Double,System.Double,System.Collections.Generic.List{System.String},System.String,System.Double,System.Double,System.Double,System.Double,System.Tuple{System.String,System.Int32}[],System.Boolean,System.Boolean,System.String,System.String,System.String,System.String,System.Collections.Generic.List{System.String},System.String,System.UInt32,System.Boolean,System.Boolean,System.Collections.Generic.Dictionary{System.String,hist_mmorpg.Ailment},System.String,System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.Int32})">
             <summary>
             Constructor for NonPlayerCharacter_Serialised taking seperate values.
             For creating NonPlayerCharacter_Serialised from CSV file.

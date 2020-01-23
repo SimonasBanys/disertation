@@ -128,6 +128,15 @@ namespace hist_mmorpg
         /// </summary>
         public string ransomDemand { get; set; }
 
+        /// <summary>
+        /// Holds a list of characters allies and how the alliance was achieved
+        /// 0 - inherited alliance
+        /// 1 - achieved through marriage
+        /// 2 - achieved through agreement
+        /// </summary>
+        public Dictionary<string, int> allies = new Dictionary<string, int>();
+
+
 #if DEBUG
         /// <summary>
         /// Fix the success chance- use -1 to calculate success based on traits
@@ -166,9 +175,10 @@ namespace hist_mmorpg
         /// <param name="myTi">List holding character's titles (fiefIDs)</param>
         /// <param name="aID">String holding armyID of army character is leading</param>
         /// <param name="ails">Dictionary<string, Ailment> holding ailments effecting character's health</param>
+        /// <param name="als">Dictionary (string, int) holding family name and type of alliance</param>
         public Character(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, Nationality nat, bool alive, Double mxHea, Double vir,
             Queue<Fief> go, Language lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<Trait, int>[] trt, bool inK, bool preg,
-            String famID, String sp, String fath, String moth, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null)
+            String famID, String sp, String fath, String moth, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, Dictionary<string, int> als = null)
         {
             // VALIDATION
 
@@ -187,7 +197,7 @@ namespace hist_mmorpg
 
             if (!Utility_Methods.ValidateName(firstNam))
             {
-				throw new InvalidDataException("Character firstname must be 1-40 characters long and contain only valid characters (a-z and ') or spaces");
+                throw new InvalidDataException("Character firstname must be 1-40 characters long and contain only valid characters (a-z and ') or spaces");
             }
 
             // FAMNAM
@@ -308,7 +318,7 @@ namespace hist_mmorpg
             }
 
             // MYTI
-            for (int i = 0; i < myTi.Count; i++ )
+            for (int i = 0; i < myTi.Count; i++)
             {
                 // trim and ensure is uppercase
                 myTi[i] = myTi[i].Trim().ToUpper();
@@ -351,6 +361,27 @@ namespace hist_mmorpg
                 }
             }
 
+
+            // Allies
+            if (als != null)
+            {
+                if (als.Count > 0)
+                {
+                    string[] myAllies = new string[als.Count];
+                    als.Keys.CopyTo(myAllies, 0);
+                    for (int i = 0; i < myAllies.Length; i++)
+                    {
+
+                        myAllies[i] = Utility_Methods.FirstCharToUpper(myAllies[i].Trim());
+
+                        if (!Utility_Methods.ValidateCharacterID(myAllies[i]))
+                        {
+                            throw new InvalidDataException("Ally id must have the format 'Char_' followed by some numbers");
+                        }
+                    }
+                }
+            }
+
             // AID
             if (!String.IsNullOrWhiteSpace(aID))
             {
@@ -381,7 +412,7 @@ namespace hist_mmorpg
             this.traits = trt;
             this.inKeep = inK;
             this.isPregnant = preg;
-			this.location = loc;
+            this.location = loc;
             if (loc != null)
             {
                 loc.charactersInFief.Add(this);
@@ -395,6 +426,10 @@ namespace hist_mmorpg
             if (ails != null)
             {
                 this.ailments = ails;
+            }
+            if (als != null) 
+            { 
+                this.allies = als; 
             }
             this.fiancee = fia;
 #if DEBUG
@@ -455,6 +490,7 @@ namespace hist_mmorpg
                 this.fiancee = charToUse.fiancee;
                 this.captorID = charToUse.captorID;
                 this.ransomDemand = charToUse.ransom;
+                this.allies = charToUse.allies;
 			}
 		}
 
@@ -3372,7 +3408,7 @@ namespace hist_mmorpg
         /// <summary>
         /// Gets the armies of which the character is the leader
         /// </summary>
-        /// <returns>List<Army> containing the armies</returns>
+        /// <returns>List(Army) containing the armies</returns>
         public List<Army> GetArmiesLeader()
         {
             List<Army> myArmies = new List<Army>();
@@ -5091,11 +5127,12 @@ namespace hist_mmorpg
         /// <param name="pID">String holding ID of player who is currently playing this PlayerCharacter</param>
         /// <param name="myA">List(Army) holding character's armies</param>
         /// <param name="myS">List(string) holding character's sieges (siegeIDs)</param>
+        /// <param name="als">Dictionary(string, int) Dictionary holding character allies and alliance type</param>
         public PlayerCharacter(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, Nationality nat, bool alive, Double mxHea, Double vir,
             Queue<Fief> go, Language lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<Trait, int>[] trt, bool inK, bool preg, String famID,
             String sp, String fath, String moth, bool outl, uint pur, List<NonPlayerCharacter> npcs, List<Fief> ownedF, List<Province> ownedP, String home, String ancHome, List<String> myTi, List<Army> myA,
-            List<string> myS, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, String pID = null)
-            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID)
+            List<string> myS, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, String pID = null, Dictionary<string, int> als = null)
+            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID, als)
         {
             // VALIDATION
             //TODO exception handling
@@ -6667,8 +6704,8 @@ namespace hist_mmorpg
         /// <param name="isH">bool denoting if is player's heir</param>
         public NonPlayerCharacter(String id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, Nationality nat, bool alive, Double mxHea, Double vir,
             Queue<Fief> go, Language lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<Trait, int>[] trt, bool inK, bool preg, String famID,
-            String sp, String fath, String moth, uint sal, bool inEnt, bool isH, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, String empl = null)
-            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID)
+            String sp, String fath, String moth, uint sal, bool inEnt, bool isH, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, String empl = null, Dictionary<string, int> als = null)
+            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID, als)
         {
             // VALIDATION
             // EMPL
@@ -7514,12 +7551,20 @@ namespace hist_mmorpg
         /// </summary>
         public string ransom { get; set; }
 
-		/// <summary>
+        /// <summary>
+        /// Holds a list of characters allies and how the alliance was achieved
+        /// 0 - inherited alliance
+        /// 1 - achieved through marriage
+        /// 2 - achieved through agreement
+        /// </summary>
+        public Dictionary<string, int> allies = new Dictionary<string, int>();
+
+        /// <summary>
         /// Constructor for Character_Serialised
-		/// </summary>
-		/// <param name="pc">PlayerCharacter object to use as source</param>
-		/// <param name="npc">NonPlayerCharacter object to use as source</param>
-		public Character_Serialised(PlayerCharacter pc = null, NonPlayerCharacter npc = null)
+        /// </summary>
+        /// <param name="pc">PlayerCharacter object to use as source</param>
+        /// <param name="npc">NonPlayerCharacter object to use as source</param>
+        public Character_Serialised(PlayerCharacter pc = null, NonPlayerCharacter npc = null)
 		{
 			Character charToUse = null;
 
@@ -7574,6 +7619,7 @@ namespace hist_mmorpg
                 this.fiancee = charToUse.fiancee;
                 this.captorID = charToUse.captorID;
                 this.ransom = charToUse.ransomDemand;
+                this.allies = charToUse.allies;
             }
 		}
 
@@ -7608,9 +7654,10 @@ namespace hist_mmorpg
         /// <param name="myTi">List holding character's titles (fiefIDs)</param>
         /// <param name="aID">String holding armyID of army character is leading</param>
         /// <param name="ails">Dictionary (string, Ailment) holding ailments effecting character's health</param>
+        /// <param name="als">Dictionary (string, int) holding allies and how they were aquired</param>
         public Character_Serialised(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, string nat, bool alive, Double mxHea, Double vir,
             List<string> go, string lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<string, int>[] trt, bool inK, bool preg,
-            String famID, String sp, String fath, String moth, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null)
+            String famID, String sp, String fath, String moth, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, Dictionary<string, int> als = null)
         {
             // VALIDATION
 
@@ -7828,6 +7875,26 @@ namespace hist_mmorpg
                 }
             }
 
+            // Allies
+            if (als != null)
+            {
+                if (als.Count > 0)
+                {
+                    string[] myAllies = new string[als.Count];
+                    als.Keys.CopyTo(myAllies, 0);
+                    for (int i = 0; i < myAllies.Length; i++)
+                    {
+
+                        myAllies[i] = Utility_Methods.FirstCharToUpper(myAllies[i].Trim());
+
+                        if (!Utility_Methods.ValidateCharacterID(myAllies[i]))
+                        {
+                            throw new InvalidDataException("Ally id must have the format 'Char_' followed by some numbers");
+                        }
+                    }
+                }
+            }
+
             // LOC
             // trim and ensure is uppercase
             loc = loc.Trim().ToUpper();
@@ -7991,8 +8058,8 @@ namespace hist_mmorpg
         public PlayerCharacter_Serialised(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, string nat, bool alive, Double mxHea, Double vir,
             List<string> go, string lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<string, int>[] trt, bool inK, bool preg, String famID,
             String sp, String fath, String moth, List<String> myTi, string fia, bool outl, uint pur, List<string> npcs, List<string> ownedF, List<string> ownedP, String home, String ancHome, List<string> myA,
-            List<string> myS, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, String pID = null)
-            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID)
+            List<string> myS, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, String pID = null, Dictionary<string, int> als = null)
+            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID, als)
         {
             // VALIDATION
 
@@ -8167,8 +8234,8 @@ namespace hist_mmorpg
         /// <param name="isH">bool denoting if is player's heir</param>
         public NonPlayerCharacter_Serialised(String id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, string nat, bool alive, Double mxHea, Double vir,
             List<string> go, string lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<string, int>[] trt, bool inK, bool preg, String famID,
-            String sp, String fath, String moth, List<String> myTi, string fia, uint sal, bool inEnt, bool isH, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, String empl = null)
-            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID)
+            String sp, String fath, String moth, List<String> myTi, string fia, uint sal, bool inEnt, bool isH, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, String empl = null, Dictionary<string, int> als = null)
+            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID, als)
         {
             // VALIDATION
 

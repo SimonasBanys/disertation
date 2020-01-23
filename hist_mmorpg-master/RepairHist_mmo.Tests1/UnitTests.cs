@@ -241,7 +241,7 @@ namespace hist_mmorpg.Tests1
         /// Attack another army (should succeed)
         /// </summary>
         [TestMethod]
-        [Timeout(15000)]
+        [Timeout(150000)]
         public void AttackValid()
         {
             OwnedArmy.location = NotOwnedArmy.location;
