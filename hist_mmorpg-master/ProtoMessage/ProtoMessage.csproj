@@ -46,7 +46,6 @@
     <Compile Include="Battle.cs" />
     <Compile Include="Birth.cs" />
     <Compile Include="Character.cs" />
-    <Compile Include="Class1.cs" />
     <Compile Include="Client.cs" />
     <Compile Include="Fief.cs" />
     <Compile Include="GameClock.cs" />

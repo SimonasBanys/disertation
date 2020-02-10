@@ -2546,6 +2546,47 @@ namespace hist_mmorpg
             return success;
         }
 
+        
+        public static ProtoMessage ProposeAlliance(string charIDa, string charIDb, Client client)
+        {
+            JournalEntry jEntry = null;
+            DisplayMessages charAErr, charBErr;
+            var charA = Utility_Methods.GetCharacter(charIDa, out charAErr);
+            var madeProposal = false;
+            if (charA == null)
+            {
+                return new ProtoMessage(charAErr);
+            }
+            if (!PermissionManager.isAuthorized(PermissionManager.ownsCharOrAdmin, client.myPlayerCharacter, charA))
+            {
+                return new ProtoMessage(DisplayMessages.ErrorGenericUnauthorised);
+            }
+            var charB = Utility_Methods.GetCharacter(charIDb, out charBErr);
+            if (charB == null)
+            {
+                return new ProtoMessage(charAErr);
+            }
+            if (!PermissionManager.isAuthorized(PermissionManager.ownsCharOrAdmin, client.myPlayerCharacter, charB))
+            {
+                return new ProtoMessage(DisplayMessages.ErrorGenericUnauthorised);
+            }
+            if (!charA.isAlly(charIDb))
+            {
+                madeProposal = charA.ProposeAlliance(charB);
+            }
+            var success = new ProtoMessage();
+            if (!madeProposal)
+            {
+                success.ResponseType = DisplayMessages.ErrorGenericMessageInvalid;
+                success.Message = "Already an ally";
+            } else
+            {
+                success.ResponseType = DisplayMessages.Success;
+                success.Message = "Proposal Success";
+            }
+            return success;
+        }
+
         public static ProtoMessage AcceptRejectProposal(uint jEntryID, bool accept, Client client)
         {
             // Attempt to get Journal entry
@@ -2563,6 +2604,7 @@ namespace hist_mmorpg
             if (success)
             {
                 var proposeresult = new ProtoMessage();
+                Diplomacy.forgeAlliance(jEntry.personae[0].ToString(), jEntry.personae[1].ToString());
                 proposeresult.ResponseType = DisplayMessages.Success;
                 return proposeresult;
             }

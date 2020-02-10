@@ -90,19 +90,19 @@ namespace hist_mmorpg
         /// <summary>
         /// Holds spouse (charID)
         /// </summary>
-        public Character spouse { get; set; }
+        public String spouse { get; set; }
         /// <summary>
         /// Holds father (CharID)
         /// </summary>
-        public Character father { get; set; }
+        public String father { get; set; }
         /// <summary>
         /// Holds mother (CharID)
         /// </summary>
-        public Character mother { get; set; }
+        public String mother { get; set; }
         /// <summary>
         /// Hold fiancee (charID)
         /// </summary>
-        public Character fiancee { get; set; }
+        public string fiancee { get; set; }
         /// <summary>
         /// Holds current location (Fief object)
         /// </summary>
@@ -127,15 +127,24 @@ namespace hist_mmorpg
         /// Holds the journal entry id of any ransom sent
         /// </summary>
         public string ransomDemand { get; set; }
-
         /// <summary>
-        /// Holds a list of characters allies and how the alliance was achieved
-        /// 0 - inherited alliance
-        /// 1 - achieved through marriage
-        /// 2 - achieved through agreement
+        /// Dictionary holding the allies of character
         /// </summary>
-        public Dictionary<string, int> allies = new Dictionary<string, int>();
+        public List<String> allies { get; set; }
+        /// <summary>
+        /// list holding the families the character is currently at war
+        /// </summary>
+        public List<String> atWar { get; set; }
+        /// <summary>
+        /// contains the amount of spies available to the character
+        /// </summary>
+        public int spiesAvail { get; set; }
+        /// <summary>
+        /// spies the character has recruited in total (those available and spying on a fief)
+        /// </summary>
+        public int spiesRecruited { get; set; }
 
+        public List<String> spyingOn { get; set; }
 
 #if DEBUG
         /// <summary>
@@ -175,10 +184,9 @@ namespace hist_mmorpg
         /// <param name="myTi">List holding character's titles (fiefIDs)</param>
         /// <param name="aID">String holding armyID of army character is leading</param>
         /// <param name="ails">Dictionary<string, Ailment> holding ailments effecting character's health</param>
-        /// <param name="als">Dictionary (string, int) holding family name and type of alliance</param>
         public Character(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, Nationality nat, bool alive, Double mxHea, Double vir,
             Queue<Fief> go, Language lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<Trait, int>[] trt, bool inK, bool preg,
-            String famID, Character sp, Character fath, Character moth, List<String> myTi, Character fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, Dictionary<string, int> als = null)
+            String famID, String sp, String fath, String moth, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null)
         {
             // VALIDATION
 
@@ -197,7 +205,7 @@ namespace hist_mmorpg
 
             if (!Utility_Methods.ValidateName(firstNam))
             {
-                throw new InvalidDataException("Character firstname must be 1-40 characters long and contain only valid characters (a-z and ') or spaces");
+				throw new InvalidDataException("Character firstname must be 1-40 characters long and contain only valid characters (a-z and ') or spaces");
             }
 
             // FAMNAM
@@ -282,43 +290,43 @@ namespace hist_mmorpg
             }
 
             // SP
-            if (!String.IsNullOrWhiteSpace(sp.charID))
+            if (!String.IsNullOrWhiteSpace(sp))
             {
                 // trim and ensure 1st is uppercase
-                sp.charID = Utility_Methods.FirstCharToUpper(sp.charID.Trim());
+                sp = Utility_Methods.FirstCharToUpper(sp.Trim());
 
-                if (!Utility_Methods.ValidateCharacterID(sp.charID))
+                if (!Utility_Methods.ValidateCharacterID(sp))
                 {
                     throw new InvalidDataException("Character spouse id must have the format 'Char_' followed by some numbers");
                 }
             }
 
             // FATH
-            if (!String.IsNullOrWhiteSpace(fath.charID))
+            if (!String.IsNullOrWhiteSpace(fath))
             {
                 // trim and ensure 1st is uppercase
-                fath.charID = Utility_Methods.FirstCharToUpper(fath.charID.Trim());
+                fath = Utility_Methods.FirstCharToUpper(fath.Trim());
 
-                if (!Utility_Methods.ValidateCharacterID(fath.charID))
+                if (!Utility_Methods.ValidateCharacterID(fath))
                 {
                     throw new InvalidDataException("Character father id must have the format 'Char_' followed by some numbers");
                 }
             }
 
             // MOTH
-            if (!String.IsNullOrWhiteSpace(moth.charID))
+            if (!String.IsNullOrWhiteSpace(moth))
             {
                 // trim and ensure 1st is uppercase
-                moth.charID = Utility_Methods.FirstCharToUpper(moth.charID.Trim());
+                moth = Utility_Methods.FirstCharToUpper(moth.Trim());
 
-                if (!Utility_Methods.ValidateCharacterID(moth.charID))
+                if (!Utility_Methods.ValidateCharacterID(moth))
                 {
                     throw new InvalidDataException("Character mother id must have the format 'Char_' followed by some numbers");
                 }
             }
 
             // MYTI
-            for (int i = 0; i < myTi.Count; i++)
+            for (int i = 0; i < myTi.Count; i++ )
             {
                 // trim and ensure is uppercase
                 myTi[i] = myTi[i].Trim().ToUpper();
@@ -330,12 +338,12 @@ namespace hist_mmorpg
             }
 
             // FIA
-            if (!String.IsNullOrWhiteSpace(fia.charID))
+            if (!String.IsNullOrWhiteSpace(fia))
             {
                 // trim and ensure 1st is uppercase
-                fia.charID = Utility_Methods.FirstCharToUpper(fia.charID.Trim());
+                fia = Utility_Methods.FirstCharToUpper(fia.Trim());
 
-                if (!Utility_Methods.ValidateCharacterID(fia.charID))
+                if (!Utility_Methods.ValidateCharacterID(fia))
                 {
                     throw new InvalidDataException("Character fiancee id must have the format 'Char_' followed by some numbers");
                 }
@@ -356,27 +364,6 @@ namespace hist_mmorpg
                         if (!Utility_Methods.ValidateAilmentID(myAils[i]))
                         {
                             throw new InvalidDataException("All IDs in Character ailments must have the format 'Ail_' followed by some numbers");
-                        }
-                    }
-                }
-            }
-
-
-            // Allies
-            if (als != null)
-            {
-                if (als.Count > 0)
-                {
-                    string[] myAllies = new string[als.Count];
-                    als.Keys.CopyTo(myAllies, 0);
-                    for (int i = 0; i < myAllies.Length; i++)
-                    {
-
-                        myAllies[i] = Utility_Methods.FirstCharToUpper(myAllies[i].Trim());
-
-                        if (!Utility_Methods.ValidateCharacterID(myAllies[i]))
-                        {
-                            throw new InvalidDataException("Ally id must have the format 'Char_' followed by some numbers");
                         }
                     }
                 }
@@ -412,7 +399,7 @@ namespace hist_mmorpg
             this.traits = trt;
             this.inKeep = inK;
             this.isPregnant = preg;
-            this.location = loc;
+			this.location = loc;
             if (loc != null)
             {
                 loc.charactersInFief.Add(this);
@@ -427,15 +414,16 @@ namespace hist_mmorpg
             {
                 this.ailments = ails;
             }
-            if (als != null) 
-            { 
-                this.allies = als; 
-            }
             this.fiancee = fia;
 #if DEBUG
             // Default = trait-influenced success chance
             fixedSuccessChance = -1;
 #endif
+        }
+
+        public bool isAlly(string c)
+        {
+            return allies.Contains(c);
         }
 
 		/// <summary>
@@ -490,7 +478,6 @@ namespace hist_mmorpg
                 this.fiancee = charToUse.fiancee;
                 this.captorID = charToUse.captorID;
                 this.ransomDemand = charToUse.ransom;
-                this.allies = charToUse.allies;
 			}
 		}
 
@@ -550,7 +537,6 @@ namespace hist_mmorpg
                     this.ailments = new Dictionary<string, Ailment>();
                     this.fiancee = null;
                     this.location = npc.location;
-                    this.allies = new Dictionary<string, int>();
                     break;
                 case "promote":
                     this.charID = npc.charID;
@@ -601,12 +587,6 @@ namespace hist_mmorpg
                     this.ailments = npc.ailments;
                     this.fiancee = npc.fiancee;
                     this.location = npc.location;
-                    this.allies = new Dictionary<string, int>();
-                    ICollection<string> allyList = npc.allies.Keys;
-                    for (int i = 0; i < allyList.Count; i++)
-                    {
-                        this.allies.Add(allyList.ElementAt(i), 0);
-                    }
                     if (this.location != null)
                     {
                         this.location.charactersInFief.Remove(npc);
@@ -1238,7 +1218,7 @@ namespace hist_mmorpg
             }
 
             // ============== 4. if married, remove from SPOUSE
-            if (!String.IsNullOrWhiteSpace(this.spouse.charID))
+            if (!String.IsNullOrWhiteSpace(this.spouse))
             {
                 mySpouse = this.GetSpouse();
 
@@ -1250,7 +1230,7 @@ namespace hist_mmorpg
             }
 
             // ============== 5. if engaged, remove from FIANCEE and CANCEL MARRIAGE
-            if (!String.IsNullOrWhiteSpace(this.fiancee.charID))
+            if (!String.IsNullOrWhiteSpace(this.fiancee))
             {
                 string marriageRole = "";
                 Character myFiancee = this.GetFiancee();
@@ -1721,7 +1701,7 @@ namespace hist_mmorpg
                     }
 
                     // forthcoming marriage
-                    if (!String.IsNullOrWhiteSpace(npc.fiancee.charID))
+                    if (!String.IsNullOrWhiteSpace(npc.fiancee))
                     {
                         Character npcFiancee = npc.GetFiancee();
 
@@ -2289,15 +2269,15 @@ namespace hist_mmorpg
         {
             Character father = null;
 
-            if (!String.IsNullOrWhiteSpace(this.father.charID))
+            if (!String.IsNullOrWhiteSpace(this.father))
             {
-                if (Globals_Game.pcMasterList.ContainsKey(this.father.charID))
+                if (Globals_Game.pcMasterList.ContainsKey(this.father))
                 {
-                    father = Globals_Game.pcMasterList[this.father.charID];
+                    father = Globals_Game.pcMasterList[this.father];
                 }
-                else if (Globals_Game.npcMasterList.ContainsKey(this.father.charID))
+                else if (Globals_Game.npcMasterList.ContainsKey(this.father))
                 {
-                    father = Globals_Game.npcMasterList[this.father.charID];
+                    father = Globals_Game.npcMasterList[this.father];
                 }
             }
 
@@ -2312,15 +2292,15 @@ namespace hist_mmorpg
         {
             Character mother = null;
 
-            if (!String.IsNullOrWhiteSpace(this.mother.charID))
+            if (!String.IsNullOrWhiteSpace(this.mother))
             {
-                if (Globals_Game.pcMasterList.ContainsKey(this.mother.charID))
+                if (Globals_Game.pcMasterList.ContainsKey(this.mother))
                 {
-                    mother = Globals_Game.pcMasterList[this.mother.charID];
+                    mother = Globals_Game.pcMasterList[this.mother];
                 }
-                else if (Globals_Game.npcMasterList.ContainsKey(this.mother.charID))
+                else if (Globals_Game.npcMasterList.ContainsKey(this.mother))
                 {
-                    mother = Globals_Game.npcMasterList[this.mother.charID];
+                    mother = Globals_Game.npcMasterList[this.mother];
                 }
             }
 
@@ -3071,15 +3051,15 @@ namespace hist_mmorpg
         {
             Character mySpouse = null;
 
-            if (!String.IsNullOrWhiteSpace(this.spouse.charID))
+            if (!String.IsNullOrWhiteSpace(this.spouse))
             {
-                if (Globals_Game.pcMasterList.ContainsKey(this.spouse.charID))
+                if (Globals_Game.pcMasterList.ContainsKey(this.spouse))
                 {
-                    mySpouse = Globals_Game.pcMasterList[this.spouse.charID];
+                    mySpouse = Globals_Game.pcMasterList[this.spouse];
                 }
-                else if (Globals_Game.npcMasterList.ContainsKey(this.spouse.charID))
+                else if (Globals_Game.npcMasterList.ContainsKey(this.spouse))
                 {
-                    mySpouse = Globals_Game.npcMasterList[this.spouse.charID];
+                    mySpouse = Globals_Game.npcMasterList[this.spouse];
                 }
             }
 
@@ -3415,7 +3395,7 @@ namespace hist_mmorpg
         /// <summary>
         /// Gets the armies of which the character is the leader
         /// </summary>
-        /// <returns>List(Army) containing the armies</returns>
+        /// <returns>List<Army> containing the armies</returns>
         public List<Army> GetArmiesLeader()
         {
             List<Army> myArmies = new List<Army>();
@@ -3899,11 +3879,44 @@ namespace hist_mmorpg
                 proposal.MessageFields = fields;
                 JournalEntry myProposal = new JournalEntry(proposalID, year, season, myProposalPersonae, "proposalMade",proposal);
                 success = Globals_Game.AddPastEvent(myProposal);
-                if (success) this.GetHeadOfFamily().activeProposals.Add(this.charID, bride.charID);
+                if (success) this.GetHeadOfFamily().activeProposals.Add(this, bride);
             }
 
             return success;
         }
+
+        public bool ProposeAlliance(Character ally)
+        {
+            bool success = false;
+            PlayerCharacter HOFthis = this.GetHeadOfFamily();
+            PlayerCharacter HOFAlly = ally.GetHeadOfFamily();
+
+            if ((HOFthis != null) && (HOFAlly != null))
+            {
+                uint propID = Globals_Game.GetNextJournalEntryID();
+                uint year = Globals_Game.clock.currentYear;
+                byte season = Globals_Game.clock.currentSeason;
+
+                string HOFthisEntry = HOFthis.charID + "|headOfFamilyProposer";
+                string HOFallyEntry = HOFAlly.charID + "|headOfFamilyAlly";
+
+                string[] myProposalPersonae = new string[] { HOFthisEntry, HOFallyEntry };
+
+
+                string[] fields = new string[3];
+                fields[0] = HOFthis.firstName + " " + HOFthis.familyName;
+                fields[1] = HOFAlly.firstName + " " + HOFAlly.familyName;
+                ProtoMessage proposal = new ProtoMessage();
+                proposal.ResponseType = DisplayMessages.JournalAlliance;
+                proposal.MessageFields = fields;
+                JournalEntry myAlliance = new JournalEntry(propID, year, season, myProposalPersonae, "Alliance offered", proposal);
+                success = Globals_Game.AddPastEvent(myAlliance);
+                if (success) this.GetHeadOfFamily().allianceOffers.Add(ally);
+            }
+
+            return success;
+        }
+
 
         //TODO prettify, if have time. A few if-elses goes a long way towards readability
         /// <summary>
@@ -3993,7 +4006,7 @@ namespace hist_mmorpg
                                         proceed = false;
                                     }
                                     // Ensure not already proposed to someone else
-                                    else if (this.GetHeadOfFamily().activeProposals.ContainsKey(this.charID))
+                                    else if (this.GetHeadOfFamily().activeProposals.ContainsKey(this))
                                     {
                                         message = DisplayMessages.CharacterProposalAlready;
                                         proceed = false;
@@ -5114,11 +5127,13 @@ namespace hist_mmorpg
         /// <summary>
         /// Dictionary holding active proposals from family members to other NPCs. Each family member can only propose to one person at a time
         /// </summary>
-        public Dictionary<string, string> activeProposals = new Dictionary<string, string>();
+        public Dictionary<Character, Character> activeProposals = new Dictionary<Character, Character>();
         /// <summary>
         /// Holds a list of all characters that have been taken captive (during battle, siege, kidnapping, failed spy attempts etc)
         /// </summary>
         public List<Character> myCaptives = new List<Character>();
+
+        public List<Character> allianceOffers = new List<Character>();
 
 
         /// <summary>
@@ -5134,12 +5149,11 @@ namespace hist_mmorpg
         /// <param name="pID">String holding ID of player who is currently playing this PlayerCharacter</param>
         /// <param name="myA">List(Army) holding character's armies</param>
         /// <param name="myS">List(string) holding character's sieges (siegeIDs)</param>
-        /// <param name="als">Dictionary(string, int) Dictionary holding character allies and alliance type</param>
         public PlayerCharacter(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, Nationality nat, bool alive, Double mxHea, Double vir,
             Queue<Fief> go, Language lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<Trait, int>[] trt, bool inK, bool preg, String famID,
             String sp, String fath, String moth, bool outl, uint pur, List<NonPlayerCharacter> npcs, List<Fief> ownedF, List<Province> ownedP, String home, String ancHome, List<String> myTi, List<Army> myA,
-            List<string> myS, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, String pID = null, Dictionary<string, int> als = null)
-            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID, als)
+            List<string> myS, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, String pID = null)
+            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID)
         {
             // VALIDATION
             //TODO exception handling
@@ -5186,7 +5200,6 @@ namespace hist_mmorpg
             this.playerID = pID;
             this.myArmies = myA;
             this.mySieges = myS;
-            this.allies = als;
         }
 
         /// <summary>
@@ -6712,8 +6725,8 @@ namespace hist_mmorpg
         /// <param name="isH">bool denoting if is player's heir</param>
         public NonPlayerCharacter(String id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, Nationality nat, bool alive, Double mxHea, Double vir,
             Queue<Fief> go, Language lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<Trait, int>[] trt, bool inK, bool preg, String famID,
-            String sp, String fath, String moth, uint sal, bool inEnt, bool isH, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, String empl = null, Dictionary<string, int> als = null)
-            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID, als)
+            String sp, String fath, String moth, uint sal, bool inEnt, bool isH, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, String empl = null)
+            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID)
         {
             // VALIDATION
             // EMPL
@@ -6739,7 +6752,6 @@ namespace hist_mmorpg
             this.inEntourage = inEnt;
             this.lastOffer = new Dictionary<string, uint>();
             this.isHeir = isH;
-            this.allies = als;
             Globals_Game.npcMasterList.Add(this.charID, this);
         }
 
@@ -7522,15 +7534,15 @@ namespace hist_mmorpg
 		/// <summary>
 		/// Holds spouse (Character ID)
 		/// </summary>
-		public Character spouse { get; set; }
+		public String spouse { get; set; }
 		/// <summary>
 		/// Holds father (Character ID)
 		/// </summary>
-		public Character father { get; set; }
+		public String father { get; set; }
         /// <summary>
         /// Holds mother (Character ID)
         /// </summary>
-        public Character mother { get; set; }
+        public String mother { get; set; }
         /// <summary>
         /// Holds charID of head of family with which character associated
 		/// </summary>
@@ -7538,7 +7550,7 @@ namespace hist_mmorpg
         /// <summary>
         /// Holds chaacter's fiancee (charID)
         /// </summary>
-        public Character fiancee { get; set; }
+        public string fiancee { get; set; }
         /// <summary>
         /// Holds character's titles (fiefIDs)
         /// </summary>
@@ -7560,20 +7572,12 @@ namespace hist_mmorpg
         /// </summary>
         public string ransom { get; set; }
 
-        /// <summary>
-        /// Holds a list of characters allies and how the alliance was achieved
-        /// 0 - inherited alliance
-        /// 1 - achieved through marriage
-        /// 2 - achieved through agreement
-        /// </summary>
-        public Dictionary<string, int> allies = new Dictionary<string, int>();
-
-        /// <summary>
+		/// <summary>
         /// Constructor for Character_Serialised
-        /// </summary>
-        /// <param name="pc">PlayerCharacter object to use as source</param>
-        /// <param name="npc">NonPlayerCharacter object to use as source</param>
-        public Character_Serialised(PlayerCharacter pc = null, NonPlayerCharacter npc = null)
+		/// </summary>
+		/// <param name="pc">PlayerCharacter object to use as source</param>
+		/// <param name="npc">NonPlayerCharacter object to use as source</param>
+		public Character_Serialised(PlayerCharacter pc = null, NonPlayerCharacter npc = null)
 		{
 			Character charToUse = null;
 
@@ -7628,7 +7632,6 @@ namespace hist_mmorpg
                 this.fiancee = charToUse.fiancee;
                 this.captorID = charToUse.captorID;
                 this.ransom = charToUse.ransomDemand;
-                this.allies = charToUse.allies;
             }
 		}
 
@@ -7663,10 +7666,9 @@ namespace hist_mmorpg
         /// <param name="myTi">List holding character's titles (fiefIDs)</param>
         /// <param name="aID">String holding armyID of army character is leading</param>
         /// <param name="ails">Dictionary (string, Ailment) holding ailments effecting character's health</param>
-        /// <param name="als">Dictionary (string, int) holding allies and how they were aquired</param>
         public Character_Serialised(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, string nat, bool alive, Double mxHea, Double vir,
             List<string> go, string lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<string, int>[] trt, bool inK, bool preg,
-            String famID, String sp, String fath, String moth, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, Dictionary<string, int> als = null)
+            String famID, String sp, String fath, String moth, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null)
         {
             // VALIDATION
 
@@ -7884,26 +7886,6 @@ namespace hist_mmorpg
                 }
             }
 
-            // Allies
-            if (als != null)
-            {
-                if (als.Count > 0)
-                {
-                    string[] myAllies = new string[als.Count];
-                    als.Keys.CopyTo(myAllies, 0);
-                    for (int i = 0; i < myAllies.Length; i++)
-                    {
-
-                        myAllies[i] = Utility_Methods.FirstCharToUpper(myAllies[i].Trim());
-
-                        if (!Utility_Methods.ValidateCharacterID(myAllies[i]))
-                        {
-                            throw new InvalidDataException("Ally id must have the format 'Char_' followed by some numbers");
-                        }
-                    }
-                }
-            }
-
             // LOC
             // trim and ensure is uppercase
             loc = loc.Trim().ToUpper();
@@ -8067,8 +8049,8 @@ namespace hist_mmorpg
         public PlayerCharacter_Serialised(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, string nat, bool alive, Double mxHea, Double vir,
             List<string> go, string lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<string, int>[] trt, bool inK, bool preg, String famID,
             String sp, String fath, String moth, List<String> myTi, string fia, bool outl, uint pur, List<string> npcs, List<string> ownedF, List<string> ownedP, String home, String ancHome, List<string> myA,
-            List<string> myS, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, String pID = null, Dictionary<string, int> als = null)
-            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID, als)
+            List<string> myS, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, String pID = null)
+            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID)
         {
             // VALIDATION
 
@@ -8243,8 +8225,8 @@ namespace hist_mmorpg
         /// <param name="isH">bool denoting if is player's heir</param>
         public NonPlayerCharacter_Serialised(String id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, string nat, bool alive, Double mxHea, Double vir,
             List<string> go, string lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<string, int>[] trt, bool inK, bool preg, String famID,
-            String sp, String fath, String moth, List<String> myTi, string fia, uint sal, bool inEnt, bool isH, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, String empl = null, Dictionary<string, int> als = null)
-            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID, als)
+            String sp, String fath, String moth, List<String> myTi, string fia, uint sal, bool inEnt, bool isH, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, String empl = null)
+            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID)
         {
             // VALIDATION
 

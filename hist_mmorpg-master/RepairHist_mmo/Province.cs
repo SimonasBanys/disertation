@@ -59,6 +59,7 @@ namespace hist_mmorpg
 			this.taxRate = ps.taxRate;
             // kingdom to be inserted later
             this.kingdom = null;
+            
         }
 
         /// <summary>
