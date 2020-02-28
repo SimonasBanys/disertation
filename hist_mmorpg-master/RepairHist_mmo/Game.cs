@@ -2547,7 +2547,7 @@ namespace hist_mmorpg
         }
 
         
-        public static ProtoMessage ProposeAlliance(string charIDa, string charIDb, Client client)
+        public static ProtoMessage OfferAlliance(string charIDa, string charIDb, Client client)
         {
             JournalEntry jEntry = null;
             DisplayMessages charAErr, charBErr;
@@ -2572,7 +2572,7 @@ namespace hist_mmorpg
             }
             if (!charA.isAlly(charIDb))
             {
-                madeProposal = charA.ProposeAlliance(charB);
+                madeProposal = charA.OfferAlliance(charB);
             }
             var success = new ProtoMessage();
             if (!madeProposal)
@@ -3784,11 +3784,24 @@ namespace hist_mmorpg
                 }
                 // Propose marriage between two characters
                 case Actions.ProposeMarriage:
-                    if (msgIn.MessageFields == null || msgIn.MessageFields.Length < 1)
                     {
-                        return new ProtoMessage(DisplayMessages.ErrorGenericMessageInvalid);
+                        if (msgIn.MessageFields == null || msgIn.MessageFields.Length < 1)
+                        {
+                            return new ProtoMessage(DisplayMessages.ErrorGenericMessageInvalid);
+                        }
+                        return ProposeMarriage(msgIn.Message, msgIn.MessageFields[0], _client);
                     }
-                    return ProposeMarriage(msgIn.Message, msgIn.MessageFields[0], _client);
+
+                // Action to offer to form an alliance with another player
+                case Actions.OfferAlliance:
+                    {
+                        if (msgIn.MessageFields == null || msgIn.MessageFields.Length < 1)
+                        {
+                            return new ProtoMessage(DisplayMessages.ErrorGenericMessageInvalid);
+                        }
+                        return OfferAlliance(msgIn.Message, msgIn.MessageFields[0], _client);
+                    }
+
                 // Reply to a proposal (accept or reject)
                 case Actions.AcceptRejectProposal:
                 {
@@ -3806,6 +3819,14 @@ namespace hist_mmorpg
                         return new ProtoMessage(DisplayMessages.ErrorGenericMessageInvalid);
                     }
                 }
+
+                case Actions.AcceptRejectAlliance:
+                    {
+                        if (msgIn.MessageFields == null || msgIn.MessageFields.Length < 1)
+                        {
+                            return new ProtoMessage(DisplayMessages.ErrorGenericMessageInvalid);
+                        }
+                    }
                 // Appoint a new heir
                 case Actions.AppointHeir:
                 {

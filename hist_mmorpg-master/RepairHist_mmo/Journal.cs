@@ -655,6 +655,32 @@ namespace hist_mmorpg
             return isValidProposal;
         }
 
+        public bool CheckForAlliance(PlayerCharacter pc)
+        {
+            bool isValidOffer = false;
+
+            if (this.type.Equals("AllianceOffered"))
+            {
+                if (!this.replied)
+                {
+                    for (int i = 0; i < this.personae.Length; i++)
+                    {
+                        string thisPersonae = this.personae[i];
+                        string[] personaeSplit = thisPersonae.Split('|');
+                        if (personaeSplit[0].Equals(pc.charID))
+                        {
+                            if (personaeSplit[1].Equals("HeadOfFamilyAlly"))
+                            {
+                                isValidOffer = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            return isValidOffer;
+        }
+
         // TODO I suspect there may be issues with this if any of the characters die. Test.
         /// <summary>
         /// Allows a character to reply to a marriage proposal

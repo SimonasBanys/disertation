@@ -17,24 +17,8 @@ namespace hist_mmorpg
         /// <returns></returns>
         public static void forgeAlliance(String a, String b)
         {
-            Character aC;
-            Character bC;
-            if (Globals_Game.npcMasterList.ContainsKey(a))
-            {
-                aC = Globals_Game.npcMasterList[a];
-            }
-            else
-            {
-                aC = Globals_Game.pcMasterList[a];
-            }
-            if (Globals_Game.npcMasterList.ContainsKey(b))
-            {
-                bC = Globals_Game.npcMasterList[b];
-            }
-            else
-            {
-                bC = Globals_Game.pcMasterList[b];
-            }
+            Character aC = Globals_Game.getCharFromID(a);
+            Character bC = Globals_Game.getCharFromID(b);
             if (!aC.allies.Contains(b) && !bC.allies.Contains(a))
             {
                 for (int i = 0; i < Globals_Game.npcMasterList.Count; i++)
@@ -69,24 +53,9 @@ namespace hist_mmorpg
         /// <param name="b"></param>
         public void removeAlly(String a, String b)
         {
-            Character aC;
-            Character bC;
-            if (Globals_Game.npcMasterList.ContainsKey(a))
-            {
-                aC = Globals_Game.npcMasterList[a];
-            }
-            else
-            {
-                aC = Globals_Game.pcMasterList[a];
-            }
-            if (Globals_Game.npcMasterList.ContainsKey(b))
-            {
-                bC = Globals_Game.npcMasterList[b];
-            }
-            else
-            {
-                bC = Globals_Game.pcMasterList[b];
-            }
+            Character aC = Globals_Game.getCharFromID(a);
+            Character bC = Globals_Game.getCharFromID(b);
+
             if (aC.allies.Contains(b) && bC.allies.Contains(a))
             {
                 for (int i = 0; i < Globals_Game.npcMasterList.Count; i++)
@@ -113,27 +82,5 @@ namespace hist_mmorpg
                 }
             }
         }
-
-        public bool recruitSpies(String c)
-        {
-            Character ch;
-            if (Globals_Game.pcMasterList.ContainsKey(c))
-            {
-                ch = Globals_Game.pcMasterList[c];
-            } 
-            else
-            {
-                ch = Globals_Game.npcMasterList[c];
-            }
-            if ((ch as PlayerCharacter).GetHomeFief().GetAvailableTreasury() >= 1000)
-            {
-                (ch as PlayerCharacter).GetHomeFief().AdjustTreasury(-1000);
-                ch.spiesAvail++;
-                ch.spiesRecruited++;
-                return true;
-            }
-            else return false;
-        }
-
     }
 }

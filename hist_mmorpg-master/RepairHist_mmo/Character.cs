@@ -3885,7 +3885,7 @@ namespace hist_mmorpg
             return success;
         }
 
-        public bool ProposeAlliance(Character ally)
+        public bool OfferAlliance(Character ally)
         {
             bool success = false;
             PlayerCharacter HOFthis = this.GetHeadOfFamily();
