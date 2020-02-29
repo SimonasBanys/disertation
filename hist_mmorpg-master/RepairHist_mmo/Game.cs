@@ -2547,9 +2547,8 @@ namespace hist_mmorpg
         }
 
         
-        public static ProtoMessage ProposeAlliance(string charIDa, string charIDb, Client client)
+        public static ProtoMessage OfferAlliance(string charIDa, string charIDb, Client client)
         {
-            JournalEntry jEntry = null;
             DisplayMessages charAErr, charBErr;
             var charA = Utility_Methods.GetCharacter(charIDa, out charAErr);
             var madeProposal = false;
@@ -2572,7 +2571,7 @@ namespace hist_mmorpg
             }
             if (!charA.isAlly(charIDb))
             {
-                madeProposal = charA.ProposeAlliance(charB);
+                madeProposal = charA.OfferAlliance(charB);
             }
             var success = new ProtoMessage();
             if (!madeProposal)
@@ -2582,7 +2581,7 @@ namespace hist_mmorpg
             } else
             {
                 success.ResponseType = DisplayMessages.Success;
-                success.Message = "Proposal Success";
+                success.Message = "Offer Success";
             }
             return success;
         }
@@ -2607,6 +2606,29 @@ namespace hist_mmorpg
                 Diplomacy.forgeAlliance(jEntry.personae[0].ToString(), jEntry.personae[1].ToString());
                 proposeresult.ResponseType = DisplayMessages.Success;
                 return proposeresult;
+            }
+            return new ProtoMessage(DisplayMessages.Error);
+        }
+
+        public static ProtoMessage AcceptRejectAlliance(uint jEntryID, bool accept, Client client)
+        {
+            JournalEntry jEntry = null;
+            client.myPastEvents.entries.TryGetValue(jEntryID, out jEntry);
+            if (jEntry == null)
+            {
+                return new ProtoMessage(DisplayMessages.JournalEntryUnrecognised);
+            }
+            if (!jEntry.CheckForAlliance(client.myPlayerCharacter))
+            {
+                return new ProtoMessage(DisplayMessages.JournalEntryNotAllianceOffer);
+            }
+            var success = jEntry.ReplyToAllianceOffer(accept);
+            if (success)
+            {
+                var propResult = new ProtoMessage();
+                Diplomacy.forgeAlliance(jEntry.personae[0].ToString(), jEntry.personae[1].ToString());
+                propResult.ResponseType = DisplayMessages.Success;
+                return propResult;
             }
             return new ProtoMessage(DisplayMessages.Error);
         }
@@ -3784,11 +3806,24 @@ namespace hist_mmorpg
                 }
                 // Propose marriage between two characters
                 case Actions.ProposeMarriage:
-                    if (msgIn.MessageFields == null || msgIn.MessageFields.Length < 1)
                     {
-                        return new ProtoMessage(DisplayMessages.ErrorGenericMessageInvalid);
+                        if (msgIn.MessageFields == null || msgIn.MessageFields.Length < 1)
+                        {
+                            return new ProtoMessage(DisplayMessages.ErrorGenericMessageInvalid);
+                        }
+                        return ProposeMarriage(msgIn.Message, msgIn.MessageFields[0], _client);
                     }
-                    return ProposeMarriage(msgIn.Message, msgIn.MessageFields[0], _client);
+
+                // Action to offer to form an alliance with another player
+                case Actions.OfferAlliance:
+                    {
+                        if (msgIn.MessageFields == null || msgIn.MessageFields.Length < 1)
+                        {
+                            return new ProtoMessage(DisplayMessages.ErrorGenericMessageInvalid);
+                        }
+                        return OfferAlliance(msgIn.Message, msgIn.MessageFields[0], _client);
+                    }
+
                 // Reply to a proposal (accept or reject)
                 case Actions.AcceptRejectProposal:
                 {
@@ -3806,6 +3841,21 @@ namespace hist_mmorpg
                         return new ProtoMessage(DisplayMessages.ErrorGenericMessageInvalid);
                     }
                 }
+
+                case Actions.AcceptRejectAlliance:
+                    {
+                        if (msgIn.MessageFields == null || msgIn.MessageFields.Length < 1)
+                        {
+                            return new ProtoMessage(DisplayMessages.ErrorGenericMessageInvalid);
+                        }
+                        try
+                        {
+                            return AcceptRejectAlliance(Convert.ToUInt32(msgIn.Message), Convert.ToBoolean(msgIn.MessageFields[0]), _client);
+                        } catch (Exception e)
+                        {
+                            return new ProtoMessage(DisplayMessages.ErrorGenericMessageInvalid);
+                        }
+                    }
                 // Appoint a new heir
                 case Actions.AppointHeir:
                 {

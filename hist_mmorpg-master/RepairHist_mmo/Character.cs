@@ -143,7 +143,9 @@ namespace hist_mmorpg
         /// spies the character has recruited in total (those available and spying on a fief)
         /// </summary>
         public int spiesRecruited { get; set; }
-
+        /// <summary>
+        /// a list of characters and fiefs being spied upon
+        /// </summary>
         public List<String> spyingOn { get; set; }
 
 #if DEBUG
@@ -3885,7 +3887,7 @@ namespace hist_mmorpg
             return success;
         }
 
-        public bool ProposeAlliance(Character ally)
+        public bool OfferAlliance(Character ally)
         {
             bool success = false;
             PlayerCharacter HOFthis = this.GetHeadOfFamily();
