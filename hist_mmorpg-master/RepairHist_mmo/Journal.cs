@@ -806,6 +806,86 @@ namespace hist_mmorpg
             return success;
         }
 
+        public bool ReplyToAllianceOffer(bool offerAccepted)
+        {
+            bool success = true;
+            string[] replyFields = new string[3];
+            PlayerCharacter HOFProposer = null;
+            PlayerCharacter HOFAlly = null;
+            
+            for (int i = 0; i < this.personae.Length; i++)
+            {
+                string thisPers = this.personae[i];
+                string[] persSplit = thisPers.Split('|');
+                switch(persSplit[1]){
+                    case "headOfFamilyProposer": 
+                        {
+                            HOFProposer = Globals_Game.pcMasterList[persSplit[0]];
+                            break;
+                        }
+                    case "headOfFamilyAlly":
+                        {
+                            HOFAlly = Globals_Game.pcMasterList[persSplit[0]];
+                            break;
+                        }
+                    default:
+                        break;
+                }
+            }
+            uint replyID = Globals_Game.GetNextJournalEntryID();
+            uint year = Globals_Game.clock.currentYear;
+            byte season = Globals_Game.clock.currentSeason;
+
+            List<string> pers = new List<string>();
+            pers.Add(HOFProposer.charID + "|headOfFamilyProposer");
+            pers.Add(HOFAlly.charID + "|headOfFamilyAlly");
+            if (offerAccepted)
+            {
+                pers.Add("all|all");
+            }
+
+            string[] persArray = pers.ToArray();
+            string type = "";
+            if (offerAccepted)
+            {
+                type = "offerAccepted";
+            } else
+            {
+                type = "offerRejected";
+            }
+
+            replyFields[0] = HOFProposer.firstName + " " + HOFProposer.familyName;
+            replyFields[1] = HOFAlly.firstName + " " + HOFAlly.familyName;
+
+            if (offerAccepted)
+            {
+                replyFields[2] = "ACCEPTED";
+            } else
+            {
+                replyFields[2] = "REJECTED";
+            }
+
+            ProtoMessage offerReply = new ProtoMessage();
+            offerReply.MessageFields = replyFields;
+            offerReply.ResponseType = DisplayMessages.JournalOfferReply;
+            JournalEntry myOfferReply = new JournalEntry(jEntryID, year, season, persArray, type, offerReply, null);
+            success = Globals_Game.AddPastEvent(myOfferReply);
+            if (success)
+            {
+                string[] newFields = new string[this.entryDetails.MessageFields.Length + 2];
+                Array.Copy(this.entryDetails.MessageFields, newFields, this.entryDetails.MessageFields.Length);
+                newFields[newFields.Length - 1] = Globals_Game.clock.seasons[season] + ", " + year;
+                this.entryDetails.MessageFields = newFields;
+                this.replied = true;
+                this.entryDetails.MessageFields[this.entryDetails.MessageFields.Length - 2] = replyFields[2];
+            }
+            if (offerAccepted)
+            {
+                Diplomacy.forgeAlliance(HOFProposer.charID, HOFAlly.charID);
+            }
+            return success;
+        }
+
         /// <summary>
         /// Processes the actions involved with an engagement
         /// </summary>
