@@ -14,7 +14,7 @@ namespace TestClientRory
         {
             ProtoTravelTo protoTravel = new ProtoTravelTo();
             protoTravel.travelVia = new[] {directions.ToString()};
-            protoTravel.characterID = "Char_158";
+            protoTravel.characterID = client.charID;
             client.net.Send(protoTravel);
             var reply = GetActionReply(Actions.TravelTo, client);
             var travel = (ProtoFief) reply.Result;
@@ -34,12 +34,38 @@ namespace TestClientRory
         public ProtoGenericArray<ProtoArmyOverview> ArmyStatus(TextTestClient client)
         {
             ProtoArmy proto = new ProtoArmy();
-            proto.ownerID = "Char_158";
+            proto.ownerID = client.charID;
             proto.ActionType = Actions.ListArmies;
             client.net.Send(proto);
             var reply = GetActionReply(Actions.ListArmies, client);
             var armies = (ProtoGenericArray<ProtoArmyOverview>) reply.Result;
             return armies;
+        }
+
+
+
+        public ProtoMessage changeAttack(string aID, TextTestClient client)
+        {
+            ProtoArmy proto = new ProtoArmy();
+            proto.owner = client.charID;
+            proto.Message = aID;
+            proto.ActionType = Actions.ChangeAttackAutoSupport;
+            client.net.Send(proto);
+            var armyReply = GetActionReply(Actions.ChangeAttackAutoSupport, client);
+            var armyResult = (ProtoMessage)armyReply.Result;
+            return armyResult;
+        }
+
+        public ProtoMessage changeDefence(string aID, TextTestClient client)
+        {
+            ProtoArmy proto = new ProtoArmy();
+            proto.owner = client.charID;
+            proto.Message = aID;
+            proto.ActionType = Actions.ChangeDefenceAutoSupport;
+            client.net.Send(proto);
+            var armyReply = GetActionReply(Actions.ChangeDefenceAutoSupport, client);
+            var armyResult = (ProtoMessage)armyReply.Result;
+            return armyResult;
         }
 
         public Task<ProtoMessage> GetActionReply(Actions action, TextTestClient client)
@@ -58,7 +84,7 @@ namespace TestClientRory
         public ProtoMessage HireTroops(int amount, TextTestClient client)
         {
             ProtoPlayerCharacter protoMessage = new ProtoPlayerCharacter();
-            protoMessage.Message = "Char_158";
+            protoMessage.Message = client.charID;
             protoMessage.ActionType = Actions.ViewChar;
             client.net.Send(protoMessage);
             var armyReply = GetActionReply(Actions.ViewChar, client);
@@ -76,10 +102,30 @@ namespace TestClientRory
             return reply.Result;
         }
 
+        public ProtoMessage HireNew(int amount, TextTestClient client)
+        {
+            ProtoPlayerCharacter protoMessage = new ProtoPlayerCharacter();
+            protoMessage.Message = client.charID;
+            protoMessage.ActionType = Actions.ViewChar;
+            client.net.Send(protoMessage);
+            var armyReply = GetActionReply(Actions.ViewChar, client);
+            var armyResult = (ProtoPlayerCharacter)armyReply.Result;
+            ProtoRecruit protoRecruitNew = new ProtoRecruit();
+            protoRecruitNew.ActionType = Actions.RecruitNew;
+            if (amount > 0)
+            {
+                protoRecruitNew.amount = (uint) amount;
+            }
+            protoRecruitNew.isConfirm = true;
+            client.net.Send(protoRecruitNew);
+            var reply = GetActionReply(Actions.RecruitNew, client);
+            return reply.Result;
+        }
+
         public ProtoMessage SiegeCurrentFief(TextTestClient client)
         {
             ProtoPlayerCharacter protoMessage = new ProtoPlayerCharacter();
-            protoMessage.Message = "Char_158";
+            protoMessage.Message = client.charID;
             protoMessage.ActionType = Actions.ViewChar;
             client.net.Send(protoMessage);
             var locReply = GetActionReply(Actions.ViewChar, client);
@@ -99,10 +145,34 @@ namespace TestClientRory
             }
         }
 
+        public ProtoMessage AttackArmy(string aID, TextTestClient client)
+        {
+            ProtoPlayerCharacter protoMessage = new ProtoPlayerCharacter();
+            protoMessage.Message = client.charID;
+            protoMessage.ActionType = Actions.ViewChar;
+            client.net.Send(protoMessage);
+            var locReply = GetActionReply(Actions.ViewChar, client);
+            var locResult = (ProtoPlayerCharacter)locReply.Result;
+            ProtoMessage protoAttack = new ProtoMessage();
+            protoAttack.ActionType = Actions.Attack;
+            protoAttack.Message = locResult.armyID;
+            protoAttack.MessageFields = new string[] { aID };
+            client.net.Send(protoAttack);
+            var reply = GetActionReply(Actions.Attack, client);
+            if (reply.GetType() == typeof(ProtoBattle))
+            {
+                return reply.Result as ProtoBattle;
+            } else
+            {
+                return reply.Result;
+            }
+
+        }
+
         public ProtoFief FiefDetails(TextTestClient client)
         {
             ProtoPlayerCharacter protoMessage = new ProtoPlayerCharacter();
-            protoMessage.Message = "Char_158";
+            protoMessage.Message = client.charID;
             protoMessage.ActionType = Actions.ViewChar;
             client.net.Send(protoMessage);
             var locReply = GetActionReply(Actions.ViewChar, client);
@@ -127,7 +197,7 @@ namespace TestClientRory
         public ProtoPlayerCharacter Profile(TextTestClient client)
         {
             ProtoPlayerCharacter protoMessage = new ProtoPlayerCharacter();
-            protoMessage.Message = "Char_158";
+            protoMessage.Message = client.charID;
             protoMessage.ActionType = Actions.ViewChar;
             client.net.Send(protoMessage);
             var reply = GetActionReply(Actions.ViewChar, client);

@@ -43,6 +43,7 @@ namespace hist_mmorpg
         public ConcurrentQueueWithEvent<string> stringMessageQueue;
         public Network net;
         public string playerID;
+        public string charID;
 
 
         public TextTestClient()
@@ -256,20 +257,25 @@ namespace hist_mmorpg
                 client.Start();
                 string host = ipAddress;
                 // remember to encrypt the bloody thing in the final
-                if (username != null)
+                try
                 {
-                    NetOutgoingMessage msg = client.CreateMessage(username);
-                    msg.Write("TestString");
-                    NetConnection c = client.Connect(host, port, msg);
-                }
-                else
+                    if (username != null)
+                    {
+                        NetOutgoingMessage msg = client.CreateMessage(username);
+                        msg.Write("TestString");
+                        NetConnection c = client.Connect(host, port, msg);
+                    }
+                    else
+                    {
+                        connection = client.Connect(host, port);
+                    }
+                    // Start listening for responses
+                    Thread t_reader = new Thread(new ThreadStart(this.read));
+                    t_reader.Start();
+                } catch (Exception e)
                 {
-                    connection = client.Connect(host, port);
+                    Console.WriteLine(e);
                 }
-                // Start listening for responses
-                Thread t_reader = new Thread(new ThreadStart(this.read));
-                t_reader.Start();
-
             }
 
 

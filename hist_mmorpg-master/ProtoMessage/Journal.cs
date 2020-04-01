@@ -656,6 +656,58 @@ namespace ProtoMessage
             return isValidProposal;
         }
 
+        public bool CheckForAlliance(PlayerCharacter pc)
+        {
+            bool isValidOffer = false;
+
+            if (this.type.Equals("Alliance Offered"))
+            {
+                if (!this.replied)
+                {
+                    for (int i = 0; i < this.personae.Length; i++)
+                    {
+                        string thisPersonae = this.personae[i];
+                        string[] personaeSplit = thisPersonae.Split('|');
+                        if (personaeSplit[0].Equals(pc.charID))
+                        {
+                            if (personaeSplit[1].Equals("HeadOfFamilyAlly"))
+                            {
+                                isValidOffer = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            return isValidOffer;
+        }
+
+        public bool CheckForPeace(PlayerCharacter pc)
+        {
+            bool isValidOffer = false;
+
+            if (this.type.Equals("Peace Offered"))
+            {
+                if (!this.replied)
+                {
+                    for (int i = 0; i < this.personae.Length; i++)
+                    {
+                        string thispersonae = this.personae[i];
+                        string[] personaeSplit = thispersonae.Split('|');
+                        if (personaeSplit[0].Equals(pc.charID))
+                        {
+                            if (personaeSplit[1].Equals("headOfFAmilyEnemy"))
+                            {
+                                isValidOffer = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            return isValidOffer;
+        }
+
         // TODO I suspect there may be issues with this if any of the characters die. Test.
         /// <summary>
         /// Allows a character to reply to a marriage proposal
@@ -778,6 +830,266 @@ namespace ProtoMessage
                 }
             }
 
+            return success;
+        }
+
+        public bool ReplyToAllianceOffer(bool offerAccepted)
+        {
+            bool success = true;
+            string[] replyFields = new string[3];
+            PlayerCharacter HOFProposer = null;
+            PlayerCharacter HOFAlly = null;
+
+            for (int i = 0; i < this.personae.Length; i++)
+            {
+                string thisPers = this.personae[i];
+                string[] persSplit = thisPers.Split('|');
+                switch (persSplit[1])
+                {
+                    case "headOfFamilyProposer":
+                        {
+                            HOFProposer = Globals_Game.pcMasterList[persSplit[0]];
+                            break;
+                        }
+                    case "headOfFamilyAlly":
+                        {
+                            HOFAlly = Globals_Game.pcMasterList[persSplit[0]];
+                            break;
+                        }
+                    default:
+                        break;
+                }
+            }
+            uint replyID = Globals_Game.GetNextJournalEntryID();
+            uint year = Globals_Game.clock.currentYear;
+            byte season = Globals_Game.clock.currentSeason;
+
+            List<string> pers = new List<string>();
+            pers.Add(HOFProposer.charID + "|headOfFamilyProposer");
+            pers.Add(HOFAlly.charID + "|headOfFamilyAlly");
+            if (offerAccepted)
+            {
+                pers.Add("all|all");
+            }
+
+            string[] persArray = pers.ToArray();
+            string type = "";
+            if (offerAccepted)
+            {
+                type = "offerAccepted";
+            }
+            else
+            {
+                type = "offerRejected";
+            }
+
+            replyFields[0] = HOFProposer.firstName + " " + HOFProposer.familyName;
+            replyFields[1] = HOFAlly.firstName + " " + HOFAlly.familyName;
+
+            if (offerAccepted)
+            {
+                replyFields[2] = "ACCEPTED";
+            }
+            else
+            {
+                replyFields[2] = "REJECTED";
+            }
+
+            ProtoMessage offerReply = new ProtoMessage();
+            offerReply.MessageFields = replyFields;
+            offerReply.ResponseType = DisplayMessages.JournalOfferReply;
+            JournalEntry myOfferReply = new JournalEntry(jEntryID, year, season, persArray, type, offerReply, null);
+            success = Globals_Game.AddPastEvent(myOfferReply);
+            if (success)
+            {
+                string[] newFields = new string[this.entryDetails.MessageFields.Length + 2];
+                Array.Copy(this.entryDetails.MessageFields, newFields, this.entryDetails.MessageFields.Length);
+                newFields[newFields.Length - 1] = Globals_Game.clock.seasons[season] + ", " + year;
+                this.entryDetails.MessageFields = newFields;
+                this.replied = true;
+                this.entryDetails.MessageFields[this.entryDetails.MessageFields.Length - 2] = replyFields[2];
+            }
+            if (offerAccepted)
+            {
+                Diplomacy.forgeAlliance(HOFProposer.charID, HOFAlly.charID);
+            }
+            return success;
+        }
+
+        public bool ReplyToPeaceOffer(bool accept)
+        {
+            bool success = true;
+            string[] replyFields = new string[3];
+            PlayerCharacter HOFProposer = null;
+            PlayerCharacter HOFEnemy = null;
+
+            for (int i = 0; i < this.personae.Length; i++)
+            {
+                string thisPers = this.personae[i];
+                string[] persSplit = thisPers.Split('|');
+                switch (persSplit[1])
+                {
+                    case "headOfFamilyProposer":
+                        {
+                            HOFProposer = Globals_Game.pcMasterList[persSplit[0]];
+                            break;
+                        }
+                    case "headOfFamilyEnemy":
+                        {
+                            HOFEnemy = Globals_Game.pcMasterList[persSplit[0]];
+                            break;
+                        }
+                    default:
+                        break;
+                }
+            }
+            uint replyID = Globals_Game.GetNextJournalEntryID();
+            uint year = Globals_Game.clock.currentYear;
+            byte season = Globals_Game.clock.currentSeason;
+
+            List<string> pers = new List<string>();
+            pers.Add(HOFProposer.charID + "|headOfFamilyProposer");
+            pers.Add(HOFEnemy.charID + "|headOfFamilyEnemy");
+            if (accept)
+            {
+                pers.Add("all|all");
+            }
+
+            string[] persArray = pers.ToArray();
+            string type = "";
+            if (accept)
+            {
+                type = "offerAccepted";
+            }
+            else
+            {
+                type = "offerRejected";
+            }
+
+            replyFields[0] = HOFProposer.firstName + " " + HOFProposer.familyName;
+            replyFields[1] = HOFEnemy.firstName + " " + HOFEnemy.familyName;
+
+            if (accept)
+            {
+                replyFields[2] = "ACCEPTED";
+            }
+            else
+            {
+                replyFields[2] = "REJECTED";
+            }
+
+            ProtoMessage offerReply = new ProtoMessage();
+            offerReply.MessageFields = replyFields;
+            offerReply.ResponseType = DisplayMessages.JournalOfferReply;
+            JournalEntry myOfferReply = new JournalEntry(jEntryID, year, season, persArray, type, offerReply, null);
+            success = Globals_Game.AddPastEvent(myOfferReply);
+            if (success)
+            {
+                string[] newFields = new string[this.entryDetails.MessageFields.Length + 2];
+                Array.Copy(this.entryDetails.MessageFields, newFields, this.entryDetails.MessageFields.Length);
+                newFields[newFields.Length - 1] = Globals_Game.clock.seasons[season] + ", " + year;
+                this.entryDetails.MessageFields = newFields;
+                this.replied = true;
+                this.entryDetails.MessageFields[this.entryDetails.MessageFields.Length - 2] = replyFields[2];
+            }
+            if (accept)
+            {
+                Diplomacy.makePeace(HOFProposer.charID, HOFEnemy.charID);
+            }
+            return success;
+        }
+
+
+        public bool ReplyToAllianceAgainstOffer(bool accept)
+        {
+            bool success = true;
+            string[] replyFields = new string[4];
+            PlayerCharacter HOFProposer = null;
+            PlayerCharacter HOFAlly = null;
+            PlayerCharacter HOFEnemy = null;
+
+            for (int i = 0; i < this.personae.Length; i++)
+            {
+                string thisPers = this.personae[i];
+                string[] persSplit = thisPers.Split('|');
+                switch (persSplit[1])
+                {
+                    case "headOfFamilyProposer":
+                        {
+                            HOFProposer = Globals_Game.pcMasterList[persSplit[0]];
+                            break;
+                        }
+                    case "headOfFamilyAlly":
+                        {
+                            HOFAlly = Globals_Game.pcMasterList[persSplit[0]];
+                            break;
+                        }
+                    case "headOfFamilyEnemy":
+                        {
+                            HOFEnemy = Globals_Game.pcMasterList[persSplit[0]];
+                            break;
+                        }
+                    default:
+                        break;
+                }
+            }
+            uint replyID = Globals_Game.GetNextJournalEntryID();
+            uint year = Globals_Game.clock.currentYear;
+            byte season = Globals_Game.clock.currentSeason;
+
+            List<string> pers = new List<string>();
+            pers.Add(HOFProposer.charID + "|headOfFamilyProposer");
+            pers.Add(HOFAlly.charID + "|headOfFamilyAlly");
+            pers.Add(HOFEnemy.charID + "|headOfFamilyEnemy");
+            if (accept)
+            {
+                pers.Add("all|all");
+            }
+
+            string[] persArray = pers.ToArray();
+            string type = "";
+            if (accept)
+            {
+                type = "offerAccepted";
+            }
+            else
+            {
+                type = "offerRejected";
+            }
+
+            replyFields[0] = HOFProposer.firstName + " " + HOFProposer.familyName;
+            replyFields[1] = HOFAlly.firstName + " " + HOFAlly.familyName;
+            replyFields[2] = HOFEnemy.firstName + " " + HOFEnemy.familyName;
+
+            if (accept)
+            {
+                replyFields[3] = "ACCEPTED";
+            }
+            else
+            {
+                replyFields[3] = "REJECTED";
+            }
+
+            ProtoMessage offerReply = new ProtoMessage();
+            offerReply.MessageFields = replyFields;
+            offerReply.ResponseType = DisplayMessages.JournalOfferReply;
+            JournalEntry myOfferReply = new JournalEntry(jEntryID, year, season, persArray, type, offerReply, null);
+            success = Globals_Game.AddPastEvent(myOfferReply);
+            if (success)
+            {
+                string[] newFields = new string[this.entryDetails.MessageFields.Length + 2];
+                Array.Copy(this.entryDetails.MessageFields, newFields, this.entryDetails.MessageFields.Length);
+                newFields[newFields.Length - 1] = Globals_Game.clock.seasons[season] + ", " + year;
+                this.entryDetails.MessageFields = newFields;
+                this.replied = true;
+                this.entryDetails.MessageFields[this.entryDetails.MessageFields.Length - 2] = replyFields[2];
+            }
+            if (accept)
+            {
+                Diplomacy.forgeAlliance(HOFProposer.charID, HOFAlly.charID);
+                Diplomacy.declareWar(HOFAlly.charID, HOFEnemy.charID);
+                Diplomacy.declareWar(HOFProposer.charID, HOFEnemy.charID);
+            }
             return success;
         }
 

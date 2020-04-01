@@ -976,6 +976,7 @@ namespace hist_mmorpg
                     npcOut.traits[i] = new Tuple<Trait, int>(Globals_Game.traitMasterList[npcs.traits[i].Item1], npcs.traits[i].Item2);
                 }
             }
+            
 
             return npcOut;
         }

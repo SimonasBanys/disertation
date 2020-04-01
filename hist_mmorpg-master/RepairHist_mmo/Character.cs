@@ -135,18 +135,7 @@ namespace hist_mmorpg
         /// list holding the families the character is currently at war
         /// </summary>
         public List<String> atWar { get; set; }
-        /// <summary>
-        /// contains the amount of spies available to the character
-        /// </summary>
-        public int spiesAvail { get; set; }
-        /// <summary>
-        /// spies the character has recruited in total (those available and spying on a fief)
-        /// </summary>
-        public int spiesRecruited { get; set; }
-        /// <summary>
-        /// a list of characters and fiefs being spied upon
-        /// </summary>
-        public List<String> spyingOn { get; set; }
+
 
 #if DEBUG
         /// <summary>
@@ -188,7 +177,7 @@ namespace hist_mmorpg
         /// <param name="ails">Dictionary<string, Ailment> holding ailments effecting character's health</param>
         public Character(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, Nationality nat, bool alive, Double mxHea, Double vir,
             Queue<Fief> go, Language lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<Trait, int>[] trt, bool inK, bool preg,
-            String famID, String sp, String fath, String moth, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null)
+            String famID, String sp, String fath, String moth, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, List<String> allies = null, List<String> atWar = null)
         {
             // VALIDATION
 
@@ -417,15 +406,35 @@ namespace hist_mmorpg
                 this.ailments = ails;
             }
             this.fiancee = fia;
+            if (atWar == null)
+            {
+                this.atWar = new List<String>();
+            } else
+            {
+                this.atWar = atWar;
+            }
+            if (allies == null)
+            {
+                this.allies = new List<String>();
+            }
+            else
+            {
+                this.allies = allies;
+            }
 #if DEBUG
             // Default = trait-influenced success chance
             fixedSuccessChance = -1;
 #endif
         }
 
-        public bool isAlly(string c)
+        public bool isAlly(Character c)
         {
-            return allies.Contains(c);
+            return this.allies.Contains(c.familyID);
+        }
+
+        public bool wagingWar(Character c)
+        {
+            return this.atWar.Contains(c.familyID);
         }
 
 		/// <summary>
@@ -480,6 +489,20 @@ namespace hist_mmorpg
                 this.fiancee = charToUse.fiancee;
                 this.captorID = charToUse.captorID;
                 this.ransomDemand = charToUse.ransom;
+                if (charToUse.allies == null)
+                {
+                    this.allies = new List<String>();
+                } else
+                {
+                    this.allies = charToUse.allies;
+                }
+                if (charToUse.atWar == null)
+                {
+                    this.atWar = new List<String>();
+                } else
+                {
+                    this.atWar = charToUse.atWar;
+                }
 			}
 		}
 
@@ -589,6 +612,21 @@ namespace hist_mmorpg
                     this.ailments = npc.ailments;
                     this.fiancee = npc.fiancee;
                     this.location = npc.location;
+                    if (npc.allies == null)
+                    {
+                        this.allies = new List<String>();
+                    } else
+                    {
+                        this.allies = npc.allies;
+                    }
+                    if (npc.atWar == null)
+                    {
+                        this.atWar = new List<String>();
+                    }
+                    else
+                    {
+                        this.atWar = npc.atWar;
+                    }
                     if (this.location != null)
                     {
                         this.location.charactersInFief.Remove(npc);
@@ -1067,7 +1105,7 @@ namespace hist_mmorpg
 
                 // delete marriage entry in Globals_Game.scheduledEvents
                 Globals_Game.scheduledEvents.entries.Remove(jEntry.jEntryID);
-
+                Diplomacy.removeAlly(headOfFamilyBride.charID, headOfFamilyGroom.charID);
                 // remove fiancee entries
                 if (bride != null)
                 {
@@ -3893,7 +3931,7 @@ namespace hist_mmorpg
             PlayerCharacter HOFthis = this.GetHeadOfFamily();
             PlayerCharacter HOFAlly = ally.GetHeadOfFamily();
 
-            if ((HOFthis != null) && (HOFAlly != null))
+            if ((HOFthis != null) && (HOFAlly != null) && (HOFAlly != HOFthis))
             {
                 uint propID = Globals_Game.GetNextJournalEntryID();
                 uint year = Globals_Game.clock.currentYear;
@@ -3913,12 +3951,77 @@ namespace hist_mmorpg
                 proposal.MessageFields = fields;
                 JournalEntry myAlliance = new JournalEntry(propID, year, season, myProposalPersonae, "Alliance offered", proposal);
                 success = Globals_Game.AddPastEvent(myAlliance);
-                if (success) this.GetHeadOfFamily().allianceOffers.Add(ally);
+                if (success) this.GetHeadOfFamily().allianceOffers.Add(ally.charID);
             }
 
             return success;
         }
 
+        public bool OfferAllianceAgainst(Character ally, Character enemy)
+        {
+            bool success = false;
+            PlayerCharacter HOFthis = this.GetHeadOfFamily();
+            PlayerCharacter HOFAlly = ally.GetHeadOfFamily();
+            PlayerCharacter HOFenemy = enemy.GetHeadOfFamily();
+
+            if ((HOFthis != null) && (HOFAlly != null) && (HOFenemy != null) && (HOFAlly != HOFthis) && (HOFthis != HOFenemy) && (HOFAlly != HOFenemy))
+            {
+                uint propID = Globals_Game.GetNextJournalEntryID();
+                uint year = Globals_Game.clock.currentYear;
+                byte season = Globals_Game.clock.currentSeason;
+
+                string HOFThisEntry = HOFthis.charID + "|headOfFamilyProposer";
+                string HOFallyEntry = HOFAlly.charID + "|headOfFamilyAlly";
+                string HOFenemyEntry = HOFenemy.charID + "|headOfFamilyEnemy";
+
+                string[] myOfferPersonae = new string[] { HOFThisEntry, HOFallyEntry, HOFenemyEntry };
+                string[] fields = new string[4];
+
+                fields[0] = HOFthis.firstName + " " + HOFthis.familyName;
+                fields[1] = HOFAlly.firstName + " " + HOFAlly.familyName;
+                fields[2] = HOFenemy.firstName + " " + HOFenemy.familyName;
+
+                ProtoMessage offer = new ProtoMessage();
+                offer.ResponseType = DisplayMessages.JournalAlliance;
+                offer.MessageFields = fields;
+                JournalEntry myAlliance = new JournalEntry(propID, year, season, myOfferPersonae, "Alliance Offered", offer);
+                success = Globals_Game.AddPastEvent(myAlliance);
+                if (success) this.GetHeadOfFamily().allianceOffers.Add(ally.charID);
+            }
+
+
+            return success;
+        }
+
+        public bool OfferPeace(Character enemy)
+        {
+            bool success = false;
+            PlayerCharacter HOFthis = this.GetHeadOfFamily();
+            PlayerCharacter HOFEnemy = enemy.GetHeadOfFamily();
+
+            if ((HOFthis != null) && (HOFEnemy != null) && (HOFthis != HOFEnemy))
+            {
+                uint propID = Globals_Game.GetNextJournalEntryID();
+                uint year = Globals_Game.clock.currentYear;
+                byte season = Globals_Game.clock.currentSeason;
+
+                string HOFThisEntry = HOFthis.charID + "|headOfFamilyProposer";
+                string HOFEnemyEntry = HOFEnemy.charID + "|headOfFAmilyEnemy";
+                string[] myOfferPersonae = new string[] { HOFThisEntry, HOFEnemyEntry };
+                string[] fields = new string[3];
+
+                fields[0] = HOFthis.firstName + " " + HOFthis.familyName;
+                fields[1] = HOFEnemy.firstName + " " + HOFEnemy.familyName;
+
+                ProtoMessage offer = new ProtoMessage();
+                offer.ResponseType = DisplayMessages.JournalPeace;
+                offer.MessageFields = fields;
+                JournalEntry peaceOffer = new JournalEntry(propID, year, season, myOfferPersonae, "Peace Offered", offer);
+                success = Globals_Game.AddPastEvent(peaceOffer);
+                if (success) this.GetHeadOfFamily().peaceOffers.Add(enemy.charID);
+            }
+            return success;
+        }
 
         //TODO prettify, if have time. A few if-elses goes a long way towards readability
         /// <summary>
@@ -5135,7 +5238,9 @@ namespace hist_mmorpg
         /// </summary>
         public List<Character> myCaptives = new List<Character>();
 
-        public List<Character> allianceOffers = new List<Character>();
+        public List<String> allianceOffers = new List<String>();
+
+        public List<String> peaceOffers = new List<String>();
 
 
         /// <summary>
@@ -5154,8 +5259,8 @@ namespace hist_mmorpg
         public PlayerCharacter(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, Nationality nat, bool alive, Double mxHea, Double vir,
             Queue<Fief> go, Language lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<Trait, int>[] trt, bool inK, bool preg, String famID,
             String sp, String fath, String moth, bool outl, uint pur, List<NonPlayerCharacter> npcs, List<Fief> ownedF, List<Province> ownedP, String home, String ancHome, List<String> myTi, List<Army> myA,
-            List<string> myS, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, String pID = null)
-            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID)
+            List<string> myS, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, String pID = null, List<String> allies = null, List<String> atWar = null)
+            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID, allies, atWar)
         {
             // VALIDATION
             //TODO exception handling
@@ -5202,6 +5307,21 @@ namespace hist_mmorpg
             this.playerID = pID;
             this.myArmies = myA;
             this.mySieges = myS;
+            if (allies == null)
+            {
+                this.allies = new List<String>();
+            } else 
+            {
+                this.allies = allies;
+            }
+            if (atWar == null)
+            {
+                this.atWar = new List<String>();
+            }
+            else
+            {
+                this.atWar = atWar;
+            }
         }
 
         /// <summary>
@@ -5235,7 +5355,23 @@ namespace hist_mmorpg
             // create empty Army List, to be populated later
             this.myArmies = new List<Army>();
             this.mySieges = pcs.mySieges;
-		}
+            if (pcs.allies == null)
+            {
+                this.allies = new List<String>();
+            }
+            else
+            {
+                this.allies = pcs.allies;
+            }
+            if (pcs.atWar == null)
+            {
+                this.atWar = new List<String>();
+            }
+            else
+            {
+                this.atWar = pcs.atWar;
+            }
+        }
 
         /// <summary>
         /// Constructor for PlayerCharacter using NonPlayerCharacter object and a PlayerCharacter object,
@@ -5250,6 +5386,22 @@ namespace hist_mmorpg
             this.purse = pc.purse;
             this.myNPCs = pc.myNPCs;
             this.ownedFiefs = pc.ownedFiefs;
+            if (pc.allies == null)
+            {
+                this.allies = new List<String>();
+            }
+            else
+            {
+                this.allies = pc.allies;
+            }
+            if (pc.atWar == null)
+            {
+                this.atWar = new List<String>();
+            }
+            else
+            {
+                this.atWar = pc.atWar;
+            }
             for (int i = 0; i < this.ownedFiefs.Count; i++ )
             {
                 this.ownedFiefs[i].owner = this;
@@ -5264,6 +5416,7 @@ namespace hist_mmorpg
             this.playerID = pc.playerID;
             this.myArmies = pc.myArmies;
             this.mySieges = pc.mySieges;
+            
         }
 
 		//TODO change to Proto
@@ -6016,7 +6169,7 @@ namespace hist_mmorpg
             bool armyExists = (thisArmy != null);
             // used to record outcome of various checks
             bool proceed = true;
-
+            int troopAvail = this.location.CalcMaxTroops();
             int troopsRecruited = 0;
             int revisedRecruited = 0;
             int indivTroopCost = 0;
@@ -6153,8 +6306,9 @@ namespace hist_mmorpg
                         thisArmy.troops[i] += typesRecruited[i];
                     }
 
-                    // indicate recruitment has occurred in this fief
-                    this.location.hasRecruited = true;
+                    // indicate recruitment has occurred in this fief only if troops have actually been recruited
+
+                        this.location.hasRecruited = true;
                 }
             }
 
@@ -6727,8 +6881,9 @@ namespace hist_mmorpg
         /// <param name="isH">bool denoting if is player's heir</param>
         public NonPlayerCharacter(String id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, Nationality nat, bool alive, Double mxHea, Double vir,
             Queue<Fief> go, Language lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<Trait, int>[] trt, bool inK, bool preg, String famID,
-            String sp, String fath, String moth, uint sal, bool inEnt, bool isH, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, String empl = null)
-            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID)
+            String sp, String fath, String moth, uint sal, bool inEnt, bool isH, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, String empl = null, 
+            List<String> allies = null, List<String> atWar = null)
+            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID, allies, atWar)
         {
             // VALIDATION
             // EMPL
@@ -6754,6 +6909,22 @@ namespace hist_mmorpg
             this.inEntourage = inEnt;
             this.lastOffer = new Dictionary<string, uint>();
             this.isHeir = isH;
+            if (allies == null)
+            {
+                this.allies = new List<String>();
+            } else 
+            {
+                this.allies = allies;
+            }
+            if (atWar == null)
+            {
+                this.atWar = new List<String>();
+            }
+            else
+            {
+                this.atWar = atWar;
+            }
+
             Globals_Game.npcMasterList.Add(this.charID, this);
         }
 
@@ -6781,7 +6952,23 @@ namespace hist_mmorpg
 			this.inEntourage = npcs.inEntourage;
 			this.lastOffer = npcs.lastOffer;
             this.isHeir = npcs.isHeir;
-		}
+            if (npcs.allies == null)
+            {
+                this.allies = new List<String>();
+            }
+            else
+            {
+                this.allies = npcs.allies;
+            }
+            if (npcs.atWar == null)
+            {
+                this.atWar = new List<String>();
+            }
+            else
+            {
+                this.atWar = npcs.atWar;
+            }
+        }
 
         /// <summary>
         /// Constructor for NonPlayerCharacter using NonPlayerCharacter object,
@@ -6796,6 +6983,22 @@ namespace hist_mmorpg
             this.inEntourage = false;
             this.lastOffer = new Dictionary<string,uint>();
             this.isHeir = false;
+            if (npc.allies == null)
+            {
+                this.allies = new List<String>();
+            }
+            else
+            {
+                this.allies = npc.allies;
+            }
+            if (npc.atWar == null)
+            {
+                this.atWar = new List<String>();
+            }
+            else
+            {
+                this.atWar = npc.atWar;
+            }
         }
 
 		//TODO replace with proto
@@ -7574,12 +7777,16 @@ namespace hist_mmorpg
         /// </summary>
         public string ransom { get; set; }
 
-		/// <summary>
+        public List<String> allies { get; set; }
+
+        public List<String> atWar { get; set; }
+
+        /// <summary>
         /// Constructor for Character_Serialised
-		/// </summary>
-		/// <param name="pc">PlayerCharacter object to use as source</param>
-		/// <param name="npc">NonPlayerCharacter object to use as source</param>
-		public Character_Serialised(PlayerCharacter pc = null, NonPlayerCharacter npc = null)
+        /// </summary>
+        /// <param name="pc">PlayerCharacter object to use as source</param>
+        /// <param name="npc">NonPlayerCharacter object to use as source</param>
+        public Character_Serialised(PlayerCharacter pc = null, NonPlayerCharacter npc = null)
 		{
 			Character charToUse = null;
 
@@ -7634,6 +7841,22 @@ namespace hist_mmorpg
                 this.fiancee = charToUse.fiancee;
                 this.captorID = charToUse.captorID;
                 this.ransom = charToUse.ransomDemand;
+                if (charToUse.allies == null)
+                {
+                    this.allies = new List<String>();
+                }
+                else
+                {
+                    this.allies = charToUse.allies;
+                }
+                if (charToUse.atWar == null)
+                {
+                    this.atWar = new List<String>();
+                }
+                else
+                {
+                    this.atWar = charToUse.atWar;
+                }
             }
 		}
 
@@ -7670,7 +7893,8 @@ namespace hist_mmorpg
         /// <param name="ails">Dictionary (string, Ailment) holding ailments effecting character's health</param>
         public Character_Serialised(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, string nat, bool alive, Double mxHea, Double vir,
             List<string> go, string lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<string, int>[] trt, bool inK, bool preg,
-            String famID, String sp, String fath, String moth, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null)
+            String famID, String sp, String fath, String moth, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, 
+            List<String> allies = null, List<String> atWar = null)
         {
             // VALIDATION
 
@@ -7934,6 +8158,21 @@ namespace hist_mmorpg
             this.familyID = famID;
             this.myTitles = myTi;
             this.armyID = aID;
+            if (allies == null)
+            {
+                this.allies = new List<String>();
+            } else
+            {
+                this.allies = allies;
+            }
+            if (atWar == null)
+            {
+                this.atWar = new List<String>();
+            }
+            else
+            {
+                this.atWar = atWar;
+            }
             if (ails != null)
             {
                 this.ailments = ails;
@@ -8032,6 +8271,22 @@ namespace hist_mmorpg
                 }
             }
             this.mySieges = pc.mySieges;
+            if (pc.allies == null)
+            {
+                this.allies = new List<String>();
+            }
+            else
+            {
+                this.allies = pc.allies;
+            }
+            if (pc.atWar == null)
+            {
+                this.atWar = new List<String>();
+            }
+            else
+            {
+                this.atWar = pc.atWar;
+            }
 		}
 
         /// <summary>
@@ -8051,8 +8306,8 @@ namespace hist_mmorpg
         public PlayerCharacter_Serialised(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, string nat, bool alive, Double mxHea, Double vir,
             List<string> go, string lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<string, int>[] trt, bool inK, bool preg, String famID,
             String sp, String fath, String moth, List<String> myTi, string fia, bool outl, uint pur, List<string> npcs, List<string> ownedF, List<string> ownedP, String home, String ancHome, List<string> myA,
-            List<string> myS, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, String pID = null)
-            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID)
+            List<string> myS, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, String pID = null, List<String> allies = null, List<String> atWar = null)
+            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID, allies, atWar)
         {
             // VALIDATION
 
@@ -8159,6 +8414,22 @@ namespace hist_mmorpg
             this.playerID = pID;
             this.myArmies = myA;
             this.mySieges = myS;
+            if (allies == null)
+            {
+                this.allies = new List<String>();
+            }
+            else
+            {
+                this.allies = allies;
+            }
+            if (atWar == null)
+            {
+                this.atWar = new List<String>();
+            }
+            else
+            {
+                this.atWar = atWar;
+            }
         }
 
         //TODO change serialised class to serialise method
@@ -8215,6 +8486,8 @@ namespace hist_mmorpg
 			this.inEntourage = npc.inEntourage;
 			this.lastOffer = npc.lastOffer;
             this.isHeir = npc.isHeir;
+            this.allies = npc.allies;
+            this.atWar = npc.atWar;
 		}
 
         /// <summary>
@@ -8227,7 +8500,8 @@ namespace hist_mmorpg
         /// <param name="isH">bool denoting if is player's heir</param>
         public NonPlayerCharacter_Serialised(String id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, string nat, bool alive, Double mxHea, Double vir,
             List<string> go, string lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<string, int>[] trt, bool inK, bool preg, String famID,
-            String sp, String fath, String moth, List<String> myTi, string fia, uint sal, bool inEnt, bool isH, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, String empl = null)
+            String sp, String fath, String moth, List<String> myTi, string fia, uint sal, bool inEnt, bool isH, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, String empl = null, 
+            List<String> allies = null, List<String> atWar = null)
             : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID)
         {
             // VALIDATION
@@ -8254,6 +8528,21 @@ namespace hist_mmorpg
             this.inEntourage = inEnt;
             this.lastOffer = new Dictionary<string, uint>();
             this.isHeir = isH;
+            if (allies == null)
+            {
+                this.allies = new List<String>();
+            }
+            else
+            {
+                this.allies = allies;
+            }
+            if (atWar == null)
+            {
+                this.atWar = new List<String>();
+            } else
+            {
+                this.atWar = atWar;
+            }
         }
 
         /// <summary>
