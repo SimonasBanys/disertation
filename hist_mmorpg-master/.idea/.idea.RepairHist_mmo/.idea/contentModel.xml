@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\Users\simon\.Rider2019.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\simon\.Rider2019.2\system\resharper-host\local\Transient\ReSharperHost\v192\SolutionCaches\_RepairHist_mmo.-2109195760.00" t="ExcludeRecursive" />
+    <e p="C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master" t="IncludeFlat">
+      <e p="ClientDLL" t="IncludeRecursive">
+        <e p="app.config" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="ClientDLL.csproj" t="IncludeRecursive" />
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="PlayerOperationsClassLib.cs" t="Include" />
+        <e p="Properties" t="Include">
+          <e p="AssemblyInfo.cs" t="Include" />
+        </e>
+      </e>
+      <e p="packages" t="ExcludeRecursive" />
+      <e p="Performance1.psess" t="Include" />
+      <e p="ProtoMessage" t="IncludeRecursive">
+        <e p="Ailment.cs" t="Include" />
+        <e p="app.config" t="Include" />
+        <e p="Army.cs" t="Include" />
+        <e p="Battle.cs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="Birth.cs" t="Include" />
+        <e p="Character.cs" t="Include" />
+        <e p="Client.cs" t="Include" />
+        <e p="Fief.cs" t="Include" />
+        <e p="GameClock.cs" t="Include" />
+        <e p="Globals_Game.cs" t="Include" />
+        <e p="Globals_Server.cs" t="Include" />
+        <e p="HexMapGraph.cs" t="Include" />
+        <e p="Interfaces.cs" t="Include" />
+        <e p="Journal.cs" t="Include" />
+        <e p="Kingdom.cs" t="Include" />
+        <e p="Language.cs" t="Include" />
+        <e p="Nationality.cs" t="Include" />
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="packages.config" t="Include" />
+        <e p="PermissionManager.cs" t="Include" />
+        <e p="Pillage_Siege.cs" t="Include" />
+        <e p="Place.cs" t="Include" />
+        <e p="Program.cs" t="Include" />
+        <e p="Properties" t="Include">
+          <e p="AssemblyInfo.cs" t="Include" />
+        </e>
+        <e p="ProtoMessage.cs" t="Include" />
+        <e p="ProtoMessage.csproj" t="IncludeRecursive" />
+        <e p="Province.cs" t="Include" />
+        <e p="Rank.cs" t="Include" />
+        <e p="RepairHist_mmo_TemporaryKey.pfx" t="Include" />
+        <e p="Siege.cs" t="Include" />
+        <e p="Terrain.cs" t="Include" />
+        <e p="Trait.cs" t="Include" />
+        <e p="Utility_Methods.cs" t="Include" />
+      </e>
+      <e p="RepairHist_mmo" t="IncludeRecursive">
+        <e p="Ailment.cs" t="Include" />
+        <e p="app.config" t="Include" />
+        <e p="Army.cs" t="Include" />
+        <e p="Battle.cs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="Birth.cs" t="Include" />
+        <e p="Character.cs" t="Include" />
+        <e p="Client.cs" t="Include" />
+        <e p="ClientSerializer.cs" t="Include" />
+        <e p="CSVimport.cs" t="Include" />
+        <e p="CSVs" t="Include">
+          <e p="gameObjects.csv" t="Include" />
+          <e p="map.csv" t="Include" />
+        </e>
+        <e p="DatabaseRead.cs" t="Include" />
+        <e p="DatabaseWrite.cs" t="Include" />
+        <e p="Diplomacy.cs" t="Include" />
+        <e p="Fief.cs" t="Include" />
+        <e p="Game.cs" t="Include" />
+        <e p="GameClock.cs" t="Include" />
+        <e p="Globals_Game.cs" t="Include" />
+        <e p="Globals_Server.cs" t="Include" />
+        <e p="HexMapGraph.cs" t="Include" />
+        <e p="Interfaces.cs" t="Include" />
+        <e p="Journal.cs" t="Include" />
+        <e p="Kingdom.cs" t="Include" />
+        <e p="Language.cs" t="Include" />
+        <e p="LogInManager.cs" t="Include" />
+        <e p="Nationality.cs" t="Include" />
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="PermissionManager.cs" t="Include" />
+        <e p="Pillage_Siege.cs" t="Include" />
+        <e p="Place.cs" t="Include" />
+        <e p="Program.cs" t="Include" />
+        <e p="Properties" t="Include">
+          <e p="AssemblyInfo.cs" t="Include" />
+        </e>
+        <e p="ProtoMessage.cs" t="Include" />
+        <e p="Province.cs" t="Include" />
+        <e p="Rank.cs" t="Include" />
+        <e p="RepairHist_mmo.csproj" t="IncludeRecursive" />
+        <e p="RepairHist_mmo_TemporaryKey.pfx" t="Include" />
+        <e p="Server.cs" t="Include" />
+        <e p="Siege.cs" t="Include" />
+        <e p="Terrain.cs" t="Include" />
+        <e p="TestClient.Battle.cs" t="Include" />
+        <e p="TestClient.cs" t="Include" />
+        <e p="Trait.cs" t="Include" />
+        <e p="Utility_Methods.cs" t="Include" />
+      </e>
+      <e p="RepairHist_mmo.sln" t="IncludeFlat" />
+      <e p="RepairHist_mmo.Tests1" t="IncludeRecursive">
+        <e p="app.config" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="Properties" t="Include">
+          <e p="AssemblyInfo.cs" t="Include" />
+        </e>
+        <e p="RepairHist_mmo.Tests1.csproj" t="IncludeRecursive" />
+        <e p="TestClientTest.cs" t="Include" />
+        <e p="UnitTests.cs" t="Include" />
+      </e>
+      <e p="Solution Items" t="Include" />
+      <e p="TestClientROry" t="IncludeRecursive">
+        <e p="app.config" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="DisplayResults.cs" t="Include" />
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="packages.config" t="Include" />
+        <e p="PlayerOperations.cs" t="Include" />
+        <e p="Program.cs" t="Include" />
+        <e p="Properties" t="Include">
+          <e p="AssemblyInfo.cs" t="Include" />
+        </e>
+        <e p="TestClientRory.csproj" t="IncludeRecursive" />
+        <e p="TestTextClient.cs" t="Include" />
+        <e p="WordRecogniser.cs" t="Include" />
+      </e>
+      <e p="TestSettings1.testsettings" t="Include" />
+    </e>
+  </component>
+</project>

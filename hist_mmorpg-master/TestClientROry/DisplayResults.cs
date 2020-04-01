@@ -20,36 +20,103 @@ namespace TestClientROry
             Console.WriteLine("Army Report");
             Console.WriteLine("-----------------------------");
             var counter = 0;
-            foreach (var army in armiesProtoBuf.fields)
+            if (armiesProtoBuf.fields != null)
             {
-                counter++;
-                Console.WriteLine("Army " + counter);
-                Console.WriteLine("Army ID: " + army.armyID);
-                Console.WriteLine("Owner: " + army.ownerName);
-                Console.WriteLine("Size: " + army.armySize);
-                Console.WriteLine("Location : " + army.locationID);
-                Console.WriteLine("-----------------------------");
+                foreach (var army in armiesProtoBuf.fields)
+                {
+                    counter++;
+                    Console.WriteLine("Army " + counter);
+                    Console.WriteLine("Army ID: " + army.armyID);
+                    Console.WriteLine("Owner: " + army.ownerName);
+                    Console.WriteLine("Size: " + army.armySize);
+                    Console.WriteLine("Troops: ");
+                    for (int i = 0; i < army.troops.Length; i++)
+                    {
+                        switch (i)
+                        {
+                            case 0:
+                                {
+                                    Console.WriteLine("  Knights: " + army.troops[i]);
+                                    break;
+                                }
+                            case 1:
+                                {
+                                    Console.WriteLine("  Men at Arms: " + army.troops[i]);
+                                    break;
+                                }
+                            case 2:
+                                {
+                                    Console.WriteLine("  Light Cavalry: " + army.troops[i]);
+                                    break;
+                                }
+                            case 3:
+                                {
+                                    Console.WriteLine("  Longbowmen: " + army.troops[i]);
+                                    break;
+                                }
+                            case 4:
+                                {
+                                    Console.WriteLine("  Crossbowmen: " + army.troops[4]);
+                                    break;
+                                }
+                            case 5:
+                                {
+                                    Console.WriteLine("  Footmen: " + army.troops[5]);
+                                    break;
+                                }
+                            case 6:
+                                {
+                                    Console.WriteLine("  Rabble: " + army.troops[6]);
+                                    break;
+                                }
+                            default:
+                                break;
+                        }
+                    }
+                    Console.WriteLine("Location : " + army.locationID);
+                    Console.WriteLine("Auto Support when ally attacks in same Fief: " + army.autoSupportAttack);
+                    Console.WriteLine("Auto Support when ally defends in same Fief: " + army.autoSupportDefence);
+                    Console.WriteLine("-----------------------------");
+                }
             }
         }
 
-        public void DisplayCheck(ProtoGenericArray<ProtoFief> fiefsProtoBuf)
+        public string DisplayCheck(ProtoGenericArray<ProtoFief> fiefsProtoBuf)
         {
             Console.WriteLine("-----------------------------");
             Console.WriteLine("Fiefs Owned Report");
             Console.WriteLine("-----------------------------");
             Console.Write("Fiefs owned by ");
             bool written = false;
+            string charID = "";
             foreach (var fief in fiefsProtoBuf.fields)
             {
                 if (!written)
                 {
                     Console.Write(fief.owner + ": \n");
                     written = true;
+                    charID = fief.ownerID;
                 }
                 Console.WriteLine(fief.fiefID);
             }
             Console.WriteLine("-----------------------------");
+            return charID;
+        }
 
+        public void DisplayChangeAtt(ProtoMessage message)
+        {
+            Console.WriteLine("-----------------------------");
+            Console.Write("Change of auto support when ally attacks: ");
+            Console.WriteLine(message.ResponseType);
+            Console.WriteLine("-----------------------------");
+        }
+
+        public void DisplayChangeDef(ProtoMessage message)
+        {
+            Console.WriteLine("-----------------------------");
+            Console.Write("Change of auto support when ally defends: ");
+            Console.WriteLine(message.ResponseType);
+            Console.WriteLine("-----------------------------");
         }
 
         public void DisplayHire(ProtoMessage recruitProtoBuf)
@@ -68,7 +135,7 @@ namespace TestClientROry
             }
             else
             {
-                var recruitProtoBufCast = (ProtoRecruit) recruitProtoBuf;
+                var recruitProtoBufCast = (ProtoRecruit)recruitProtoBuf;
                 Console.WriteLine("-----------------------------");
                 Console.WriteLine("Recruit Report");
                 Console.WriteLine("-----------------------------");
@@ -81,7 +148,9 @@ namespace TestClientROry
 
         public void Help()
         {
-            Console.WriteLine("Command List: \n siege\n army \n check \n profile \n fief \n move [direction parameter ne,nw,e,w,se,sw] \n hire [amount] \n fiefs");
+            Console.WriteLine("Command List: \n siege\n army \n check \n profile \n fief \n move [direction parameter ne,nw,e,w,se,sw] \n hire [amount] \n fiefs" +
+                " \n changeAtt [Army ID] (changes auto support for allied armies when attacking, should heavy losses be incured the army could potentially be disbanded)" +
+                " \n changeDef [Army ID] (changes auto support for allied armies when defending, should heavy loses be incurred the army could potentially be disbanded)");
         }
 
         public void DisplaySiege(ProtoSiegeDisplay siegeDisplayProtoBuf)
@@ -124,7 +193,7 @@ namespace TestClientROry
                 {
                     Console.WriteLine("-----------------------------");
                     Console.WriteLine("ID: " + army.armyID);
-                    Console.WriteLine("Size :" + army.armySize);
+                    Console.WriteLine("Size :" + army.armySize); // for some reason displays different number than when checking armies 
                     Console.WriteLine("Leader: " + army.leaderName);
                     Console.WriteLine("Owner: " + army.ownerName);
                 }
@@ -180,6 +249,32 @@ namespace TestClientROry
             Console.WriteLine("Location: " + characterProtoBuf.location);
             Console.WriteLine("Army: " + characterProtoBuf.armyID);
             Console.WriteLine("Purse: " + characterProtoBuf.purse);
+            Console.Write("Allies: ");
+            if (characterProtoBuf.allies != null && characterProtoBuf.allies.Count > 0)
+            {
+                for (int i = 0; i < characterProtoBuf.allies.Count; i++)
+                {
+                    Console.Write(characterProtoBuf.allies[i]);
+                    if (i != characterProtoBuf.allies.Count - 1)
+                    {
+                        Console.Write(" , ");
+                    }
+                }
+            }
+            Console.WriteLine();
+            Console.Write("At war with: ");
+            if (characterProtoBuf.atWar != null && characterProtoBuf.atWar.Count > 0)
+            {
+                for (int i = 0; i < characterProtoBuf.atWar.Count; i++)
+                {
+                    Console.Write(characterProtoBuf.atWar[i]);
+                    if (i != characterProtoBuf.atWar.Count - 1)
+                    {
+                        Console.Write(", ");
+                    }
+                }
+            }
+            Console.WriteLine();
             Console.WriteLine("-----------------------------");
         }
 
@@ -193,12 +288,30 @@ namespace TestClientROry
             Console.WriteLine("-----------------------------");
             Console.WriteLine("Sieges Overview");
             Console.WriteLine("-----------------------------");
-            foreach (var siege in siegeResultProtobuf.fields)
+            if (siegeResultProtobuf.fields != null)
             {
-                Console.Write(siege.siegeID + ": " + siege.besiegingPlayer
-                    + " vs. " + siege.defendingPlayer + " in " + siege.besiegedFief + "\n");
-                Console.WriteLine("-----------------------------");
+                foreach (var siege in siegeResultProtobuf.fields)
+                {
+                    Console.Write(siege.siegeID + ": " + siege.besiegingPlayer
+                        + " vs. " + siege.defendingPlayer + " in " + siege.besiegedFief + "\n");
+                    Console.WriteLine("-----------------------------");
+                }
             }
+        }
+
+        public void DisplayAttack(ProtoBattle battleResults)
+        {
+            Console.WriteLine("-----------------------------");
+            Console.WriteLine("Battle Overview");
+            Console.WriteLine("-----------------------------");
+            Console.WriteLine("Attacker leader: " + battleResults.attackerLeader);
+            Console.WriteLine("Defender leader: " + battleResults.defenderLeader);
+            Console.WriteLine("Attacker victorious:" + battleResults.attackerVictorious);
+            Console.WriteLine("Attacker calsualties: " + battleResults.attackerCasualties);
+            Console.WriteLine("Defender Casualties: " + battleResults.defenderCasualties);
+            Console.WriteLine("Attacker stature change: " + battleResults.statureChangeAttacker);
+            Console.WriteLine("Defender stature change: " + battleResults.statureChangeDefender);
+            Console.WriteLine("-----------------------------");
         }
 
         public void DisplayJournalEntries(ProtoGenericArray<ProtoJournalEntry> journalEntriesProtoBuf)

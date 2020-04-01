@@ -6,7 +6,9 @@
         {
             Move, Siege, Hire, Fief, Check, ArmyStatus, SyntaxError,
             Exit, Players, Sieges, Profile, SeasonUpdate,
-            JournalEntries, Journal, FiefExpenditure, Help
+            JournalEntries, Journal, FiefExpenditure, Help,
+            ChangeAttackSupport, ChangeDefenceSupport,
+            HireNew, AttackArmy
         }
 
         public Tasks CheckWord(string InputWord)
@@ -28,6 +30,8 @@
                     return Tasks.Fief;
                 case "HIRE":
                     return Tasks.Hire;
+                case "HIRENEW":
+                    return Tasks.HireNew;
                 case "SIEGE":
                     return Tasks.Siege;
                 case "PLAYERS":
@@ -44,6 +48,12 @@
                     return Tasks.Journal;
                 case "NPCS":
                     return Tasks.FiefExpenditure;
+                case "CHANGEATT":
+                    return Tasks.ChangeAttackSupport;
+                case "CHANGEDEF":
+                    return Tasks.ChangeDefenceSupport;
+                case "ATTACKARMY":
+                    return Tasks.AttackArmy;
                 default:
                     return Tasks.SyntaxError;
             }

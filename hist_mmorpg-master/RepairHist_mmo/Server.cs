@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using Lidgren.Network;
@@ -72,6 +71,7 @@ namespace hist_mmorpg
         {
             LogInManager.StoreNewUser("helen", "potato");
             LogInManager.StoreNewUser("test", "tomato");
+            LogInManager.StoreNewUser("simon", "farshas");
             NetPeerConfiguration config = new NetPeerConfiguration(app_identifier);
             config.LocalAddress = NetUtility.Resolve(host_name);
             config.MaximumConnections = max_connections;
@@ -88,8 +88,10 @@ namespace hist_mmorpg
                                     app_identifier + ", max connections: " + max_connections);
             Client client = new Client("helen", "Char_158");
             Globals_Server.Clients.Add("helen", client);
-            Client client2 = new Client("test", "Char_126");
+            Client client2 = new Client("test", "Char_196");
             Globals_Server.Clients.Add("test", client2);
+            Client client3 = new Client("simon", "Char_283");
+            Globals_Server.Clients.Add("simon", client3);
             String dir = Directory.GetCurrentDirectory();
             //dir = dir.Remove(dir.IndexOf("RepairHist_mmo"));
             String path;
@@ -104,8 +106,11 @@ namespace hist_mmorpg
                 dir = Directory.GetParent(dir).FullName;
                 path = Path.Combine(dir, "Certificates");
             }
+            Diplomacy.forgeAlliance("Char_283", "Char_196");
+            Diplomacy.declareWar("Char_283", "Char_158");
             LogInManager.InitialiseCertificateAndRSA(path);
         }
+
 
         /// <summary>
         /// Server listening thread- accepts connections, receives messages, deserializes them and hands them to ProcessMessage

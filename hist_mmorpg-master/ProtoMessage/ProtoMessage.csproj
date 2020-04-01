@@ -47,6 +47,7 @@
     <Compile Include="Birth.cs" />
     <Compile Include="Character.cs" />
     <Compile Include="Client.cs" />
+    <Compile Include="Diplomacy.cs" />
     <Compile Include="Fief.cs" />
     <Compile Include="GameClock.cs" />
     <Compile Include="Globals_Game.cs" />

@@ -18,9 +18,10 @@ namespace TestClientRory
             var encryptString = "_encrypted_";
             string datePatern = "MM_dd_H_mm";
             var logFilePath = "TestRun_NoSessions" + encryptString + DateTime.Now.ToString(datePatern) + ".txt";
+            Client c;
             TextTestClient client = new TextTestClient();
             _displayResults = new DisplayResults();
-            Globals_Game.pcMasterList.Add("rory", new PlayerCharacter());
+            //Globals_Game.pcMasterList.Add("rory", new PlayerCharacter());
             using (Globals_Server.LogFile = new System.IO.StreamWriter(logFilePath))
             {
                 _wordRecogniser = new WordRecogniser();
@@ -34,6 +35,7 @@ namespace TestClientRory
                 }
                 var command = TokenizeConsoleEntry();
                 ProcessCommand(_wordRecogniser.CheckWord(command[0]), command);
+                ProcessCommand(WordRecogniser.Tasks.Check, command);
                 while (_wordRecogniser.CheckWord(command[0]) != WordRecogniser.Tasks.Exit)
                 {
                     command = TokenizeConsoleEntry();
@@ -59,7 +61,7 @@ namespace TestClientRory
             }
             catch
             {
-                
+
             }
             _testClient.LogInAndConnect(usernameForReturn, passwordForReturn, ipForReturn);
             Console.Clear();
@@ -98,10 +100,30 @@ namespace TestClientRory
                     var armyStatusResult = player.ArmyStatus(_testClient);
                     _displayResults.DisplayArmyStatus(armyStatusResult);
                     break;
+                case WordRecogniser.Tasks.ChangeAttackSupport:
+                    {
+                        if (ValidateArgs(arguments))
+                        {
+                            var armyStatusRes = player.changeAttack(arguments[1], _testClient);
+                            _displayResults.DisplayChangeAtt(armyStatusRes);
+                        }
+                        break;
+                    }
+                case WordRecogniser.Tasks.ChangeDefenceSupport:
+                    {
+                        if (ValidateArgs(arguments))
+                        {
+                            var armyStatusRes = player.changeDefence(arguments[1], _testClient);
+                            _displayResults.DisplayChangeDef(armyStatusRes);
+                        }
+                        break;
+                    }
                 case WordRecogniser.Tasks.Check:
                     var checkResult = player.Check(_testClient);
-                    _displayResults.DisplayCheck(checkResult);
+                    _testClient.charID = _displayResults.DisplayCheck(checkResult);
                     break;
+
+
                 case WordRecogniser.Tasks.Fief:
                     var fiefResult = player.FiefDetails(_testClient);
                     _displayResults.DisplayFief(fiefResult);
@@ -130,11 +152,23 @@ namespace TestClientRory
                         _displayResults.DisplayArmyStatus(armyUpdate);
                     }
                     break;
+
+                case WordRecogniser.Tasks.HireNew:
+                    {
+                        if (ValidateArgs(arguments))
+                        {
+                            var hireResult = player.HireNew(Convert.ToInt32(arguments[1]), _testClient);
+                            _displayResults.DisplayHire(hireResult);
+                            var armyUpdate = player.ArmyStatus(_testClient);
+                            _displayResults.DisplayArmyStatus(armyUpdate);
+                        }
+                        break;
+                    }
                 case WordRecogniser.Tasks.Siege:
                     var siegeResult = player.SiegeCurrentFief(_testClient);
                     if (siegeResult.GetType() == typeof(ProtoSiegeDisplay))
                     {
-                        var siegeDisplay = (ProtoSiegeDisplay) siegeResult;
+                        var siegeDisplay = (ProtoSiegeDisplay)siegeResult;
                         _displayResults.DisplaySiege(siegeDisplay);
 
                     }
@@ -157,11 +191,18 @@ namespace TestClientRory
                         }
                     }
                     break;
+                case WordRecogniser.Tasks.AttackArmy:
+                    {
+                        var attackResult = player.AttackArmy(arguments[1], _testClient);
+                        var attackDisplay = (ProtoBattle)attackResult;
+                        _displayResults.DisplayAttack(attackDisplay);
+                        break;
+                    }
                 case WordRecogniser.Tasks.Players:
                     var playersResult = player.Players(_testClient);
                     _displayResults.DisplayPlayers(playersResult);
                     break;
-                case WordRecogniser.Tasks.Profile: 
+                case WordRecogniser.Tasks.Profile:
                     var profileResult = player.Profile(_testClient);
                     _displayResults.DisplayProfile(profileResult);
                     break;
@@ -201,11 +242,12 @@ namespace TestClientRory
                 case WordRecogniser.Tasks.Exit:
                     break;
             }
+            Console.WriteLine();
         }
 
         static bool ValidateArgs(List<String> argumentList)
         {
-            var counter =0;
+            var counter = 0;
             foreach (var argument in argumentList)
             {
                 counter++;

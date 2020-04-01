@@ -791,7 +791,7 @@ namespace hist_mmorpg
             /* double keepLvl = this.calcStormKeepLevel(s);
             double successChance = this.calcStormSuccess(keepLvl); */
             // get battle values for both armies
-            uint[] battleValues = besieger.CalculateBattleValues(defenderGarrison, Convert.ToInt32(siegeLocation.keepLevel));
+            uint[] battleValues = besieger.CalculateBattleValues(defenderGarrison,null, null, Convert.ToInt32(siegeLocation.keepLevel));
             double successChance = Battle.CalcVictoryChance(battleValues[0], battleValues[1]);
             attackerText += "- storm: " + successChance + "\r\n";
 
@@ -885,7 +885,7 @@ namespace hist_mmorpg
             string siegeDescription = "";
 
             // get STORM RESULT
-            uint[] battleValues = besiegingArmy.CalculateBattleValues(defenderGarrison, Convert.ToInt32(besiegedFief.keepLevel), true);
+            uint[] battleValues = besiegingArmy.CalculateBattleValues(defenderGarrison, null, null, Convert.ToInt32(besiegedFief.keepLevel), true);
             stormSuccess = Battle.DecideBattleVictory(battleValues[0], battleValues[1]);
 
             // KEEP DAMAGE
@@ -1127,7 +1127,7 @@ namespace hist_mmorpg
             string siegeDescription = "";
 
             // calculate success chance
-            uint[] battleValues = besieger.CalculateBattleValues(defenderGarrison, Convert.ToInt32(besiegedFief.keepLevel));
+            uint[] battleValues = besieger.CalculateBattleValues(defenderGarrison, null, null, Convert.ToInt32(besiegedFief.keepLevel));
             double successChance = Battle.CalcVictoryChance(battleValues[0], battleValues[1]) / 2;
 
             // generate random double 0-100 to see if negotiation a success

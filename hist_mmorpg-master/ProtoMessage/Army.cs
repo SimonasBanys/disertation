@@ -57,6 +57,10 @@ namespace ProtoMessage
         /// </summary>
         public byte combatOdds { get; set; }
 
+        public bool autoSupportDefence { get; set; }
+
+        public bool autoSupportAttack { get; set; }
+
         [ContractInvariantMethod]
         private void Invariant()
         {
@@ -76,7 +80,7 @@ namespace ProtoMessage
         /// <param name="aggr">byte indicating army's aggression level</param>
         /// <param name="odds">byte indicating army's combat odds value</param>
         /// <param name="trp">uint[] holding troops in army</param>
-        public Army(String id, string ldr, string own, double day, string loc, bool maint = false, byte aggr = 1, byte odds = 9, uint[] trp = null)
+        public Army(String id, string ldr, string own, double day, string loc, bool maint = false, byte aggr = 1, byte odds = 9, uint[] trp = null, bool supAtt = false, bool supDef = false)
         {
             Contract.Requires(!string.IsNullOrWhiteSpace(id) && !string.IsNullOrWhiteSpace(own) && !string.IsNullOrWhiteSpace(loc));
             // VALIDATION
@@ -141,6 +145,8 @@ namespace ProtoMessage
             this.isMaintained = maint;
             this.aggression = aggr;
             this.combatOdds = odds;
+            this.autoSupportAttack = supAtt;
+            this.autoSupportDefence = supDef;
             if (trp != null)
             {
                 this.troops = trp;
@@ -1210,6 +1216,12 @@ namespace ProtoMessage
             bool proceed = true;
             result = null;
             // check has enough days to give battle (1)
+            if (this.GetOwner().isAlly(targetArmy.GetOwner()))
+            {
+                result = new ProtoMessage();
+                result.ResponseType = DisplayMessages.ErrorTargetArmyIsAlly;
+                return false;
+            }
             if (this.days < 1)
             {
                 result = new ProtoMessage();
@@ -1378,7 +1390,7 @@ namespace ProtoMessage
         /// <param name="defender">The defending army</param>
         /// <param name="keepLvl">Keep level (if for a keep storm)</param>
         /// <param name="isSiege">bool indicating if the circumstance is a siege storm</param>
-        public uint[] CalculateBattleValues(Army defender, int keepLvl = 0, bool isSiegeStorm = false)
+        public uint[] CalculateBattleValues(Army defender, List<Army> attackerAllies = null, List<Army> defenderAllies = null, int keepLvl = 0, bool isSiegeStorm = false)
         {
 
             uint[] battleValues = new uint[2];
@@ -1410,7 +1422,26 @@ namespace ProtoMessage
             // get base combat value for each army
             uint attackerCV = Convert.ToUInt32(this.CalculateCombatValue());
             uint defenderCV = Convert.ToUInt32(defender.CalculateCombatValue(keepLvl));
-
+            if (defenderAllies != null)
+            {
+                if (defenderAllies.Count > 0)
+                {
+                    for (int i = 0; i < defenderAllies.Count; i++)
+                    {
+                        defenderCV += Convert.ToUInt32(defenderAllies[i].CalculateCombatValue(keepLvl));
+                    }
+                }
+            }
+            if (attackerAllies != null)
+            {
+                if (attackerAllies.Count > 0)
+                {
+                    for (int i = 0; i < attackerAllies.Count; i++)
+                    {
+                        attackerCV += Convert.ToUInt32(attackerAllies[i].CalculateCombatValue());
+                    }
+                }
+            }
             // apply battle modifer to the army CV corresponding to the highest LV
             if (attackerLV == maxLV)
             {
@@ -1738,6 +1769,16 @@ namespace ProtoMessage
                 }
             }
             return null;
+        }
+
+        public void changeAttSupp()
+        {
+            this.autoSupportAttack = !autoSupportAttack;
+        }
+
+        public void changeDefSupp()
+        {
+            this.autoSupportDefence = !autoSupportDefence;
         }
     }
 }

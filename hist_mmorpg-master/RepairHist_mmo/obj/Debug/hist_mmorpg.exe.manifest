@@ -42,14 +42,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="hist_mmorpg.exe" size="428544">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="hist_mmorpg.exe" size="441856">
       <assemblyIdentity name="hist_mmorpg" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>0GlvnysDfmkO8Ah9EgzsEoUkW6j/Dtbb3yQarV/mwQo=</dsig:DigestValue>
+        <dsig:DigestValue>qYMBYC2ULm5FqSToBGf/Yl9KuZs2ESw+/cCXUsZwGtc=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -90,14 +90,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="ProtoMessage.dll" size="279552">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="ProtoMessage.dll" size="291328">
       <assemblyIdentity name="ProtoMessage" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>pS4eSRG16SwMa5PWTLiYJRIGfPVrGQmvzF2+60egQsY=</dsig:DigestValue>
+        <dsig:DigestValue>aly81NzLQyms/DNclixbp0snXZKxQ+qpJTndGoz0fQ8=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

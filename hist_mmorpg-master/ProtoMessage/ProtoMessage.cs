@@ -546,6 +546,8 @@ namespace ProtoMessage
         /// Holds name of captor (if is null character is not captive)
         /// </summary>
         public string captor { get; set; }
+        public List<String> allies { get; set; }
+        public List<String> atWar { get; set; }
         // Holds information as to whether character is involved in a siege
         public enum SiegeRole { None = 0, Besieger, Defender, DefenderAdd };
         public SiegeRole siegeRole;
@@ -573,6 +575,22 @@ namespace ProtoMessage
             this.isPregnant = c.isPregnant;
             this.titles = c.myTitles.ToArray();
             this.armyID = c.armyID;
+            if (c.allies == null)
+            {
+                this.allies = new List<String>();
+            }
+            else
+            {
+                this.allies = c.allies;
+            }
+            if (c.atWar == null)
+            {
+                this.atWar = new List<String>();
+            }
+            else
+            {
+                this.atWar = c.atWar;
+            }
             if (c.GetArmy() != null)
             {
                 if (c.GetArmy().CheckIfBesieger() != null)
@@ -607,6 +625,22 @@ namespace ProtoMessage
             this.statureModifier = c.statureModifier;
             this.management = c.management;
             this.combat = c.combat;
+            if (c.allies == null)
+            {
+                this.allies = new List<String>();
+            }
+            else
+            {
+                this.allies = c.allies;
+            }
+            if (c.atWar == null)
+            {
+                this.atWar = new List<String>();
+            }
+            else
+            {
+                this.atWar = c.atWar;
+            }
             this.traits = new Pair[c.traits.Length];
             for (int i = 0; i < c.traits.Length; i++)
             {
@@ -732,6 +766,26 @@ namespace ProtoMessage
             this.homeFief = pc.homeFief;
             this.ancestralHomeFief = pc.ancestralHomeFief;
             this.outlawed = pc.outlawed;
+
+            if (pc.allies == null)
+            {
+                this.allies = new List<String>();
+            }
+            else
+            {
+                this.allies = pc.allies;
+            }
+
+            // issues with atWar list, doesnt get initiallised somewhere, use is exactly the same as allies list
+            // need to investigate further
+            if (pc.atWar == null)
+            {
+                this.atWar = new List<String>();
+            }
+            else
+            {
+                this.atWar = pc.atWar;
+            }
         }
 
         public ProtoPlayerCharacter()
@@ -744,6 +798,24 @@ namespace ProtoMessage
             PlayerCharacter pc = character as PlayerCharacter;
             this.playerID = pc.playerID;
             this.purse = pc.purse;
+            if (character.allies == null)
+            {
+                this.allies = new List<String>();
+            }
+            else
+            {
+                this.allies = character.allies;
+            }
+            // issues with atWar list, doesnt get initiallised somewhere, use is exactly the same as allies list
+            // need to investigate further
+            if (character.atWar == null)
+            {
+                this.atWar = new List<String>();
+            }
+            else
+            {
+                this.atWar = character.atWar;
+            }
             this.myNPCs = new ProtoCharacterOverview[pc.myNPCs.Count];
             int i = 0;
             foreach (Character c in pc.myNPCs)
@@ -797,6 +869,25 @@ namespace ProtoMessage
                 provinces[i] = p.id;
                 i++;
             }
+            if (character.allies == null)
+            {
+                this.allies = new List<String>();
+            }
+            else
+            {
+                this.allies = character.allies;
+            }
+
+            // issues with atWar list, doesnt get initiallised somewhere, use is exactly the same as allies list
+            // need to investigate further
+            if (character.atWar == null)
+            {
+                this.atWar = new List<String>();
+            }
+            else
+            {
+                this.atWar = character.atWar;
+            }
         }
     }
     /// <summary>
@@ -846,6 +937,25 @@ namespace ProtoMessage
             this.salary = npc.salary;
             this.inEntourage = npc.inEntourage;
             this.isHeir = npc.isHeir;
+            if (npc.allies == null)
+            {
+                this.allies = new List<String>();
+            }
+            else
+            {
+                this.allies = npc.allies;
+            }
+
+            // issues with atWar list, doesnt get initiallised somewhere, use is exactly the same as allies list
+            // need to investigate further
+            if (npc.atWar == null)
+            {
+                this.atWar = new List<String>();
+            }
+            else
+            {
+                this.atWar = npc.atWar;
+            }
         }
 
         public override void onIncludeSpy(Character character)
@@ -858,6 +968,25 @@ namespace ProtoMessage
             this.salary = npc.salary;
             this.inEntourage = npc.inEntourage;
             this.isHeir = npc.isHeir;
+            if (npc.allies == null)
+            {
+                this.allies = new List<String>();
+            }
+            else
+            {
+                this.allies = npc.allies;
+            }
+
+            // issues with atWar list, doesnt get initiallised somewhere, use is exactly the same as allies list
+            // need to investigate further
+            if (npc.atWar == null)
+            {
+                this.atWar = new List<String>();
+            }
+            else
+            {
+                this.atWar = npc.atWar;
+            }
         }
         public void IncludeHire(NonPlayerCharacter character, string observerID)
         {
@@ -865,6 +994,25 @@ namespace ProtoMessage
             uint lastoffer = 0;
             character.lastOffer.TryGetValue(observerID, out lastoffer);
             this.lastOfferAmount = lastoffer;
+            if (character.allies == null)
+            {
+                this.allies = new List<String>();
+            }
+            else
+            {
+                this.allies = character.allies;
+            }
+
+            // issues with atWar list, doesnt get initiallised somewhere, use is exactly the same as allies list
+            // need to investigate further
+            if (character.atWar == null)
+            {
+                this.atWar = new List<String>();
+            }
+            else
+            {
+                this.atWar = character.atWar;
+            }
         }
     }
     /// <summary>
@@ -1169,6 +1317,8 @@ namespace ProtoMessage
         public string locationID { get; set; }
         public string ownerName { get; set; }
         public uint armySize { get; set; }
+        public bool autoSupportAttack { get; set; }
+        public bool autoSupportDefence { get; set; }
 
         public ProtoArmyOverview()
             : base()
@@ -1191,11 +1341,16 @@ namespace ProtoMessage
             {
                 this.ownerName = a.GetOwner().firstName + " " + a.GetOwner().familyName;
             }
+            this.armySize = a.CalcArmySize();
+            this.autoSupportAttack = a.autoSupportAttack;
+            this.autoSupportDefence = a.autoSupportDefence;
         }
         public void includeAll(Army a)
         {
             this.locationID = a.location;
             this.armySize = a.CalcArmySize();
+            this.autoSupportAttack = a.autoSupportAttack;
+            this.autoSupportDefence = a.autoSupportDefence;
         }
 
     }

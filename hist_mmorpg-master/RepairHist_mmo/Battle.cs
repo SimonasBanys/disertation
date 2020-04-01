@@ -5,7 +5,7 @@ using System.Linq;
 namespace hist_mmorpg
 {
     [ContractVerification(true)] 
-    public static class Battle
+    public class Battle
     {
         /// <summary>
         /// Calculates whether the attacking army is able to successfully bring the defending army to battle
@@ -246,12 +246,33 @@ namespace hist_mmorpg
         /// <returns>int containing battle odds</returns>
         /// <param name="attacker">The attacking army</param>
         /// <param name="defender">The defending army</param>
-        public static int GetBattleOdds(Army attacker, Army defender)
+        public static int GetBattleOdds(Army attacker, Army defender, List<Army> defenderAllies = null, List<Army> attackerAllies = null)
         {
             Contract.Requires(attacker!=null&&defender!=null);
             double battleOdds = 0;
-
-            battleOdds = Math.Floor(attacker.CalculateCombatValue() / defender.CalculateCombatValue());
+            double attackerCV = attacker.CalculateCombatValue();
+            double defenderCV = defender.CalculateCombatValue();
+            if (defenderAllies != null)
+            {
+                if (defenderAllies.Count > 0)
+                {
+                    for (int i = 0; i < defenderAllies.Count; i++)
+                    {
+                        defenderCV += defenderAllies[i].CalculateCombatValue();
+                    }
+                }
+            }
+            if (attackerAllies != null)
+            {
+                if (attackerAllies.Count > 0)
+                {
+                    for (int i = 0; i < attackerAllies.Count; i++)
+                    {
+                        attackerCV += attackerAllies[i].CalculateCombatValue();
+                    }
+                }
+            }
+            battleOdds = Math.Floor(attackerCV / defenderCV);
 
             return Convert.ToInt32(battleOdds);
         }
@@ -425,9 +446,9 @@ namespace hist_mmorpg
         /// <param name="attacker">The attacking army</param>
         /// <param name="defender">The defending army</param>
         /// <param name="circumstance">string indicating circumstance of battle</param>
-        public static bool GiveBattle(Army attacker, Army defender, out ProtoBattle battleResults, string circumstance = "battle")
+        public static bool GiveBattle(Army attacker, Army defender, out ProtoBattle battleResults, List<Army> attackerAllies = null, List<Army> defenderAllies = null, string circumstance = "battle")
         {
-            Contract.Requires(attacker!=null&&defender!=null&&circumstance!=null);
+            Contract.Requires(attacker != null && defender != null && circumstance != null);
             battleResults = new ProtoBattle();
             bool attackerVictorious = false;
             bool battleHasCommenced = false;
@@ -456,7 +477,20 @@ namespace hist_mmorpg
             uint defenderStartTroops = defender.CalcArmySize();
             uint attackerCasualties = 0;
             uint defenderCasualties = 0;
-
+            if (attackerAllies != null)
+            {
+                for (int i = 0; i < attackerAllies.Count; i++)
+                {
+                    attackerStartTroops += attackerAllies[i].CalcArmySize();
+                }
+            }
+            if (defenderAllies != null)
+            {
+                for (int i = 0; i < defenderAllies.Count; i++)
+                {
+                    defenderStartTroops += defenderAllies[i].CalcArmySize();
+                }
+            }
             // get leaders
             Character attackerLeader = attacker.GetLeader();
             Character defenderLeader = defender.GetLeader();
@@ -486,8 +520,24 @@ namespace hist_mmorpg
             }
 
             // get battle values for both armies
-            battleValues = attacker.CalculateBattleValues(defender);
-
+            switch (circumstance)
+            {
+                case "pillage":
+                    {
+                        battleValues = attacker.CalculateBattleValues(defender);
+                        break;
+                    }
+                case "siege":
+                    {
+                        battleValues = attacker.CalculateBattleValues(defender, attackerAllies, defenderAllies);
+                        break;
+                    }
+                default:
+                    {
+                        battleValues = attacker.CalculateBattleValues(defender, attackerAllies, defenderAllies);
+                        break;
+                    }
+            }
             // check if attacker has managed to bring defender to battle
             // case 1: defending army sallies during siege to attack besieger = battle always occurs
             if (circumstance.Equals("siege"))
@@ -505,7 +555,7 @@ namespace hist_mmorpg
                 if (defender.aggression == 1)
                 {
                     // get odds
-                    int battleOdds = Battle.GetBattleOdds(attacker, defender);
+                    int battleOdds = Battle.GetBattleOdds(attacker, defender, defenderAllies, attackerAllies);
 
                     // if odds OK, give battle
                     if (battleOdds <= defender.combatOdds)
@@ -521,7 +571,6 @@ namespace hist_mmorpg
                         if (!battleHasCommenced)
                         {
                             defender.ProcessRetreat(1);
-                            
                         }
                     }
                 }
@@ -588,15 +637,37 @@ namespace hist_mmorpg
                         defenderDisbanded = true;
                         disbandedArmies.Add(defender.owner);
                         totalDefendTroopsLost = defender.CalcArmySize();
+                        if (defenderAllies != null && defenderAllies.Count > 0)
+                        {
+                            for (int i = 0; i < defenderAllies.Count; i++)
+                            {
+                                disbandedArmies.Add(defenderAllies[i].owner);
+                                totalDefendTroopsLost += defenderAllies[i].CalcArmySize();
+                            }
+                        }
                     }
                     // OR apply troop casualties to losing army
                     else
                     {
                         totalDefendTroopsLost = defender.ApplyTroopLosses(casualtyModifiers[1]);
+                        if (defenderAllies != null && defenderAllies.Count > 0)
+                        {
+                            for (int i = 0; i < defenderAllies.Count; i++)
+                            {
+                                totalDefendTroopsLost += defenderAllies[i].ApplyTroopLosses(casualtyModifiers[1]);
+                            }
+                        }
                     }
 
                     // apply troop casualties to winning army
                     totalAttackTroopsLost = attacker.ApplyTroopLosses(casualtyModifiers[0]);
+                    if (attackerAllies != null && attackerAllies.Count > 0)
+                    {
+                        for (int i = 0; i < attackerAllies.Count; i++)
+                        {
+                            totalAttackTroopsLost += attackerAllies[i].ApplyTroopLosses(casualtyModifiers[0]);
+                        }
+                    }
                 }
                 else
                 {
@@ -605,13 +676,35 @@ namespace hist_mmorpg
                         attackerDisbanded = true;
                         disbandedArmies.Add(attacker.owner);
                         totalAttackTroopsLost = attacker.CalcArmySize();
+                        if (attackerAllies != null && attackerAllies.Count > 0)
+                        {
+                            for (int i = 0; i < attackerAllies.Count; i++)
+                            {
+                                disbandedArmies.Add(attackerAllies[i].owner);
+                                totalAttackTroopsLost += attackerAllies[i].CalcArmySize();
+                            }
+                        }
                     }
                     else
                     {
                         totalAttackTroopsLost = attacker.ApplyTroopLosses(casualtyModifiers[0]);
+                        if (attackerAllies != null && attackerAllies.Count > 0)
+                        {
+                            for (int i = 0; i < attackerAllies.Count; i++)
+                            {
+                                totalAttackTroopsLost += attackerAllies[i].ApplyTroopLosses(casualtyModifiers[0]);
+                            }
+                        }
                     }
 
                     totalDefendTroopsLost = defender.ApplyTroopLosses(casualtyModifiers[1]);
+                    if (defenderAllies != null && defenderAllies.Count > 0)
+                    {
+                        for (int i = 0; i < defenderAllies.Count; i++)
+                        {
+                            totalDefendTroopsLost += defenderAllies[i].ApplyTroopLosses(casualtyModifiers[1]);
+                        }
+                    }
                 }
                 battleResults.attackerCasualties = totalAttackTroopsLost;
                 battleResults.defenderCasualties = totalDefendTroopsLost;

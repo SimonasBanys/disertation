@@ -49,6 +49,16 @@ namespace ClientDLL
             return _playerOps.ArmyStatus(_testClient);
         }
 
+        public ProtoMessage changeAttack(string aID)
+        {
+            return _playerOps.changeAttack(aID, _testClient);
+        }
+
+        public ProtoMessage changeDefence(string aID)
+        {
+            return _playerOps.changeDefence(aID, _testClient);
+        }
+
         public ProtoGenericArray<ProtoFief> Check()
         {
             return _playerOps.Check(_testClient);
@@ -59,11 +69,20 @@ namespace ClientDLL
             return _playerOps.HireTroops(Convert.ToInt32(amount), _testClient);
         }
 
-        public ProtoSiegeDisplay Siege()
+        public ProtoMessage HireNew(string amount)
         {
-            return _playerOps.SiegeCurrentFief(_testClient);
+            return _playerOps.HireNew(Convert.ToInt32(amount), _testClient);
         }
 
+        public ProtoSiegeDisplay Siege()
+        {
+            return (ProtoSiegeDisplay) _playerOps.SiegeCurrentFief(_testClient);
+        }
+
+        public ProtoMessage Attack(string aID)
+        {
+            return (ProtoBattle)_playerOps.AttackArmy(aID, _testClient);
+        }
         public ProtoGenericArray<ProtoPlayer> Players()
         {
             return _playerOps.Players(_testClient);
