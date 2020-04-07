@@ -59,6 +59,11 @@ namespace ClientDLL
             return _playerOps.changeDefence(aID, _testClient);
         }
 
+        public ProtoMessage changePillage(string aID)
+        {
+            return _playerOps.changePillage(aID, _testClient);
+        }
+
         public ProtoGenericArray<ProtoFief> Check()
         {
             return _playerOps.Check(_testClient);

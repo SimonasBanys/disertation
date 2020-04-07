@@ -355,15 +355,15 @@ namespace hist_mmorpg
             Globals_Game.languageMasterList.Add(e1.id, e1);
 
             // create terrain objects
-            var plains = new Terrain("terr_P", "Plains", 1);
+            var plains = new Terrain("terr_P", "Plains", 1, new double[] { 1.5, 1.5, 1.5, 1.0,1.0,1.15,1.15});
             Globals_Game.terrainMasterList.Add(plains.id, plains);
-            var hills = new Terrain("terr_H", "Hills", 1.5);
+            var hills = new Terrain("terr_H", "Hills", 1.5, new double[] { 1.15,1.25,1.25,1.35,1.35,0.85,0.85});
             Globals_Game.terrainMasterList.Add(hills.id, hills);
-            var forrest = new Terrain("terr_F", "Forrest", 1.5);
+            var forrest = new Terrain("terr_F", "Forrest", 1.5, new double[] { 0.85, 0.85, 0.85, 1.45, 1.45, 1.15, 1.15 });
             Globals_Game.terrainMasterList.Add(forrest.id, forrest);
-            var mountains = new Terrain("terr_M", "Mountains", 15);
+            var mountains = new Terrain("terr_M", "Mountains", 15, new double[] { 1.15, 1.25, 1.25, 1.35, 1.35, 0.85, 0.85 });
             Globals_Game.terrainMasterList.Add(mountains.id, mountains);
-            var impassable_mountains = new Terrain("terr_MX", "Impassable mountains", 91);
+            var impassable_mountains = new Terrain("terr_MX", "Impassable mountains", 91, new double[] { 0.15, 0.15, 0.15, 1.9, 1.9, 0.25, 0.25 });
             Globals_Game.terrainMasterList.Add(impassable_mountains.id, impassable_mountains);
 
             // create keep barred lists for fiefs
@@ -2547,6 +2547,27 @@ namespace hist_mmorpg
             return success;
         }
 
+        public static ProtoMessage PlanAssasination(string assassinID, string targetID, Client client)
+        {
+            DisplayMessages targetErr, assassinErr;
+            var target = Utility_Methods.GetCharacter(targetID, out targetErr);
+            if (target == null)
+            {
+                return new ProtoMessage(targetErr);
+            }
+            var assassin = Utility_Methods.GetCharacter(assassinID, out assassinErr);
+            if (assassin == null)
+            {
+                return new ProtoMessage(assassinErr);
+            }
+            var madePlans = false;
+            madePlans = assassin.planAssassination(target);
+            var success = new ProtoMessage();
+            success.ResponseType = DisplayMessages.Success;
+            success.Message = "Assassination planned";
+            return success;
+        }
+
         public static ProtoMessage OfferPeace(string charIDa, string charIDb, Client client)
         {
             DisplayMessages charAErr, charBErr;
@@ -2931,6 +2952,24 @@ namespace hist_mmorpg
             ProtoMessage result = new ProtoMessage();
             result.ResponseType = DisplayMessages.Success;
             army.changeAttSupp();
+            return result;
+        }
+
+        public static ProtoMessage ChangeAutoPillage(string armyID, Client client)
+        {
+            DisplayMessages errorMessage;
+            var army = Utility_Methods.GetArmy(armyID, out errorMessage);
+            if (army == null)
+            {
+                return new ProtoMessage(errorMessage);
+            }
+            if (!PermissionManager.isAuthorized(PermissionManager.ownsArmyOrAdmin, client.myPlayerCharacter, army))
+            {
+                return new ProtoMessage(DisplayMessages.ErrorGenericUnauthorised);
+            }
+            ProtoMessage result = new ProtoMessage();
+            result.ResponseType = DisplayMessages.Success;
+            army.changePillage();
             return result;
         }
 
@@ -4059,6 +4098,15 @@ namespace hist_mmorpg
                         return ProposeMarriage(msgIn.Message, msgIn.MessageFields[0], _client);
                     }
 
+                case Actions.PlanAssassination:
+                    {
+                        if (msgIn.MessageFields == null || msgIn.MessageFields.Length < 1)
+                        {
+                            return new ProtoMessage(DisplayMessages.ErrorGenericMessageInvalid);
+                        }
+                        return PlanAssasination(msgIn.Message, msgIn.MessageFields[0], _client);
+                    }
+
                 // Action to offer to form an alliance with another player
                 case Actions.OfferAlliance:
                     {
@@ -4171,6 +4219,10 @@ namespace hist_mmorpg
                 case Actions.ChangeAttackAutoSupport:
                     {
                         return ChangeAttackAutoSupport(msgIn.Message, _client);
+                    }
+                case Actions.ChangeAutoPillage:
+                    {
+                        return ChangeAutoPillage(msgIn.Message, _client);
                     }
                 case Actions.ChangeDefenceAutoSupport:
                     {

@@ -61,6 +61,14 @@ namespace hist_mmorpg
 
         public bool autoSupportAttack { get; set; }
 
+        public bool autoPillage { get; set; }
+
+        public double loyalty { get; set; }
+
+        public double morale { get; set; }
+
+        
+
         [ContractInvariantMethod]
         private void Invariant()
         {
@@ -80,7 +88,7 @@ namespace hist_mmorpg
         /// <param name="aggr">byte indicating army's aggression level</param>
         /// <param name="odds">byte indicating army's combat odds value</param>
         /// <param name="trp">uint[] holding troops in army</param>
-        public Army(String id, string ldr, string own, double day, string loc, bool maint = false, byte aggr = 1, byte odds = 9, uint[] trp = null, bool supAtt = false, bool supDef = false)
+        public Army(String id, string ldr, string own, double day, string loc, bool maint = false, byte aggr = 1, byte odds = 9, uint[] trp = null, bool supAtt = false, bool supDef = false, bool autoPil = false, double morale = 1.0)
         {
             Contract.Requires(!string.IsNullOrWhiteSpace(id) && !string.IsNullOrWhiteSpace(own) && !string.IsNullOrWhiteSpace(loc));
             // VALIDATION
@@ -147,6 +155,11 @@ namespace hist_mmorpg
             this.combatOdds = odds;
             this.autoSupportAttack = supAtt;
             this.autoSupportDefence = supDef;
+            this.autoPillage = autoPil;
+            Fief f;
+            Globals_Game.fiefMasterList.TryGetValue(location, out f);
+            this.loyalty = f.loyalty/10;
+            this.morale = morale;
             if (trp != null)
             {
                 this.troops = trp;
@@ -242,6 +255,19 @@ namespace hist_mmorpg
             {
                 result = new ProtoMessage();
                 result.ResponseType = DisplayMessages.ArmyMaintainedAlready;
+            }
+        }
+
+
+        public void moraleChange(double change)
+        {
+            this.morale += change;
+            if (this.morale > 1.0d)
+            {
+                this.morale = 1.0d;
+            } else if (this.morale < -1.0d)
+            {
+                this.morale = -1.0d;
             }
         }
 
@@ -601,7 +627,7 @@ namespace hist_mmorpg
             string toDisplay = "";
             string[] troopTypeLabels = new string[] { "knights", "men-at-arms", "light cavalry", "longbowmen", "crossbowmen", "foot", "rabble" };
             Character myLeader = null;
-
+            
             // carry out CONDITIONAL CHECKS
             // 1. check arry length
             if (troops.Length != 7)
@@ -797,7 +823,7 @@ namespace hist_mmorpg
             // get CV for each troop type
             for (int i = 0; i < this.troops.Length; i++)
             {
-                cv += this.troops[i] * thisCombatValues[i];
+                cv += this.troops[i] * thisCombatValues[i] * (1 + this.morale) * this.GetLocation().terrain.combatMods[i] ;
             }
 
             // if calculating defender during keep storm, account for keep level
@@ -1148,6 +1174,54 @@ namespace hist_mmorpg
 
             // get leader
             Character myLeader = this.GetLeader();
+
+            uint[] deserted = new uint[7];
+            uint leftToPay = 0;
+            if (!isMaintained)
+            {
+                leftToPay = getMaintenanceCost() - (uint)this.GetOwner().GetHomeFief().GetAvailableTreasury(true);
+            }
+            if (leftToPay > 0 && autoPillage)
+            {
+                ProtoMessage pillageError;
+                var canPillage = Pillage_Siege.ChecksBeforePillageSiege(this, GetLocation(), out pillageError);
+                if (canPillage)
+                {
+                    var result = Pillage_Siege.PillageFief(this, GetLocation());
+                    result.ResponseType = DisplayMessages.Success;
+                    result.Message = "pillage";
+                    leftToPay = getMaintenanceCost() - (uint)this.GetOwner().GetHomeFief().GetAvailableTreasury(true);
+                    if (leftToPay > 0)
+                    {
+                        // troops lost due to desertion
+                        for (int i = 0; i < troops.Length; i++)
+                        {
+                            deserted[i] = troops[i] - (uint)(troops[i] * (1+loyalty));
+                            troops[i] =(uint) (troops[i] * (1+loyalty));
+                        }
+                        this.loyalty = this.loyalty - leftToPay / getMaintenanceCost();
+                        GetOwner().GetHomeFief().AdjustTreasury(-GetOwner().GetHomeFief().GetAvailableTreasury());
+                    }
+                    else
+                    {
+                        this.loyalty = 0;
+                    }
+                }
+            } else if (leftToPay > 0 && !autoPillage)
+            {
+                // troops lost due to desertion
+                for (int i = 0; i < troops.Length; i++)
+                {
+                    deserted[i] = troops[i] - (uint)(troops[i] * (1+loyalty));
+                    troops[i] = (uint)(troops[i] * (1+loyalty));
+                }
+                this.loyalty = this.loyalty - leftToPay / getMaintenanceCost();
+                GetOwner().GetHomeFief().AdjustTreasury(-GetOwner().GetHomeFief().GetAvailableTreasury());
+            }
+            else
+            {
+                this.loyalty = 0;
+            }
 
             if (attritionApplies)
             {
@@ -1776,12 +1850,17 @@ namespace hist_mmorpg
 
         public void changeAttSupp()
         {
-            this.autoSupportAttack = !autoSupportAttack;
+            autoSupportAttack = !autoSupportAttack;
+        }
+
+        public void changePillage()
+        {
+            autoPillage = !autoPillage;
         }
 
         public void changeDefSupp()
         {
-            this.autoSupportDefence = !autoSupportDefence;
+            autoSupportDefence = !autoSupportDefence;
         }
     }
 }

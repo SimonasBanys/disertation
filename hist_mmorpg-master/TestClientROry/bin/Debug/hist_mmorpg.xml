@@ -108,7 +108,7 @@
             Indicates army's combat odds value (i.e. at what odds will attempt automated combat action)
             </summary>
         </member>
-        <member name="M:hist_mmorpg.Army.#ctor(System.String,System.String,System.String,System.Double,System.String,System.Boolean,System.Byte,System.Byte,System.UInt32[],System.Boolean,System.Boolean)">
+        <member name="M:hist_mmorpg.Army.#ctor(System.String,System.String,System.String,System.Double,System.String,System.Boolean,System.Byte,System.Byte,System.UInt32[],System.Boolean,System.Boolean,System.Boolean,System.Double)">
             <summary>
             Constructor for Army
             </summary>
@@ -7121,7 +7121,7 @@
             Holds season and year the siege ended
             </summary>
         </member>
-        <member name="M:hist_mmorpg.Siege.#ctor(System.String,System.UInt32,System.Byte,System.String,System.String,System.String,System.String,System.String,System.Double,System.Double,System.Int32,System.Int32,System.Double,System.String,System.String)">
+        <member name="M:hist_mmorpg.Siege.#ctor(System.String,System.UInt32,System.Byte,System.String,System.String,System.String,System.String,System.String,System.Double,System.Double,System.Int32,System.Int32,System.Double,System.String,System.String,System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.String})">
             <summary>
             Constructor for Siege
             </summary>
@@ -7263,7 +7263,7 @@
             Holds terrain travel cost
             </summary>
         </member>
-        <member name="M:hist_mmorpg.Terrain.#ctor(System.String,System.String,System.Double)">
+        <member name="M:hist_mmorpg.Terrain.#ctor(System.String,System.String,System.Double,System.Double[])">
             <summary>
             Constructor for Terrain
             </summary>

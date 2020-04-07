@@ -76,6 +76,9 @@ namespace TestClientROry
                     Console.WriteLine("Location : " + army.locationID);
                     Console.WriteLine("Auto Support when ally attacks in same Fief: " + army.autoSupportAttack);
                     Console.WriteLine("Auto Support when ally defends in same Fief: " + army.autoSupportDefence);
+                    Console.WriteLine("Auto Pillage to maintain army: " + army.autoPillage);
+                    Console.WriteLine("Army loyalty: " + (army.loyalty+1)*100);
+                    Console.WriteLine("Army morale: " + (army.morale+1)*50);
                     Console.WriteLine("-----------------------------");
                 }
             }
@@ -115,6 +118,14 @@ namespace TestClientROry
         {
             Console.WriteLine("-----------------------------");
             Console.Write("Change of auto support when ally defends: ");
+            Console.WriteLine(message.ResponseType);
+            Console.WriteLine("-----------------------------");
+        }
+
+        public void DisplayChangePilllage(ProtoMessage message)
+        {
+            Console.WriteLine("-----------------------------");
+            Console.Write("Change of auto pillage to maintain army: ");
             Console.WriteLine(message.ResponseType);
             Console.WriteLine("-----------------------------");
         }
@@ -163,6 +174,30 @@ namespace TestClientROry
             Console.WriteLine("Siege Successful: " + siegeDisplayProtoBuf.besiegerWon);
             Console.WriteLine("Siege Length: " + siegeDisplayProtoBuf.days + " days");
             Console.WriteLine("Loot Lost: " + siegeDisplayProtoBuf.lootLost);
+            if (siegeDisplayProtoBuf.attackerAllies.Count > 0 && siegeDisplayProtoBuf.attackerAllies != null)
+            {
+                Console.WriteLine("Attacker allies participating in the battle: ");
+                for (int i = 0; i < siegeDisplayProtoBuf.attackerAllies.Count; i++)
+                {
+                    Console.Write(siegeDisplayProtoBuf.attackerAllies[i]);
+                    if (i != siegeDisplayProtoBuf.attackerAllies.Count - 1)
+                    {
+                        Console.Write(", ");
+                    }
+                }
+            }
+            if (siegeDisplayProtoBuf.defenderAllies.Count > 0 && siegeDisplayProtoBuf.defenderAllies != null)
+            {
+                Console.WriteLine("Defender allies participating in the battle: ");
+                for (int i = 0; i < siegeDisplayProtoBuf.defenderAllies.Count; i++)
+                {
+                    Console.Write(siegeDisplayProtoBuf.defenderAllies[i]);
+                    if (i != siegeDisplayProtoBuf.defenderAllies.Count - 1)
+                    {
+                        Console.Write(", ");
+                    }
+                }
+            }
             Console.WriteLine("-----------------------------");
         }
 
@@ -311,6 +346,30 @@ namespace TestClientROry
             Console.WriteLine("Defender Casualties: " + battleResults.defenderCasualties);
             Console.WriteLine("Attacker stature change: " + battleResults.statureChangeAttacker);
             Console.WriteLine("Defender stature change: " + battleResults.statureChangeDefender);
+            if (battleResults.attackerAllies.Count > 0 && battleResults.attackerAllies != null)
+            {
+                Console.WriteLine("Attacker allies participating in the battle: ");
+                for (int i = 0; i < battleResults.attackerAllies.Count; i++)
+                {
+                    Console.Write(battleResults.attackerAllies[i]);
+                    if (i != battleResults.attackerAllies.Count - 1)
+                    {
+                        Console.Write(", ");
+                    }
+                }
+            }
+            if (battleResults.defenderAllies.Count > 0 && battleResults.defenderAllies != null)
+            {
+                Console.WriteLine("Defender allies participating in the battle: ");
+                for (int i = 0; i < battleResults.defenderAllies.Count; i++)
+                {
+                    Console.Write(battleResults.defenderAllies[i]);
+                    if (i != battleResults.defenderAllies.Count - 1)
+                    {
+                        Console.Write(", ");
+                    }
+                }
+            }
             Console.WriteLine("-----------------------------");
         }
 

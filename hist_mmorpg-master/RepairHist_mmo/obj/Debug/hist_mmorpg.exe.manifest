@@ -42,14 +42,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="hist_mmorpg.exe" size="441856">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="hist_mmorpg.exe" size="451584">
       <assemblyIdentity name="hist_mmorpg" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>qYMBYC2ULm5FqSToBGf/Yl9KuZs2ESw+/cCXUsZwGtc=</dsig:DigestValue>
+        <dsig:DigestValue>6q4PlYU6ZPiAaiVnv85PMm995d/IlXA94Kz7FvAAONY=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -97,7 +97,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>aly81NzLQyms/DNclixbp0snXZKxQ+qpJTndGoz0fQ8=</dsig:DigestValue>
+        <dsig:DigestValue>E2XgNOZbOoKtew8EazqoSoHoh6TuPOQou053KSvQV58=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

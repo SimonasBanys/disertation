@@ -118,6 +118,15 @@ namespace TestClientRory
                         }
                         break;
                     }
+                case WordRecogniser.Tasks.ChangeAutoPillage:
+                    {
+                        if (ValidateArgs(arguments))
+                        {
+                            var armyStatusRes = player.changePillage(arguments[1], _testClient);
+                            _displayResults.DisplayChangePilllage(armyStatusRes);
+                        }
+                        break;
+                    }
                 case WordRecogniser.Tasks.Check:
                     var checkResult = player.Check(_testClient);
                     _testClient.charID = _displayResults.DisplayCheck(checkResult);

@@ -8,7 +8,8 @@
             Exit, Players, Sieges, Profile, SeasonUpdate,
             JournalEntries, Journal, FiefExpenditure, Help,
             ChangeAttackSupport, ChangeDefenceSupport,
-            HireNew, AttackArmy
+            HireNew, AttackArmy,
+            ChangeAutoPillage
         }
 
         public Tasks CheckWord(string InputWord)

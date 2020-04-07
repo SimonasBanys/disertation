@@ -68,6 +68,18 @@ namespace TestClientRory
             return armyResult;
         }
 
+        public ProtoMessage changePillage(string aID, TextTestClient client)
+        {
+            ProtoArmy proto = new ProtoArmy();
+            proto.owner = client.charID;
+            proto.Message = aID;
+            proto.ActionType = Actions.ChangeAutoPillage;
+            client.net.Send(proto);
+            var armyReply = GetActionReply(Actions.ChangeAutoPillage, client);
+            var armyResult = (ProtoMessage)armyReply.Result;
+            return armyResult;
+        }
+
         public Task<ProtoMessage> GetActionReply(Actions action, TextTestClient client)
         {
             Task<ProtoMessage> responseTask = client.GetReply();

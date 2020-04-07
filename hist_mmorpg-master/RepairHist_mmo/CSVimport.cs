@@ -2811,8 +2811,44 @@ namespace hist_mmorpg
                     throw new InvalidDataException("Incorrect number of data parts for Terrain object.");
                 }
 
+                double[] combatMods = new double[7];
+
+                switch (terrData[2])
+                {
+                    case "Plains":
+                        {
+                            combatMods = new double[] { 1.5, 1.5, 1.5, 1.0,1.0,1.15,1.15};
+                            break;
+                        }
+                    case "Hills":
+                        {
+                            combatMods = new double[] { 1.15, 1.25, 1.25, 1.35, 1.35, 0.85, 0.85 };
+                            break;
+                        }
+                    case "Forrest":
+                        {
+                            combatMods = new double[] { 0.85, 0.85, 0.85, 1.45, 1.45, 1.15, 1.15 };
+                            break;
+                        }
+                    case "Mountains":
+                        {
+                            combatMods = new double[] { 1.15, 1.25, 1.25, 1.35, 1.35, 0.85, 0.85 };
+                            break;
+                        }
+                    case "Impassable mountains":
+                        {
+                            combatMods = new double[] { 0.15, 0.15, 0.15, 1.9, 1.9, 0.25, 0.25 };
+                            break;
+                        }
+                    case "":
+                        {
+                            combatMods = new double[] { 1, 1, 1, 1, 1, 1, 1 };
+                            break;
+                        }
+                }
+
                 // create Terrain object
-                thisTerr = new Terrain(terrData[1], terrData[2], Convert.ToDouble(terrData[3]));
+                thisTerr = new Terrain(terrData[1], terrData[2], Convert.ToDouble(terrData[3]), combatMods);
             }
             // catch exception that could result from incorrect conversion of string to numeric 
             catch (FormatException fe)

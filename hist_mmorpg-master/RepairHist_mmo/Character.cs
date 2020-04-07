@@ -136,6 +136,8 @@ namespace hist_mmorpg
         /// </summary>
         public List<String> atWar { get; set; }
 
+        public List<Character> assassinationPlans { get; set; }
+
 
 #if DEBUG
         /// <summary>
@@ -1546,6 +1548,16 @@ namespace hist_mmorpg
                         }
                         fields[2] += "captors";
                         break;
+                    case "assassinated":
+                        {
+                            fields[2] = "assassinated by another player";
+                            break;
+                        }
+                    case "assassination attempt failed":
+                        {
+                            fields[2] = "died during an assassination attempt";
+                            break;
+                        }
                     case "kidnap":
                         fields[2] = "a botched kidnap attempt";
                         break;
@@ -3869,6 +3881,34 @@ namespace hist_mmorpg
             return charText;
         }
 
+        public bool planAssassination(Character target)
+        {
+            bool success = false;
+            uint planID = Globals_Game.GetNextJournalEntryID();
+
+            uint year = Globals_Game.clock.currentYear;
+            byte season = Globals_Game.clock.currentSeason;
+
+            string assassinEntry = this.charID + "|assassin";
+            string targetEntry = target.charID + "|target";
+            string[] myPlanPersonae = new string[] { assassinEntry, targetEntry };
+
+            string[] fields = new string[2];
+            fields[0] = this.firstName + " " + this.familyName;
+            fields[1] = target.firstName + " " + target.familyName;
+
+            ProtoMessage plan = new ProtoMessage();
+            plan.ResponseType = DisplayMessages.JournalAssassinationPlan;
+            plan.MessageFields = fields;
+            JournalEntry myPlan = new JournalEntry(planID, year, season, myPlanPersonae, "planMade", plan);
+            success = Globals_Game.AddPastEvent(myPlan);
+            if (success)
+            {
+                this.assassinationPlans.Add(target);
+            }
+            return success;
+        }
+
         /// <summary>
         /// Allows a character to propose marriage between himself and a female family member of another player 
         /// </summary>
@@ -4646,6 +4686,8 @@ namespace hist_mmorpg
        }
 
 
+
+
         // TODO use values from config
         /// <summary>
         /// Get the success chance for spying on a target
@@ -4921,7 +4963,91 @@ namespace hist_mmorpg
 
             result.ResponseType = DisplayMessages.Success;
            return isSuccessful;
-       }
+        }
+
+        public bool Assassinate(Character target)
+        {
+            bool isSuccessful = false;
+            bool wasDetected = false;
+            bool wasKilled = false;
+
+            double detecThreshold = 40;
+
+            double killThreshold = 30;
+            var result = new ProtoMessage();
+            double success = GetSpySuccessChance(target);
+            this.AdjustDays(10);
+
+            double successChance = Utility_Methods.GetRandomDouble(85,25);
+            double escapeChance = Utility_Methods.GetRandomDouble(75, 35);
+
+            if (success > successChance)
+            {
+                isSuccessful = true;
+                target.ProcessDeath("assassinated");
+            }
+
+            if ((success + escapeChance)/2 < detecThreshold)
+            {
+                wasDetected = true;
+            }
+            if ((success + escapeChance)/2 < killThreshold)
+            {
+                wasKilled = true;
+                this.ProcessDeath("assassination attempt failed");
+            }
+
+            PlayerCharacter assassinOwner = this.GetPlayerCharacter();
+            PlayerCharacter targetOwner = this.GetPlayerCharacter();
+
+
+            if (isSuccessful && wasKilled)
+            {
+                Globals_Game.UpdatePlayer(assassinOwner.playerID, DisplayMessages.AssassinSuccessKilled, new string[] { this.firstName + " " + this.familyName, target.firstName + " " + target.familyName });
+                if (targetOwner != null)
+                {
+                    Globals_Game.UpdatePlayer(targetOwner.playerID, DisplayMessages.EnemyAssassinSuccessKilled, new string[] { target.firstName + " " + target.familyName, assassinOwner.firstName + " " + assassinOwner.familyName });
+                }
+                this.AdjustStatureModifier(-(assassinOwner.statureModifier / target.statureModifier)*2);
+                assassinOwner.AdjustStatureModifier(-(assassinOwner.statureModifier / target.statureModifier)*2);
+            }
+            if (isSuccessful && wasDetected)
+            {
+                Globals_Game.UpdatePlayer(assassinOwner.playerID, DisplayMessages.AssassinSuccessDetected, new string[] { this.firstName + " " + this.familyName, target.firstName + " " + target.familyName });
+                if (targetOwner != null)
+                {
+                    Globals_Game.UpdatePlayer(targetOwner.playerID, DisplayMessages.EnemyAssassinSuccessDetected, new string[] { target.firstName + " " + target.familyName, assassinOwner.firstName + " " + assassinOwner.familyName });
+                }
+                this.AdjustStatureModifier(-assassinOwner.statureModifier / target.statureModifier);
+                assassinOwner.AdjustStatureModifier(-assassinOwner.statureModifier / target.statureModifier);
+            }
+            else if (isSuccessful)
+            {
+                Globals_Game.UpdatePlayer(assassinOwner.playerID, DisplayMessages.AssassinSuccessful, new string[] { this.firstName + " " + this.familyName, target.firstName + " " + target.familyName });
+            }
+            else if (!isSuccessful && wasKilled)
+            {
+                Globals_Game.UpdatePlayer(assassinOwner.playerID, DisplayMessages.AssassinFailedKilled, new string[] { this.firstName + " " + this.familyName, target.firstName + " " + target.familyName });
+                if (targetOwner != null)
+                {
+                    Globals_Game.UpdatePlayer(targetOwner.playerID, DisplayMessages.EnemyAssassinFailedKilled, new string[] { target.firstName + " " + target.familyName, assassinOwner.firstName + " " + assassinOwner.familyName });
+                }
+                this.AdjustStatureModifier(-(assassinOwner.statureModifier / target.statureModifier) * 2);
+                assassinOwner.AdjustStatureModifier(-(assassinOwner.statureModifier / target.statureModifier) * 2);
+            }
+            else if (!isSuccessful && wasDetected)
+            {
+                Globals_Game.UpdatePlayer(assassinOwner.playerID, DisplayMessages.AssassinFailedDetected, new string[] { this.firstName + " " + this.familyName, target.firstName + " " + target.familyName });
+                if (targetOwner != null)
+                {
+                    Globals_Game.UpdatePlayer(targetOwner.playerID, DisplayMessages.EnemyAssassinFailedDetected, new string[] { target.firstName + " " + target.familyName, assassinOwner.firstName + " " + assassinOwner.familyName });
+                }
+                this.AdjustStatureModifier(-assassinOwner.statureModifier / target.statureModifier);
+                assassinOwner.AdjustStatureModifier(-assassinOwner.statureModifier / target.statureModifier);
+            }
+
+            return isSuccessful;
+        }
 
         /// <summary>
         /// Spy on an army to obtain information. Note: SpyCheck should be performed first

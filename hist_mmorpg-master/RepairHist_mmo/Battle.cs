@@ -482,6 +482,7 @@ namespace hist_mmorpg
                 for (int i = 0; i < attackerAllies.Count; i++)
                 {
                     attackerStartTroops += attackerAllies[i].CalcArmySize();
+                    battleResults.attackerAllies.Add(attackerAllies[i].GetOwner().familyID);
                 }
             }
             if (defenderAllies != null)
@@ -489,12 +490,14 @@ namespace hist_mmorpg
                 for (int i = 0; i < defenderAllies.Count; i++)
                 {
                     defenderStartTroops += defenderAllies[i].CalcArmySize();
+                    battleResults.defenderAllies.Add(defenderAllies[i].GetOwner().familyID);
                 }
             }
             // get leaders
             Character attackerLeader = attacker.GetLeader();
             Character defenderLeader = defender.GetLeader();
-
+            
+            
            // if(attackerLeader!=null) {
                 battleResults.attackerLeader = attackerLeader.firstName + " " + attackerLeader.familyName;
           //  }
@@ -524,7 +527,7 @@ namespace hist_mmorpg
             {
                 case "pillage":
                     {
-                        battleValues = attacker.CalculateBattleValues(defender);
+                        battleValues = attacker.CalculateBattleValues(defender, defenderAllies);
                         break;
                     }
                 case "siege":
@@ -606,18 +609,54 @@ namespace hist_mmorpg
                     statureChange = 0.8 * (defender.CalcArmySize() / Convert.ToDouble(10000));
                     battleResults.statureChangeAttacker = statureChange;
                     attacker.GetOwner().AdjustStatureModifier(statureChange);
+                    attacker.moraleChange(statureChange);
+                    if (attackerAllies.Count > 0 && attackerAllies != null)
+                    {
+                        for (int i = 0; i < attackerAllies.Count; i++)
+                        {
+                            attackerAllies[i].GetOwner().AdjustStatureModifier(statureChange);
+                            attackerAllies[i].moraleChange(statureChange);
+                        }
+                    }
                     statureChange = -0.5 * (attacker.CalcArmySize() / Convert.ToDouble(10000));
                     battleResults.statureChangeDefender = statureChange;
                     defender.GetOwner().AdjustStatureModifier(statureChange);
+                    defender.moraleChange(statureChange);
+                    if (defenderAllies.Count > 0 && defenderAllies != null)
+                    {
+                        for (int i = 0; i < defenderAllies.Count; i++)
+                        {
+                            defenderAllies[i].GetOwner().AdjustStatureModifier(statureChange);
+                            defenderAllies[i].moraleChange(statureChange);
+                        }
+                    }
                 }
                 else
                 {
                     statureChange = 0.8 * (attacker.CalcArmySize() / Convert.ToDouble(10000));
                     battleResults.statureChangeDefender = statureChange;
                     defender.GetOwner().AdjustStatureModifier(statureChange);
+                    defender.moraleChange(statureChange);
+                    if (defenderAllies.Count > 0 && defenderAllies != null)
+                    {
+                        for (int i = 0; i < defenderAllies.Count; i++)
+                        {
+                            defenderAllies[i].GetOwner().AdjustStatureModifier(statureChange);
+                            defenderAllies[i].moraleChange(statureChange);
+                        }
+                    }
                     statureChange = -0.5 * (defender.CalcArmySize() / Convert.ToDouble(10000));
                     battleResults.statureChangeAttacker = statureChange;
                     attacker.GetOwner().AdjustStatureModifier(statureChange);
+                    attacker.moraleChange(statureChange);
+                    if (attackerAllies.Count > 0 && attackerAllies != null)
+                    {
+                        for (int i = 0; i < attackerAllies.Count; i++)
+                        {
+                            attackerAllies[i].GetOwner().AdjustStatureModifier(statureChange);
+                            attackerAllies[i].moraleChange(statureChange);
+                        }
+                    }
                 }
 
                 // CASUALTIES
@@ -782,6 +821,22 @@ namespace hist_mmorpg
                     if (retreatDistances[i] > 0)
                     {
                         bothSides[i].ProcessRetreat(retreatDistances[i]);
+                    }
+                }
+
+                if (attackerAllies.Count > 0 && attackerAllies != null)
+                {
+                    for (int i = 0; i < attackerAllies.Count; i++)
+                    {
+                        attackerAllies[i].ProcessRetreat(retreatDistances[0]);
+                    }
+                }
+
+                if (defenderAllies.Count > 0 && defenderAllies != null)
+                {
+                    for (int i = 0; i < defenderAllies.Count; i++) 
+                    { 
+                        defenderAllies[i].ProcessRetreat(retreatDistances[1]); 
                     }
                 }
                 // If attacker has retreated add to retreat list

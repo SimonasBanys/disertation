@@ -72,6 +72,10 @@ namespace hist_mmorpg
         /// </summary>
         public String endDate { get; set; }
 
+        public List<String> defenderAllies { get; set; }
+
+        public List<String> attackerAllies { get; set; }
+
         /// <summary>
         /// Constructor for Siege
         /// </summary>
@@ -92,7 +96,7 @@ namespace hist_mmorpg
         /// <param name="end">string holding season and year the siege ended</param>
         public Siege(String id, uint startYr, byte startSeas, string bsgPlayer, string defPlayer, string bsgArmy,
             string defGarr, string fief, double day, double kpLvl, int totAtt = 0, int totDef = 0, double totDay = 1,
-            string defAdd = null, string end = null)
+            string defAdd = null, string end = null, List<String> attackerAllies = null, List<String> defenderAllies = null)
         {
             // VALIDATION
 
@@ -212,6 +216,8 @@ namespace hist_mmorpg
             this.totalCasualtiesDefender = totDef;
             this.totalDays = totDay;
             this.defenderAdditional = defAdd;
+            this.defenderAllies = defenderAllies;
+            this.attackerAllies = attackerAllies;
             if (String.IsNullOrWhiteSpace(end))
             {
                 this.endDate = null;

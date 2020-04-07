@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
     <e p="C:\Users\simon\.Rider2019.2\system\extResources" t="IncludeRecursive" />
@@ -25,6 +25,7 @@
         <e p="Birth.cs" t="Include" />
         <e p="Character.cs" t="Include" />
         <e p="Client.cs" t="Include" />
+        <e p="Diplomacy.cs" t="Include" />
         <e p="Fief.cs" t="Include" />
         <e p="GameClock.cs" t="Include" />
         <e p="Globals_Game.cs" t="Include" />

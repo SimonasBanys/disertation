@@ -24,13 +24,15 @@ namespace hist_mmorpg
         /// </summary>
         public double travelCost { get; set; }
 
+        public double[] combatMods { get; set; }
+
         /// <summary>
         /// Constructor for Terrain
         /// </summary>
 		/// <param name="id">String holding terrain code</param>
         /// <param name="desc">String holding terrain description</param>
         /// <param name="tc">double holding terrain travel cost</param>
-		public Terrain(String id, string desc, double tc)
+		public Terrain(String id, string desc, double tc, double[] combatMods)
         {
             // VALIDATION
 
@@ -61,6 +63,7 @@ namespace hist_mmorpg
             this.id = id;
             this.description = desc;
             this.travelCost = tc;
+            this.combatMods = combatMods;
         }
 
         /// <summary>

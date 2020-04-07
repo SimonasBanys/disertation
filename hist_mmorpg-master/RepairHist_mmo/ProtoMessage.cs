@@ -342,6 +342,12 @@ namespace hist_mmorpg
         /// </summary>
         public string siegeStatus { get; set; }
 
+        public bool autoSupportAttack { get; set; }
+        public bool autoSupportDefence { get; set; }
+        public bool autoPillage { get; set; }
+        public double loyalty { get; set; }
+        public double morale { get; set; }
+
         public ProtoArmy():base()
         {
 
@@ -395,6 +401,8 @@ namespace hist_mmorpg
             }
             this.troops = a.GetTroopsEstimate(observer);
         }
+
+
         public void includeAll(Army a)
         {
             this.aggression = a.aggression;
@@ -403,6 +411,11 @@ namespace hist_mmorpg
             this.days = a.days;
             this.isMaintained = a.isMaintained;
             this.maintCost = a.getMaintenanceCost();
+            this.autoSupportAttack = a.autoSupportAttack;
+            this.autoSupportDefence = a.autoSupportDefence;
+            this.autoPillage = a.autoPillage;
+            this.morale = a.morale;
+            this.loyalty = a.loyalty;
         }
 
         public void includeSpy(Army a)
@@ -1308,6 +1321,9 @@ namespace hist_mmorpg
         public uint[] troops { get; set; }
         public bool autoSupportAttack { get; set; }
         public bool autoSupportDefence { get; set; }
+        public bool autoPillage { get; set; }
+        public double loyalty { get; set; }
+        public double morale { get; set; }
 
         public ProtoArmyOverview()
             : base()
@@ -1332,6 +1348,9 @@ namespace hist_mmorpg
             }
             this.autoSupportAttack = a.autoSupportAttack;
             this.autoSupportDefence = a.autoSupportDefence;
+            this.autoPillage = a.autoPillage;
+            this.morale = a.morale;
+            this.loyalty = a.loyalty;
         }
         public void includeAll(Army a)
         {
@@ -1340,6 +1359,9 @@ namespace hist_mmorpg
             this.troops = a.troops;
             this.autoSupportAttack = a.autoSupportAttack;
             this.autoSupportDefence = a.autoSupportDefence;
+            this.autoPillage = a.autoPillage;
+            this.morale = a.morale;
+            this.loyalty = a.loyalty;
         }
                 
     }
@@ -1469,6 +1491,12 @@ namespace hist_mmorpg
         /// </summary>
         public string defendingPlayer { get; set; }
 
+        public List<String> defenderAllies { get; set; }
+
+        public List<String> attackerAllies { get; set; }
+
+
+
         public ProtoSiegeOverview(Siege s)
         {
             this.siegeID = s.siegeID;
@@ -1565,6 +1593,10 @@ namespace hist_mmorpg
         public bool besiegerWon { get; set; }
         public int lootLost { get; set; }
 
+        public List<String> defenderAllies { get; set; }
+
+        public List<String> attackerAllies { get; set; }
+
         public ProtoSiegeDisplay() : base() { }
         public ProtoSiegeDisplay(Siege s)
         {
@@ -1584,6 +1616,8 @@ namespace hist_mmorpg
             totalCasualtiesDefender = totalCasualtiesDefender;
             defenderAdditional = s.defenderAdditional;
             endDate = s.endDate;
+            attackerAllies = s.attackerAllies;
+            defenderAllies = s.defenderAllies;
         }
     }
 
@@ -1674,6 +1708,11 @@ namespace hist_mmorpg
         /// Indicates how much stature the defender has gained/lost
         /// </summary>
         public double statureChangeDefender;
+
+        public List<String> attackerAllies { get; set; }
+
+        public List<String> defenderAllies { get; set; }
+
         public ProtoBattle()
             : base()
         {
