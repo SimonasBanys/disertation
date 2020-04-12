@@ -843,11 +843,19 @@ namespace hist_mmorpg
                 if (retreatDistances[0] > 0)
                 {
                     retreatedArmies.Add(battleResults.attackerOwner);
+                    for (int i = 0; i < attackerAllies.Count; i++)
+                    {
+                        retreatedArmies.Add(attackerAllies[i].owner);
+                    }
                 }
                 // If defender retreated add to retreat list
                 if (retreatDistances[1] > 0)
                 {
                     retreatedArmies.Add(battleResults.defenderOwner);
+                    for (int i = 0; i < defenderAllies.Count; i++)
+                    {
+                        retreatedArmies.Add(defenderAllies[i].owner);
+                    }
                 }
                 // PC/NPC INJURIES/DEATHS
                 // check if any PCs/NPCs have been wounded or killed

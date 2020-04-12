@@ -131,8 +131,12 @@ namespace TestClientRory
                     var checkResult = player.Check(_testClient);
                     _testClient.charID = _displayResults.DisplayCheck(checkResult);
                     break;
-
-
+                case WordRecogniser.Tasks.SendAssassin:
+                    {
+                        var assassinResult = player.sendAssassin(arguments[1], arguments[2], _testClient);
+                        _displayResults.DisplaySendAssassin(assassinResult);
+                        break;
+                    }
                 case WordRecogniser.Tasks.Fief:
                     var fiefResult = player.FiefDetails(_testClient);
                     _displayResults.DisplayFief(fiefResult);

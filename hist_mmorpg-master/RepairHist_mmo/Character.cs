@@ -3900,7 +3900,7 @@ namespace hist_mmorpg
             ProtoMessage plan = new ProtoMessage();
             plan.ResponseType = DisplayMessages.JournalAssassinationPlan;
             plan.MessageFields = fields;
-            JournalEntry myPlan = new JournalEntry(planID, year, season, myPlanPersonae, "planMade", plan);
+            JournalEntry myPlan = new JournalEntry(planID, year, season, myPlanPersonae, "assassination", plan);
             success = Globals_Game.AddPastEvent(myPlan);
             if (success)
             {
@@ -6403,7 +6403,7 @@ namespace hist_mmorpg
                         thisArmy = new Army(Globals_Game.GetNextArmyID(), null, this.charID, this.days, this.location.id);
                         thisArmy.AddArmy();
                     }
-
+                    uint oldSize = thisArmy.CalcArmySize();
                     // deduct cost of troops from treasury
                     homeFief.AdjustTreasury(-troopCost);
 
@@ -6431,7 +6431,7 @@ namespace hist_mmorpg
                     {
                         thisArmy.troops[i] += typesRecruited[i];
                     }
-
+                    thisArmy.loyalty = (oldSize * thisArmy.loyalty + totalSoFar * (this.location.loyalty/10)) / thisArmy.loyalty;
                     // indicate recruitment has occurred in this fief only if troops have actually been recruited
 
                         this.location.hasRecruited = true;

@@ -161,7 +161,8 @@ namespace TestClientROry
         {
             Console.WriteLine("Command List: \n siege\n army \n check \n profile \n fief \n move [direction parameter ne,nw,e,w,se,sw] \n hire [amount] \n fiefs" +
                 " \n changeAtt [Army ID] (changes auto support for allied armies when attacking, should heavy losses be incured the army could potentially be disbanded)" +
-                " \n changeDef [Army ID] (changes auto support for allied armies when defending, should heavy loses be incurred the army could potentially be disbanded)");
+                " \n changeDef [Army ID] (changes auto support for allied armies when defending, should heavy loses be incurred the army could potentially be disbanded)" +
+                " \n sendAssassin [assassinID] [targetID] (assassin may die during the attempt)");
         }
 
         public void DisplaySiege(ProtoSiegeDisplay siegeDisplayProtoBuf)
@@ -198,6 +199,17 @@ namespace TestClientROry
                     }
                 }
             }
+            Console.WriteLine("-----------------------------");
+        }
+
+        public void DisplaySendAssassin(ProtoMessage reply)
+        {
+            Console.WriteLine("-----------------------------");
+            Console.WriteLine("Send Assassin result:");
+            Console.WriteLine("-----------------------------");
+            Console.WriteLine("Making plans result: " + reply.ResponseType);
+            Console.WriteLine("Assassin ID:" + reply.MessageFields[0]);
+            Console.WriteLine("Target ID: " + reply.MessageFields[1]);
             Console.WriteLine("-----------------------------");
         }
 

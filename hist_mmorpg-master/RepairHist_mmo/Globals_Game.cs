@@ -1240,6 +1240,86 @@ namespace hist_mmorpg
                         }
 
                     }
+
+                    else if ((jEntry.Value.type).ToLower().Equals("assassination"))
+                    {
+                        // get target and assassin
+                        Character target = null;
+                        Character assassin = null;
+
+                        for (int i = 0; i < jEntry.Value.personae.Length; i++)
+                        {
+                            string thisPersonae = jEntry.Value.personae[i];
+                            string[] thisPersonaeSplit = thisPersonae.Split('|');
+
+                            switch (thisPersonaeSplit[1])
+                            {
+                                case "targer":
+                                    if (Globals_Game.pcMasterList.ContainsKey(thisPersonaeSplit[0]))
+                                    {
+                                        target = Globals_Game.pcMasterList[thisPersonaeSplit[0]];
+                                    }
+                                    else if (Globals_Game.npcMasterList.ContainsKey(thisPersonaeSplit[0]))
+                                    {
+                                        target = Globals_Game.npcMasterList[thisPersonaeSplit[0]];
+                                    }
+                                    break;
+                                case "assassin":
+                                    if (Globals_Game.pcMasterList.ContainsKey(thisPersonaeSplit[0]))
+                                    {
+                                        assassin = Globals_Game.pcMasterList[thisPersonaeSplit[0]];
+                                    }
+                                    else if (Globals_Game.npcMasterList.ContainsKey(thisPersonaeSplit[0]))
+                                    {
+                                        assassin = Globals_Game.npcMasterList[thisPersonaeSplit[0]];
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
+                        // CONDITIONAL CHECKS
+                        // death of bride or groom
+                        if ((!target.isAlive) || (!assassin.isAlive))
+                        {
+                            proceed = false;
+
+                            // add entry to list for removal
+                            forRemoval.Add(jEntry.Value);
+                        }
+
+                        // separated by siege
+                        else
+                        {
+                            // if are in different fiefs
+                            if (target.location != assassin.location)
+                            {
+                                proceed = false;
+
+                                // postpone marriage until next season
+                                if (jEntry.Value.season == 3)
+                                {
+                                    jEntry.Value.season = 0;
+                                    jEntry.Value.year++;
+                                }
+                                else
+                                {
+                                    jEntry.Value.season++;
+                                }
+                            }
+                        }
+                    }
+
+                    if (proceed)
+                    {
+                        // process marriage
+                        jEntry.Value.processAssassination();
+
+                        // add entry to list for removal
+                        forRemoval.Add(jEntry.Value);
+                    }
+
                 }
             }
 

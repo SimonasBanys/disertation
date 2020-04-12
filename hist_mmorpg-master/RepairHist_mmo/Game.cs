@@ -2560,11 +2560,26 @@ namespace hist_mmorpg
             {
                 return new ProtoMessage(assassinErr);
             }
+            if (assassin != null)
+            {
+                if (!PermissionManager.isAuthorized(PermissionManager.ownsCharOrAdmin, client.myPlayerCharacter, assassin))
+                {
+                    return new ProtoMessage(DisplayMessages.ErrorGenericUnauthorised);
+                }
+            }
             var madePlans = false;
             madePlans = assassin.planAssassination(target);
             var success = new ProtoMessage();
-            success.ResponseType = DisplayMessages.Success;
+            if (madePlans)
+            {
+                success.ResponseType = DisplayMessages.Success;
+            } else
+            {
+                success.ResponseType = DisplayMessages.ErrorGenericUnauthorised;
+            }
             success.Message = "Assassination planned";
+            success.MessageFields[0] = assassinID;
+            success.MessageFields[1] = targetID;
             return success;
         }
 

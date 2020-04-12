@@ -71,9 +71,7 @@ namespace hist_mmorpg
         /// Holds season and year the siege ended
         /// </summary>
         public String endDate { get; set; }
-
         public List<String> defenderAllies { get; set; }
-
         public List<String> attackerAllies { get; set; }
 
         /// <summary>

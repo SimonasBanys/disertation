@@ -365,7 +365,8 @@ namespace hist_mmorpg
                         result.ResponseType = DisplayMessages.PillageOwnFief;
                         result.MessageFields = new string[] { "siege" };
                     }
-                } else if (a.GetOwner().isAlly(f.owner))
+                } 
+                else if (a.GetOwner().isAlly(f.owner))
                 {
                     proceed = false;
                     if (circumstance.Equals("pillage"))

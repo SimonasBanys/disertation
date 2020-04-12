@@ -8,8 +8,7 @@
             Exit, Players, Sieges, Profile, SeasonUpdate,
             JournalEntries, Journal, FiefExpenditure, Help,
             ChangeAttackSupport, ChangeDefenceSupport,
-            HireNew, AttackArmy,
-            ChangeAutoPillage
+            HireNew, AttackArmy, ChangeAutoPillage, SendAssassin
         }
 
         public Tasks CheckWord(string InputWord)
@@ -55,6 +54,8 @@
                     return Tasks.ChangeDefenceSupport;
                 case "ATTACKARMY":
                     return Tasks.AttackArmy;
+                case "SENDASSASSIN":
+                    return Tasks.SendAssassin;
                 default:
                     return Tasks.SyntaxError;
             }

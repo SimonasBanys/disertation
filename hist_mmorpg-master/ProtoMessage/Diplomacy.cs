@@ -92,7 +92,7 @@ namespace ProtoMessage
             Character aC = Globals_Game.getCharFromID(a);
             Character bC = Globals_Game.getCharFromID(b);
 
-            if (aC.wagingWar(bC) && bC.wagingWar(aC))
+            if (!aC.wagingWar(bC) && !bC.wagingWar(aC))
             {
                 for (int i = 0; i < Globals_Game.npcMasterList.Count; i++)
                 {

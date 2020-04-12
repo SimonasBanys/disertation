@@ -1490,9 +1490,7 @@ namespace hist_mmorpg
         /// Holds defending player
         /// </summary>
         public string defendingPlayer { get; set; }
-
         public List<String> defenderAllies { get; set; }
-
         public List<String> attackerAllies { get; set; }
 
 
@@ -1503,6 +1501,8 @@ namespace hist_mmorpg
             this.besiegedFief = s.besiegedFief;
             this.besiegingPlayer = s.besiegingPlayer;
             this.defendingPlayer = s.defendingPlayer;
+            this.defenderAllies = s.defenderAllies;
+            this.attackerAllies = s.attackerAllies;
         }
         public ProtoSiegeOverview() : base()
         {
@@ -1592,9 +1592,7 @@ namespace hist_mmorpg
 
         public bool besiegerWon { get; set; }
         public int lootLost { get; set; }
-
         public List<String> defenderAllies { get; set; }
-
         public List<String> attackerAllies { get; set; }
 
         public ProtoSiegeDisplay() : base() { }
@@ -1708,9 +1706,7 @@ namespace hist_mmorpg
         /// Indicates how much stature the defender has gained/lost
         /// </summary>
         public double statureChangeDefender;
-
         public List<String> attackerAllies { get; set; }
-
         public List<String> defenderAllies { get; set; }
 
         public ProtoBattle()

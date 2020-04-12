@@ -15,7 +15,8 @@ namespace ProtoMessage
         Update = 0, LogIn, UseChar, GetPlayers, ViewChar, ViewArmy, GetNPCList, HireNPC, FireNPC, TravelTo, MoveCharacter, ViewFief, ViewMyFiefs, AppointBailiff, RemoveBailiff, BarCharacters, BarNationalities, UnbarCharacters, UnbarNationalities, GrantFiefTitle, AdjustExpenditure, TransferFunds,
         TransferFundsToPlayer, EnterExitKeep, ListCharsInMeetingPlace, TakeThisRoute, Camp, AddRemoveEntourage, ProposeMarriage, OfferAlliance, AcceptRejectProposal, RejectProposal, AppointHeir, TryForChild, RecruitTroops, MaintainArmy, AppointLeader, DropOffTroops,
         ListDetachments, ListArmies, PickUpTroops, PillageFief, BesiegeFief, AdjustCombatValues, ExamineArmiesInFief, Attack, ViewJournalEntries, ViewJournalEntry, SiegeRoundReduction, SiegeRoundStorm, SiegeRoundNegotiate, SiegeList, ViewSiege, EndSiege, DisbandArmy, SpyFief, SpyCharacter, SpyArmy, Kidnap, ViewCaptives, ViewCaptive, RansomCaptive, ReleaseCaptive, ExecuteCaptive, RespondRansom, SeasonUpdate,
-        AcceptRejectAlliance, OfferAllianceAgainst, AcceptRejectAllianceAgainst, OfferPeace, ChangeAttackAutoSupport, ChangeDefenceAutoSupport
+        AcceptRejectAlliance, OfferAllianceAgainst, AcceptRejectAllianceAgainst, OfferPeace, ChangeAttackAutoSupport, ChangeDefenceAutoSupport, RecruitNew, ChangeAutoPillage,
+        PlanAssassination
     }
     /// <summary>
     /// enum representing all strings that may be sent to a client,
@@ -48,12 +49,8 @@ namespace ProtoMessage
         CharacterTransferTitle, CharacterTitleOwner, CharacterTitleHighest, CharacterTitleKing, CharacterTitleAncestral, CharacterHeir, PillageInitiateSiege, PillageRetreat, PillageDays, PillageOwnFief, PillageUnderSiege, PillageSiegeAlready, PillageAlready, PillageArmyDefeat, PillageSiegeRebellion, FiefExpenditureAdjustment, FiefExpenditureAdjusted, FiefStatus, FiefOwnershipHome,
         FiefOwnershipNewHome, FiefOwnershipNoFiefs, FiefChangeOwnership, FiefQuellRebellionFail, FiefEjectCharacter, FiefNoCaptives, ProvinceAlreadyOwn, KingdomAlreadyKing, KingdomOwnershipChallenge, ProvinceOwnershipChallenge, ErrorGenericCharacterUnidentified, ErrorGenericUnauthorised, ErrorGenericMessageInvalid, ErrorGenericTooFarFromFief, FiefNoBailiff, FiefCouldNotBar, FiefCouldNotUnbar,
         ErrorGenericBarOwnNationality, ErrorGenericPositiveInteger, GenericReceivedFunds, ErrorGenericNoHomeFief, CharacterRecruitInsufficientFunds, CharacterRecruitOk, SiegeNotBesieger, JournalEntryUnrecognised, JournalEntryNotProposal, ErrorGenericArmyUnidentified, ErrorGenericSiegeUnidentified, ErrorSpyDead, ErrorSpyCaptive, ErrorSpyOwn, SpyChance, SpySuccess, SpyFail, SpySuccessDetected, SpyFailDetected, SpyFailDead, SpyCancelled, EnemySpySuccess, EnemySpyFail, EnemySpyKilled, CharacterHeldCaptive, RansomReceived, RansomPaid, RansonDenied, RansomRepliedAlready, RansomCaptiveDead, RansomAlready, NotCaptive, EntryNotRansom, KidnapOwnCharacter, KidnapDead, KidnapNoPlayer, KidnapSuccess, KidnapSuccessDetected, KidnapFailDetected, KidnapFailDead, KidnapFail, EnemyKidnapSuccess, EnemyKidnapSuccessDetected, EnemyKidnapFail, EnemyKidnapKilled, CharacterExecuted, CharacterReleased, LogInSuccess, LogInFail, YouDied, YouDiedNoHeir, CharacterIsDead, Timeout,
-        JournalAlliance,
-        JournalEntryNotAllianceOffer,
-        JournalOfferReply,
-        JournalPeace,
-        JournalEntryNotPeaceOffer,
-        ErrorTargetArmyIsAlly
+        JournalAlliance, JournalEntryNotAllianceOffer, JournalOfferReply, JournalPeace, JournalEntryNotPeaceOffer, ErrorTargetArmyIsAlly, PillageAllyFief, JournalAssassination, JournalAssassinationPlan, AssassinSuccessDetected,
+        EnemyAssassinSuccessDetected, AssassinSuccessful, AssassinFailedKilled, EnemyAssassinFailedKilled, AssassinFailedDetected, EnemyAssassinFailedDetected, AssassinSuccessKilled, EnemyAssassinSuccessKilled
     }
     /// <summary>
     /// Class storing any required game-wide static variables and related methods
@@ -71,7 +68,7 @@ namespace ProtoMessage
         /// <summary>
         /// Holds data for all players required for the calculation of individual victory
         /// </summary>
-        public static Dictionary<string, VictoryData> victoryData = new Dictionary<string,VictoryData>();
+        public static Dictionary<string, VictoryData> victoryData = new Dictionary<string, VictoryData>();
         /// <summary>
         /// Holds keys for VictoryData objects (used when retrieving from database)
         /// </summary>
@@ -288,7 +285,7 @@ namespace ProtoMessage
         /// 1 = individual position game
         /// 2 = team historical game
         /// </summary>
-        
+
         /// <summary>
         /// Enum representing character stats, which affect the success of certain actions and are affected by traits
         /// </summary>
@@ -421,7 +418,7 @@ namespace ProtoMessage
 
             return totMoney;
         }
-        
+
         /// <summary>
         /// Gets the total population for all fiefs in the game
         /// </summary>
@@ -573,7 +570,7 @@ namespace ProtoMessage
                 foreach (PlayerCharacter pc in interestedPlayers)
                 {
                     // If PlayerCharacter is active (assigned to a client)
-                    if (pc.playerID!=null && Globals_Server.Clients.ContainsKey(pc.playerID))
+                    if (pc.playerID != null && Globals_Server.Clients.ContainsKey(pc.playerID))
                     {
                         // call observer's update method to perform the required actions
                         // based on the string passed
@@ -584,7 +581,7 @@ namespace ProtoMessage
                         }
                     }
                 }
-                Globals_Game.NotifyObservers(DisplayMessages.newEvent,interestedPlayers);
+                Globals_Game.NotifyObservers(DisplayMessages.newEvent, interestedPlayers);
 
             }
 
@@ -629,7 +626,7 @@ namespace ProtoMessage
         /// </summary>
         /// <returns>bool indicating success</returns>
         /// <param name="challenge">OwnershipChallenge to be added</param>
-        public static bool AddOwnershipChallenge(OwnershipChallenge challenge,out ProtoMessage error)
+        public static bool AddOwnershipChallenge(OwnershipChallenge challenge, out ProtoMessage error)
         {
             bool success = true;
             string toDisplay = "";
@@ -755,7 +752,7 @@ namespace ProtoMessage
                         successThreshold = totalParts / 2.0;
                     }
                     String[] fields = null;
-                    DisplayMessages ResponseType = DisplayMessages.None ;
+                    DisplayMessages ResponseType = DisplayMessages.None;
                     // check to see if ownership condition has been met
                     // ownership condition MET
                     if (challengerTally > successThreshold)
@@ -787,7 +784,7 @@ namespace ProtoMessage
                                 // journal entry description
                                 fields[0] = contestedPlace.name;
                                 fields[1] = contestedPlace.id;
-                                fields[2] = challenger.firstName+ " " + challenger.familyName;
+                                fields[2] = challenger.firstName + " " + challenger.familyName;
                                 fields[3] = currentOwner.firstName + " " + currentOwner.familyName;
 
                             }
@@ -885,7 +882,7 @@ namespace ProtoMessage
                         ProtoMessage processChallenge = new ProtoMessage();
                         processChallenge.ResponseType = ResponseType;
                         processChallenge.MessageFields = fields;
-                        JournalEntry myEntry = new JournalEntry(entryID, year, season, entryPersonae, entryType, processChallenge, loc: entryLoc );
+                        JournalEntry myEntry = new JournalEntry(entryID, year, season, entryPersonae, entryType, processChallenge, loc: entryLoc);
                         Globals_Game.AddPastEvent(myEntry);
                     }
                 }
@@ -1243,13 +1240,91 @@ namespace ProtoMessage
                         }
 
                     }
+                    else if ((jEntry.Value.type).ToLower().Equals("assassination"))
+                    {
+                        // get target and assassin
+                        Character target = null;
+                        Character assassin = null;
+
+                        for (int i = 0; i < jEntry.Value.personae.Length; i++)
+                        {
+                            string thisPersonae = jEntry.Value.personae[i];
+                            string[] thisPersonaeSplit = thisPersonae.Split('|');
+
+                            switch (thisPersonaeSplit[1])
+                            {
+                                case "targer":
+                                    if (Globals_Game.pcMasterList.ContainsKey(thisPersonaeSplit[0]))
+                                    {
+                                        target = Globals_Game.pcMasterList[thisPersonaeSplit[0]];
+                                    }
+                                    else if (Globals_Game.npcMasterList.ContainsKey(thisPersonaeSplit[0]))
+                                    {
+                                        target = Globals_Game.npcMasterList[thisPersonaeSplit[0]];
+                                    }
+                                    break;
+                                case "assassin":
+                                    if (Globals_Game.pcMasterList.ContainsKey(thisPersonaeSplit[0]))
+                                    {
+                                        assassin = Globals_Game.pcMasterList[thisPersonaeSplit[0]];
+                                    }
+                                    else if (Globals_Game.npcMasterList.ContainsKey(thisPersonaeSplit[0]))
+                                    {
+                                        assassin = Globals_Game.npcMasterList[thisPersonaeSplit[0]];
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
+                        // CONDITIONAL CHECKS
+                        // death of bride or groom
+                        if ((!target.isAlive) || (!assassin.isAlive))
+                        {
+                            proceed = false;
+
+                            // add entry to list for removal
+                            forRemoval.Add(jEntry.Value);
+                        }
+
+                        // separated by siege
+                        else
+                        {
+                            // if are in different fiefs
+                            if (target.location != assassin.location)
+                            {
+                                proceed = false;
+
+                                // postpone marriage until next season
+                                if (jEntry.Value.season == 3)
+                                {
+                                    jEntry.Value.season = 0;
+                                    jEntry.Value.year++;
+                                }
+                                else
+                                {
+                                    jEntry.Value.season++;
+                                }
+                            }
+                        }
+                    }
+
+                    if (proceed)
+                    {
+                        // process marriage
+                        jEntry.Value.processAssassination();
+
+                        // add entry to list for removal
+                        forRemoval.Add(jEntry.Value);
+                    }
                 }
             }
 
             return forRemoval;
 
         }
-        
+
         /// <summary>
         /// Sends an update to a particular user
         /// </summary>
@@ -1257,7 +1332,8 @@ namespace ProtoMessage
         /// <param name="message"></param>
         public static void UpdatePlayer(string player, DisplayMessages message, string[] fields = null, string type = null)
         {
-            if(string.IsNullOrWhiteSpace(player)||(message == null)) {
+            if (string.IsNullOrWhiteSpace(player) || (message == null))
+            {
                 return;
             }
             if (string.IsNullOrWhiteSpace(type))
@@ -1334,14 +1410,14 @@ namespace ProtoMessage
 
             foreach (PlayerCharacter pc in interestedPlayers)
             {
-                Client c=null;
+                Client c = null;
                 // Check PlayerCharacter is being played
                 if (!string.IsNullOrWhiteSpace(pc.playerID))
                 {
                     Globals_Server.Clients.TryGetValue(pc.playerID, out c);
                 }
                 // If PlayerCharacter belongs to a client and client iscurrently playing
-                if (c!=null && registeredObservers.Contains(c))
+                if (c != null && registeredObservers.Contains(c))
                 {
                     // call observer's update method to perform the required actions
                     // based on the string passed
@@ -1362,7 +1438,7 @@ namespace ProtoMessage
 
         public static bool IsObserver(string c)
         {
-            return (registeredObservers.Exists(i=>i.username.Equals(c)));
+            return (registeredObservers.Exists(i => i.username.Equals(c)));
         }
     }
 
@@ -1506,7 +1582,7 @@ namespace ProtoMessage
                 this.currentMoney = thisPC.GetMoneyPercentage();
             }
         }
-        
+
         /// <summary>
         /// Calculates the current stature score
         /// </summary>

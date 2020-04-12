@@ -345,6 +345,12 @@ namespace ProtoMessage
         /// </summary>
         public string siegeStatus { get; set; }
 
+        public bool autoSupportAttack { get; set; }
+        public bool autoSupportDefence { get; set; }
+        public bool autoPillage { get; set; }
+        public double loyalty { get; set; }
+        public double morale { get; set; }
+
         public ProtoArmy() : base()
         {
 
@@ -406,6 +412,11 @@ namespace ProtoMessage
             this.days = a.days;
             this.isMaintained = a.isMaintained;
             this.maintCost = a.getMaintenanceCost();
+            this.autoSupportAttack = a.autoSupportAttack;
+            this.autoSupportDefence = a.autoSupportDefence;
+            this.autoPillage = a.autoPillage;
+            this.morale = a.morale;
+            this.loyalty = a.loyalty;
         }
 
         public void includeSpy(Army a)
@@ -1317,8 +1328,12 @@ namespace ProtoMessage
         public string locationID { get; set; }
         public string ownerName { get; set; }
         public uint armySize { get; set; }
+        public uint[] troops { get; set; }
         public bool autoSupportAttack { get; set; }
         public bool autoSupportDefence { get; set; }
+        public bool autoPillage { get; set; }
+        public double loyalty { get; set; }
+        public double morale { get; set; }
 
         public ProtoArmyOverview()
             : base()
@@ -1344,6 +1359,9 @@ namespace ProtoMessage
             this.armySize = a.CalcArmySize();
             this.autoSupportAttack = a.autoSupportAttack;
             this.autoSupportDefence = a.autoSupportDefence;
+            this.autoPillage = a.autoPillage;
+            this.morale = a.morale;
+            this.loyalty = a.loyalty;
         }
         public void includeAll(Army a)
         {
@@ -1351,6 +1369,9 @@ namespace ProtoMessage
             this.armySize = a.CalcArmySize();
             this.autoSupportAttack = a.autoSupportAttack;
             this.autoSupportDefence = a.autoSupportDefence;
+            this.autoPillage = a.autoPillage;
+            this.morale = a.morale;
+            this.loyalty = a.loyalty;
         }
 
     }
@@ -1486,6 +1507,8 @@ namespace ProtoMessage
         /// Holds defending player
         /// </summary>
         public string defendingPlayer { get; set; }
+        public List<String> defenderAllies { get; set; }
+        public List<String> attackerAllies { get; set; }
 
         public ProtoSiegeOverview(Siege s)
         {
@@ -1493,6 +1516,8 @@ namespace ProtoMessage
             this.besiegedFief = s.besiegedFief;
             this.besiegingPlayer = s.besiegingPlayer;
             this.defendingPlayer = s.defendingPlayer;
+            this.defenderAllies = s.defenderAllies;
+            this.attackerAllies = s.attackerAllies;
         }
         public ProtoSiegeOverview() : base()
         {
@@ -1582,6 +1607,8 @@ namespace ProtoMessage
 
         public bool besiegerWon { get; set; }
         public int lootLost { get; set; }
+        public List<String> defenderAllies { get; set; }
+        public List<String> attackerAllies { get; set; }
 
         public ProtoSiegeDisplay() : base() { }
         public ProtoSiegeDisplay(Siege s)
@@ -1602,6 +1629,8 @@ namespace ProtoMessage
             totalCasualtiesDefender = totalCasualtiesDefender;
             defenderAdditional = s.defenderAdditional;
             endDate = s.endDate;
+            attackerAllies = s.attackerAllies;
+            defenderAllies = s.defenderAllies;
         }
     }
 
@@ -1692,6 +1721,9 @@ namespace ProtoMessage
         /// Indicates how much stature the defender has gained/lost
         /// </summary>
         public double statureChangeDefender;
+        public List<String> attackerAllies { get; set; }
+        public List<String> defenderAllies { get; set; }
+
         public ProtoBattle()
             : base()
         {

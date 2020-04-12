@@ -53,3 +53,4 @@ C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\ProtoMessage\obj\Debug
 C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\ProtoMessage\obj\Debug\ProtoMessage.csproj.CopyComplete
 C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\ProtoMessage\obj\Debug\ProtoMessage.dll
 C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\ProtoMessage\obj\Debug\ProtoMessage.pdb
+C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\ProtoMessage\obj\Debug\ProtoMessage.csproj.CoreCompileInputs.cache

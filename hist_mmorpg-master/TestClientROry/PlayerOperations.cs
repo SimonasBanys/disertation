@@ -68,6 +68,18 @@ namespace TestClientRory
             return armyResult;
         }
 
+        public ProtoMessage sendAssassin(string assassin, string target, TextTestClient client)
+        {
+            ProtoMessage proto = new ProtoMessage();
+            proto.Message = assassin;
+            proto.MessageFields[0] = target;
+            proto.ActionType = Actions.PlanAssassination;
+            client.net.Send(proto);
+            var protoReply = GetActionReply(Actions.PlanAssassination, client);
+            var assassinResult = (ProtoMessage)protoReply.Result;
+            return assassinResult;
+        }
+
         public ProtoMessage changePillage(string aID, TextTestClient client)
         {
             ProtoArmy proto = new ProtoArmy();

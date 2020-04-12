@@ -23,7 +23,6 @@ namespace hist_mmorpg
         /// Holds terrain travel cost
         /// </summary>
         public double travelCost { get; set; }
-
         public double[] combatMods { get; set; }
 
         /// <summary>

@@ -1173,7 +1173,7 @@ namespace hist_mmorpg
             return success;
         }
 
-        public bool ProcessAssassination()
+        public bool processAssassination()
         {
             bool success = false;
 

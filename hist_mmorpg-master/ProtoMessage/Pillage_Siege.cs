@@ -366,6 +366,22 @@ namespace ProtoMessage
                         result.MessageFields = new string[] { "siege" };
                     }
                 }
+                else if (a.GetOwner().isAlly(f.owner))
+                {
+                    proceed = false;
+                    if (circumstance.Equals("pillage"))
+                    {
+                        result = new ProtoMessage();
+                        result.ResponseType = DisplayMessages.PillageAllyFief;
+                        result.MessageFields = new string[] { "pillage" };
+                    }
+                    else if (circumstance.Equals("siege"))
+                    {
+                        result = new ProtoMessage();
+                        result.ResponseType = DisplayMessages.PillageAllyFief;
+                        result.MessageFields = new string[] { "siege" };
+                    }
+                }
             }
 
             // check if fief is under siege

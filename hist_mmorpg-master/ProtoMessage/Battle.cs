@@ -482,6 +482,7 @@ namespace ProtoMessage
                 for (int i = 0; i < attackerAllies.Count; i++)
                 {
                     attackerStartTroops += attackerAllies[i].CalcArmySize();
+                    battleResults.attackerAllies.Add(attackerAllies[i].GetOwner().familyID);
                 }
             }
             if (defenderAllies != null)
@@ -489,6 +490,7 @@ namespace ProtoMessage
                 for (int i = 0; i < defenderAllies.Count; i++)
                 {
                     defenderStartTroops += defenderAllies[i].CalcArmySize();
+                    battleResults.defenderAllies.Add(defenderAllies[i].GetOwner().familyID);
                 }
             }
             // get leaders
@@ -520,7 +522,25 @@ namespace ProtoMessage
             }
 
             // get battle values for both armies
-            battleValues = attacker.CalculateBattleValues(defender);
+            switch (circumstance)
+            {
+                case "pillage":
+                    {
+                        battleValues = attacker.CalculateBattleValues(defender, defenderAllies);
+                        break;
+                    }
+                case "siege":
+                    {
+                        battleValues = attacker.CalculateBattleValues(defender, attackerAllies, defenderAllies);
+                        break;
+                    }
+                default:
+                    {
+                        battleValues = attacker.CalculateBattleValues(defender, attackerAllies, defenderAllies);
+                        break;
+                    }
+            }
+
 
             // check if attacker has managed to bring defender to battle
             // case 1: defending army sallies during siege to attack besieger = battle always occurs
@@ -591,18 +611,54 @@ namespace ProtoMessage
                     statureChange = 0.8 * (defender.CalcArmySize() / Convert.ToDouble(10000));
                     battleResults.statureChangeAttacker = statureChange;
                     attacker.GetOwner().AdjustStatureModifier(statureChange);
+                    attacker.moraleChange(statureChange);
+                    if (attackerAllies.Count > 0 && attackerAllies != null)
+                    {
+                        for (int i = 0; i < attackerAllies.Count; i++)
+                        {
+                            attackerAllies[i].GetOwner().AdjustStatureModifier(statureChange);
+                            attackerAllies[i].moraleChange(statureChange);
+                        }
+                    }
                     statureChange = -0.5 * (attacker.CalcArmySize() / Convert.ToDouble(10000));
                     battleResults.statureChangeDefender = statureChange;
                     defender.GetOwner().AdjustStatureModifier(statureChange);
+                    defender.moraleChange(statureChange);
+                    if (defenderAllies.Count > 0 && defenderAllies != null)
+                    {
+                        for (int i = 0; i < defenderAllies.Count; i++)
+                        {
+                            defenderAllies[i].GetOwner().AdjustStatureModifier(statureChange);
+                            defenderAllies[i].moraleChange(statureChange);
+                        }
+                    }
                 }
                 else
                 {
                     statureChange = 0.8 * (attacker.CalcArmySize() / Convert.ToDouble(10000));
                     battleResults.statureChangeDefender = statureChange;
                     defender.GetOwner().AdjustStatureModifier(statureChange);
+                    defender.moraleChange(statureChange);
+                    if (defenderAllies.Count > 0 && defenderAllies != null)
+                    {
+                        for (int i = 0; i < defenderAllies.Count; i++)
+                        {
+                            defenderAllies[i].GetOwner().AdjustStatureModifier(statureChange);
+                            defenderAllies[i].moraleChange(statureChange);
+                        }
+                    }
                     statureChange = -0.5 * (defender.CalcArmySize() / Convert.ToDouble(10000));
                     battleResults.statureChangeAttacker = statureChange;
                     attacker.GetOwner().AdjustStatureModifier(statureChange);
+                    attacker.moraleChange(statureChange);
+                    if (attackerAllies.Count > 0 && attackerAllies != null)
+                    {
+                        for (int i = 0; i < attackerAllies.Count; i++)
+                        {
+                            attackerAllies[i].GetOwner().AdjustStatureModifier(statureChange);
+                            attackerAllies[i].moraleChange(statureChange);
+                        }
+                    }
                 }
 
                 // CASUALTIES
@@ -635,7 +691,6 @@ namespace ProtoMessage
                     else
                     {
                         totalDefendTroopsLost = defender.ApplyTroopLosses(casualtyModifiers[1]);
-                        totalDefendTroopsLost = defender.ApplyTroopLosses(casualtyModifiers[1]);
                         if (defenderAllies != null && defenderAllies.Count > 0)
                         {
                             for (int i = 0; i < defenderAllies.Count; i++)
@@ -649,7 +704,7 @@ namespace ProtoMessage
                     totalAttackTroopsLost = attacker.ApplyTroopLosses(casualtyModifiers[0]);
                     if (attackerAllies != null && attackerAllies.Count > 0)
                     {
-                        for (int i = 0; i < defenderAllies.Count; i++)
+                        for (int i = 0; i < attackerAllies.Count; i++)
                         {
                             totalAttackTroopsLost += attackerAllies[i].ApplyTroopLosses(casualtyModifiers[0]);
                         }
@@ -676,7 +731,7 @@ namespace ProtoMessage
                         totalAttackTroopsLost = attacker.ApplyTroopLosses(casualtyModifiers[0]);
                         if (attackerAllies != null && attackerAllies.Count > 0)
                         {
-                            for (int i = 0; i < defenderAllies.Count; i++)
+                            for (int i = 0; i < attackerAllies.Count; i++)
                             {
                                 totalAttackTroopsLost += attackerAllies[i].ApplyTroopLosses(casualtyModifiers[0]);
                             }
@@ -770,15 +825,39 @@ namespace ProtoMessage
                         bothSides[i].ProcessRetreat(retreatDistances[i]);
                     }
                 }
+
+                if (attackerAllies.Count > 0 && attackerAllies != null)
+                {
+                    for (int i = 0; i < attackerAllies.Count; i++)
+                    {
+                        attackerAllies[i].ProcessRetreat(retreatDistances[0]);
+                    }
+                }
+
+                if (defenderAllies.Count > 0 && defenderAllies != null)
+                {
+                    for (int i = 0; i < defenderAllies.Count; i++)
+                    {
+                        defenderAllies[i].ProcessRetreat(retreatDistances[1]);
+                    }
+                }
                 // If attacker has retreated add to retreat list
                 if (retreatDistances[0] > 0)
                 {
                     retreatedArmies.Add(battleResults.attackerOwner);
+                    for (int i = 0; i < attackerAllies.Count; i++)
+                    {
+                        retreatedArmies.Add(attackerAllies[i].owner);
+                    }
                 }
                 // If defender retreated add to retreat list
                 if (retreatDistances[1] > 0)
                 {
                     retreatedArmies.Add(battleResults.defenderOwner);
+                    for (int i = 0; i < defenderAllies.Count; i++)
+                    {
+                        retreatedArmies.Add(defenderAllies[i].owner);
+                    }
                 }
                 // PC/NPC INJURIES/DEATHS
                 // check if any PCs/NPCs have been wounded or killed

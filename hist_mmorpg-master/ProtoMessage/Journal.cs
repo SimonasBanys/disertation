@@ -1178,6 +1178,74 @@ namespace ProtoMessage
             return success;
         }
 
+        public bool processAssassination()
+        {
+            bool success = false;
+
+            Character assassin = null;
+            Character target = null;
+            DisplayMessages targetErr;
+
+            for (int i = 0; i < this.personae.Length; i++)
+            {
+                string thisPersonae = this.personae[i];
+                string[] thisPersonaeSplit = thisPersonae.Split('|');
+
+                switch (thisPersonaeSplit[1])
+                {
+                    case "assassin":
+                        {
+                            assassin = Globals_Game.npcMasterList[thisPersonaeSplit[0]];
+                            break;
+                        }
+                    case "target":
+                        {
+                            target = Utility_Methods.GetCharacter(thisPersonaeSplit[0], out targetErr);
+                            break;
+                        }
+                    default:
+                        {
+                            break;
+                        }
+                }
+            }
+
+            uint assassinationID = Globals_Game.GetNextJournalEntryID();
+
+            uint year = Globals_Game.clock.currentYear;
+            byte season = Globals_Game.clock.currentSeason;
+
+            string assassinEntry = assassin.charID + "|assassin";
+            string targetEntry = target.charID + "|target";
+
+            string[] assassinationPersonae = new string[] { assassinEntry, targetEntry };
+
+            string type = "assassination";
+
+            string[] fields = new string[2];
+            fields[0] = assassin.firstName + " " + assassin.familyName;
+            fields[1] = target.firstName + " " + target.familyName;
+
+            ProtoMessage assassination = new ProtoMessage();
+
+            assassination.MessageFields = fields;
+            assassination.ResponseType = DisplayMessages.JournalAssassination;
+
+            JournalEntry assassinationEntry = new JournalEntry(assassinationID, year, season, assassinationPersonae, type, assassination);
+
+            var proceed = Globals_Game.AddPastEvent(assassinationEntry);
+
+            if (!proceed)
+            {
+                return false;
+            }
+
+            success = assassin.Assassinate(target);
+
+            return success;
+        }
+
+
         /// <summary>
         /// Processes the actions involved with a marriage
         /// </summary>
