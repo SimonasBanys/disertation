@@ -20,4 +20,4 @@ The server and text client can both be run on the same machine at the same time.
   
   Once the player is logged in, they should prest "enter" on their keyboard. This will allow the text client to get their character information from the server. Then typing "help" will give all the possible actions for the players to perform. For actions such as attack/changeAtt/changeDef the text client requires exact army ID, which is also case sensitive.
 
-# To find out full actions list on Text Client type help after character information has been fetched #
+# To find out full actions list on Text Client type "help" after character information has been fetched #
