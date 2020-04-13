@@ -3904,7 +3904,14 @@ namespace hist_mmorpg
             success = Globals_Game.AddPastEvent(myPlan);
             if (success)
             {
-                this.assassinationPlans.Add(target);
+                if (this.assassinationPlans != null)
+                {
+                    this.assassinationPlans.Add(target);
+                } else
+                {
+                    this.assassinationPlans = new List<Character>();
+                    this.assassinationPlans.Add(target);
+                }
             }
             return success;
         }

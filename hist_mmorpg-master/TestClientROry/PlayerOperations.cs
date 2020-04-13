@@ -72,7 +72,7 @@ namespace TestClientRory
         {
             ProtoMessage proto = new ProtoMessage();
             proto.Message = assassin;
-            proto.MessageFields[0] = target;
+            proto.MessageFields = new string[] { target };
             proto.ActionType = Actions.PlanAssassination;
             client.net.Send(proto);
             var protoReply = GetActionReply(Actions.PlanAssassination, client);

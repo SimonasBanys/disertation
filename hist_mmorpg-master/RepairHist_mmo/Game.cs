@@ -2578,8 +2578,7 @@ namespace hist_mmorpg
                 success.ResponseType = DisplayMessages.ErrorGenericUnauthorised;
             }
             success.Message = "Assassination planned";
-            success.MessageFields[0] = assassinID;
-            success.MessageFields[1] = targetID;
+            success.MessageFields = new string[] { assassinID, targetID };
             return success;
         }
 

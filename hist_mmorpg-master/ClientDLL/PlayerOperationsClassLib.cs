@@ -63,7 +63,10 @@ namespace ClientDLL
         {
             return _playerOps.changePillage(aID, _testClient);
         }
-
+        public ProtoMessage sendAssassin(string assassin, string target)
+        {
+            return _playerOps.sendAssassin(assassin, target, _testClient);
+        }
         public ProtoGenericArray<ProtoFief> Check()
         {
             return _playerOps.Check(_testClient);

@@ -17,10 +17,11 @@ namespace TestClientRory
         {
             var encryptString = "_encrypted_";
             string datePatern = "MM_dd_H_mm";
-            var logFilePath = "TestRun_NoSessions" + encryptString + DateTime.Now.ToString(datePatern) + ".txt";
             Client c;
             TextTestClient client = new TextTestClient();
             _displayResults = new DisplayResults();
+            var logFilePath = "TestRun_NoSessions" + encryptString + DateTime.Now.ToString(datePatern) + "_" +".txt";
+
             //Globals_Game.pcMasterList.Add("rory", new PlayerCharacter());
             using (Globals_Server.LogFile = new System.IO.StreamWriter(logFilePath))
             {

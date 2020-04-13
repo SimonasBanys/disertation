@@ -93,3 +93,4 @@ C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\TestClientROry\obj\Deb
 C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\TestClientROry\obj\Debug\TestClientRory.csproj.CopyComplete
 C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\TestClientROry\obj\Debug\TestClientROry.exe
 C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\TestClientROry\obj\Debug\TestClientROry.pdb
+C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\TestClientROry\obj\Debug\TestClientRory.csproj.CoreCompileInputs.cache

@@ -73,7 +73,8 @@ namespace hist_mmorpg
             LogInManager.StoreNewUser("test", "tomato");
             LogInManager.StoreNewUser("simon", "farshas");
             NetPeerConfiguration config = new NetPeerConfiguration(app_identifier);
-            config.LocalAddress = NetUtility.Resolve(host_name);
+            config.BroadcastAddress = NetUtility.Resolve("88.98.246.220");
+            //config.LocalAddress = NetUtility.Resolve(host_name);
             config.MaximumConnections = max_connections;
             config.Port = port;
             config.SetMessageTypeEnabled(NetIncomingMessageType.ConnectionApproval, true);
