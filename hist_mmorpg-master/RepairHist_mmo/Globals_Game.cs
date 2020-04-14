@@ -1253,7 +1253,7 @@ namespace hist_mmorpg
 
                             switch (thisPersonaeSplit[1])
                             {
-                                case "targer":
+                                case "target":
                                     if (Globals_Game.pcMasterList.ContainsKey(thisPersonaeSplit[0]))
                                     {
                                         target = Globals_Game.pcMasterList[thisPersonaeSplit[0]];

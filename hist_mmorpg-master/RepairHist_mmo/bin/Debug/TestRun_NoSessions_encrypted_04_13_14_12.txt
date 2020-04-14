@@ -1,0 +1,43 @@
+Server started- host: 88.98.246.220, port: 8000, appID: test, max connections: 2000
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Accepted connection from simon
+simon logs in from 192.168.1.1:56133
+From hist_mmorpg.Client: request = ViewMyFiefs, reply = None
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+From hist_mmorpg.Client: request = TravelTo, reply = Success
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Update simon: newEvent
+From hist_mmorpg.Client: request = PlanAssassination, reply = Success
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+From hist_mmorpg.Client: request = ViewJournalEntries, reply = JournalEntries
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library message Ping from 78.62.2.41:51291
+Run-time error: Recieved warning message: Received unhandled library mess

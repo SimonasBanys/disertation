@@ -961,7 +961,7 @@ namespace hist_mmorpg
 
             // calculate base chance of death
             // chance = 2.8% (2.5% for women) per health level below 10
-            Double deathChanceIncrement = 0;
+            double deathChanceIncrement = 0;
             if (this.isMale)
             {
                 deathChanceIncrement = 2.8;
@@ -971,7 +971,7 @@ namespace hist_mmorpg
                 deathChanceIncrement = 2.5;
             }
 
-            Double deathChance = (10 - this.CalculateHealth()) * deathChanceIncrement;
+            double deathChance = (10 - this.CalculateHealth()) * deathChanceIncrement;
 
             // apply traits modifier (if exists)
             if (deathTraitsModifier != 0)
@@ -1688,92 +1688,98 @@ namespace hist_mmorpg
             tempArmyList.Clear();
 
             // EMPLOYEES/FAMILY
-            for (int i = 0; i < deceased.myNPCs.Count; i++)
+            if (deceased.myNPCs != null)
             {
-                // get NPC
-                NonPlayerCharacter npc = deceased.myNPCs[i];
-
-                // remove from entourage
-                deceased.RemoveFromEntourage(npc);
-
-                // clear goTo queue
-                npc.goTo.Clear();
-
-                // employees are taken on by king
-                if (!String.IsNullOrWhiteSpace(npc.employer))
+                for (int i = 0; i < deceased.myNPCs.Count; i++)
                 {
-                    if (npc.employer.Equals(deceased.charID))
+                    // get NPC
+                    NonPlayerCharacter npc = deceased.myNPCs[i];
+
+                    // remove from entourage
+                    deceased.RemoveFromEntourage(npc);
+
+                    // clear goTo queue
+                    npc.goTo.Clear();
+
+                    // employees are taken on by king
+                    if (!String.IsNullOrWhiteSpace(npc.employer))
                     {
-                        npc.employer = king.charID;
-                        king.myNPCs.Add(npc);
-                    }
-                }
-
-                // family members are cast into the cruel world
-                else if (!String.IsNullOrWhiteSpace(npc.familyID))
-                {
-                    // familyID
-                    npc.familyID = null;
-
-                    // wage
-                    npc.salary = 0;
-
-                    // inKeep
-                    npc.inKeep = false;
-
-                    // titles
-                    npc.AllMyTitlesToOwner();
-
-                    // employment as bailiff
-                    foreach (Fief fief in deceased.ownedFiefs)
-                    {
-                        if (fief.bailiff == npc)
+                        if (npc.employer.Equals(deceased.charID) && king != null)
                         {
-                            fief.bailiff = null;
+                            npc.employer = king.charID;
+                            king.myNPCs.Add(npc);
+                        } else if (npc.employer.Equals(deceased.charID) && king == null)
+                        {
+                            npc.employer = "";
                         }
                     }
 
-                    // pregnancy
-                    Character npcSpouse = npc.GetSpouse();
-                    Character toAbort = null;
-
-                    if (npc.isPregnant)
+                    // family members are cast into the cruel world
+                    else if (!String.IsNullOrWhiteSpace(npc.familyID))
                     {
-                        toAbort = npc;
-                    }
-                    else if ((npcSpouse != null) && (npcSpouse.isPregnant))
-                    {
-                        toAbort = npcSpouse;
-                    }
+                        // familyID
+                        npc.familyID = null;
 
-                    if (toAbort != null)
-                    {
-                        // abort pregnancy
-                        toAbort.AbortPregnancy();
-                    }
+                        // wage
+                        npc.salary = 0;
 
-                    // forthcoming marriage
-                    if (!String.IsNullOrWhiteSpace(npc.fiancee))
-                    {
-                        Character npcFiancee = npc.GetFiancee();
+                        // inKeep
+                        npc.inKeep = false;
 
-                        if (npcFiancee != null)
+                        // titles
+                        npc.AllMyTitlesToOwner();
+
+                        // employment as bailiff
+                        foreach (Fief fief in deceased.ownedFiefs)
                         {
-                            // get marriage entry in Globals_Game.scheduledEvents
-                            // get role
-                            string role = "";
-                            if (npc.isMale)
+                            if (fief.bailiff == npc)
                             {
-                                role = "groom";
+                                fief.bailiff = null;
                             }
-                            else
+                        }
+
+                        // pregnancy
+                        Character npcSpouse = npc.GetSpouse();
+                        Character toAbort = null;
+
+                        if (npc.isPregnant)
+                        {
+                            toAbort = npc;
+                        }
+                        else if ((npcSpouse != null) && (npcSpouse.isPregnant))
+                        {
+                            toAbort = npcSpouse;
+                        }
+
+                        if (toAbort != null)
+                        {
+                            // abort pregnancy
+                            toAbort.AbortPregnancy();
+                        }
+
+                        // forthcoming marriage
+                        if (!String.IsNullOrWhiteSpace(npc.fiancee))
+                        {
+                            Character npcFiancee = npc.GetFiancee();
+
+                            if (npcFiancee != null)
                             {
-                                role = "bride";
+                                // get marriage entry in Globals_Game.scheduledEvents
+                                // get role
+                                string role = "";
+                                if (npc.isMale)
+                                {
+                                    role = "groom";
+                                }
+                                else
+                                {
+                                    role = "bride";
+                                }
+
+                                // cancel marriage
+                                npc.CancelMarriage(role);
+
                             }
-
-                            // cancel marriage
-                            npc.CancelMarriage(role);
-
                         }
                     }
                 }
@@ -1796,17 +1802,20 @@ namespace hist_mmorpg
                 // transfer title
                 if (thisPlace != null)
                 {
-                    if (thisPlace.owner == deceased)
+                    if (thisPlace.owner == deceased && king != null)
                     {
                         thisPlace.titleHolder = king.charID;
                         king.myTitles.Add(title);
                     }
 
-                    else
+                    else if (thisPlace.owner == deceased && king == null)
+                    {
+                        thisPlace.titleHolder = "";
+                    } else
                     {
                         thisPlace.titleHolder = thisPlace.owner.charID;
                     }
-                }
+                } 
             }
 
             deceased.myTitles.Clear();
@@ -1814,23 +1823,42 @@ namespace hist_mmorpg
             // PLACES
 
             // fiefs
-            foreach (Fief fief in deceased.ownedFiefs)
+            if (king != null)
             {
-                // ownership
-                fief.owner = king;
-                king.ownedFiefs.Add(fief);
-
-                // ancestral ownership
-                if (fief.ancestralOwner == deceased)
+                foreach (Fief fief in deceased.ownedFiefs)
                 {
-                    fief.ancestralOwner = king;
+                    // ownership
+                    fief.owner = king;
+                    king.ownedFiefs.Add(fief);
+
+                    // ancestral ownership
+                    if (fief.ancestralOwner == deceased)
+                    {
+                        fief.ancestralOwner = king;
+                    }
+                }
+            } else
+            {
+                foreach (Fief fief in deceased.ownedFiefs)
+                {
+                    fief.owner = null;
+                    if (fief.ancestralOwner == deceased)
+                    {
+                        fief.ancestralOwner = null;
+                    }
                 }
             }
 
             // provinces
             foreach (Province prov in deceased.ownedProvinces)
             {
-                prov.owner = king;
+                if (king != null)
+                {
+                    prov.owner = king;
+                } else
+                {
+                    prov.owner = null;
+                }
             }
 
 			// OWNERSHIPCHALLENGES
@@ -2648,11 +2676,11 @@ namespace hist_mmorpg
                 }
             }
             //TODO client side if goTo list not empty and target not first in goTo list confirm is ok to clear destination list
-            if (this.goTo.Count!=0 && target != this.goTo.Peek())
+            if (this.goTo.Count != 0 && target != this.goTo.Peek())
             {
                 this.goTo.Clear();
             }
-            else {
+            else if (this.goTo.Count > 0) {
                 // remove character from current fief's character list
                 this.location.RemoveCharacter(this);
 
@@ -4270,7 +4298,7 @@ namespace hist_mmorpg
                 // get travel cost
                 travelCost = this.location.getTravelCost(this.goTo.Peek(), this.armyID);
                 // attempt to move character
-                success = this.MoveCharacter(this.goTo.Peek(), travelCost,out error);
+                success = this.MoveCharacter(this.goTo.Peek(), travelCost, out error);
                 // if move successfull, remove fief from goTo queue
                 if (success)
                 {

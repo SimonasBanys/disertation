@@ -2705,17 +2705,19 @@ namespace hist_mmorpg
         {
             double cost = 0;
             // calculate base travel cost based on terrain for both fiefs
-            cost = (this.terrain.travelCost + target.terrain.travelCost) / 2;
-
-            // apply season modifier
-            cost = cost * Globals_Game.clock.CalcSeasonTravMod();
-
-            // if necessary, apply army modifier
-            if (!String.IsNullOrWhiteSpace(armyID))
+            if (target != null)
             {
-                cost = cost * Globals_Game.armyMasterList[armyID].CalcMovementModifier();
-            }
+                cost = (this.terrain.travelCost + target.terrain.travelCost) / 2;
 
+                // apply season modifier
+                cost = cost * Globals_Game.clock.CalcSeasonTravMod();
+
+                // if necessary, apply army modifier
+                if (!String.IsNullOrWhiteSpace(armyID))
+                {
+                    cost = cost * Globals_Game.armyMasterList[armyID].CalcMovementModifier();
+                }
+            }
             return cost;
         }
 

@@ -40,6 +40,7 @@ namespace TestClientRory
                 while (_wordRecogniser.CheckWord(command[0]) != WordRecogniser.Tasks.Exit)
                 {
                     command = TokenizeConsoleEntry();
+
                     ProcessCommand(_wordRecogniser.CheckWord(command[0]), command);
                 }
 

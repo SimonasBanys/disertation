@@ -77,7 +77,7 @@ namespace TestClientROry
                     Console.WriteLine("Auto Support when ally attacks in same Fief: " + army.autoSupportAttack);
                     Console.WriteLine("Auto Support when ally defends in same Fief: " + army.autoSupportDefence);
                     Console.WriteLine("Auto Pillage to maintain army: " + army.autoPillage);
-                    Console.WriteLine("Army loyalty: " + (army.loyalty+1)*100);
+                    Console.WriteLine("Army loyalty: " + army.loyalty);
                     Console.WriteLine("Army morale: " + (army.morale+1)*50);
                     Console.WriteLine("-----------------------------");
                 }
@@ -398,7 +398,12 @@ namespace TestClientROry
                     Console.WriteLine("Journal Entry ID: " + journal.jEntryID);
                     Console.WriteLine("Journal Event Year: " + journal.year);
                     Console.WriteLine("Journal Event Location: " + journal.location);
-                    Console.WriteLine("Journal Personae: " + journal.personae);
+                    Console.WriteLine("Journal Personae: ");
+                    foreach (var pers in journal.personae)
+                    {
+                        Console.WriteLine("    " + pers.charName);
+                    }
+                    Console.WriteLine("Entry type: " + journal.type);
                     Console.WriteLine("-----------------------------");
                 }
             }
@@ -416,8 +421,13 @@ namespace TestClientROry
             Console.WriteLine("-----------------------------");
             Console.WriteLine("Journal Entry ID: " + journalEntryProtoBuf.jEntryID);
             Console.WriteLine("Journal Event Year: " + journalEntryProtoBuf.year);
+            Console.WriteLine("Journal Event Season: " + journalEntryProtoBuf.season);
             Console.WriteLine("Journal Event Location: " + journalEntryProtoBuf.location);
-            Console.WriteLine("Journal Personae: " + journalEntryProtoBuf.personae);
+            Console.WriteLine("Journal Personae: ");
+            foreach (var pers in journalEntryProtoBuf.personae)
+            {
+                Console.WriteLine("    " + pers);
+            }
             Console.WriteLine("-----------------------------");
         }
     }

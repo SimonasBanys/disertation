@@ -73,8 +73,8 @@ namespace hist_mmorpg
             LogInManager.StoreNewUser("test", "tomato");
             LogInManager.StoreNewUser("simon", "farshas");
             NetPeerConfiguration config = new NetPeerConfiguration(app_identifier);
-            config.BroadcastAddress = NetUtility.Resolve("88.98.246.220");
-            //config.LocalAddress = NetUtility.Resolve(host_name);
+            //config.BroadcastAddress = NetUtility.Resolve("88.98.246.220"); // external IP of a machine that the server might be running on
+            config.LocalAddress = NetUtility.Resolve(host_name);
             config.MaximumConnections = max_connections;
             config.Port = port;
             config.SetMessageTypeEnabled(NetIncomingMessageType.ConnectionApproval, true);
@@ -85,7 +85,7 @@ namespace hist_mmorpg
             ctSource = new CancellationTokenSource();
             server.Start();
             Globals_Server.server = server;
-            Globals_Server.logEvent("Server started- host: " + host_name + ", port: " + port + ", appID: " +
+            Globals_Server.logEvent("Server started- host: " + config.BroadcastAddress + ", port: " + port + ", appID: " +
                                     app_identifier + ", max connections: " + max_connections);
             Client client = new Client("helen", "Char_158");
             Globals_Server.Clients.Add("helen", client);

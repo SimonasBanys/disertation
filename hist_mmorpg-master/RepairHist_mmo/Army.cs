@@ -158,7 +158,7 @@ namespace hist_mmorpg
             this.autoPillage = autoPil;
             Fief f;
             Globals_Game.fiefMasterList.TryGetValue(location, out f);
-            this.loyalty = f.loyalty/10;
+            this.loyalty = f.loyalty;
             this.morale = morale;
             if (trp != null)
             {
@@ -513,7 +513,7 @@ namespace hist_mmorpg
             Contract.Requires(troops!=null);
             uint troopNumbers = this.CalcArmySize();
             double casualtyModifier = 0;
-            Double attritionChance = 0;
+            double attritionChance = 0;
             String toDisplay = "";
             // initialise fields for display
             string[] fields = new string[] { "", "", "", "", "" };
@@ -600,9 +600,12 @@ namespace hist_mmorpg
 
             for (int i = 0; i < this.troops.Length; i++ )
             {
-                uint thisTypeLost = Convert.ToUInt32(this.troops[i] * lossModifier);
-                troopsLost += thisTypeLost;
-                this.troops[i] -= thisTypeLost;
+                if (this.troops[i] != null)
+                {
+                    uint thisTypeLost = Convert.ToUInt32(this.troops[i] * lossModifier);
+                    troopsLost += thisTypeLost;
+                    this.troops[i] -= thisTypeLost;
+                }
             }
 
             return troopsLost;
@@ -1177,7 +1180,7 @@ namespace hist_mmorpg
 
             uint[] deserted = new uint[7];
             uint leftToPay = 0;
-            if (!isMaintained)
+            if (!isMaintained && getMaintenanceCost() > 0)
             {
                 leftToPay = getMaintenanceCost() - (uint)this.GetOwner().GetHomeFief().GetAvailableTreasury(true);
             }
@@ -1196,15 +1199,15 @@ namespace hist_mmorpg
                         // troops lost due to desertion
                         for (int i = 0; i < troops.Length; i++)
                         {
-                            deserted[i] = troops[i] - (uint)(troops[i] * (1+loyalty));
-                            troops[i] =(uint) (troops[i] * (1+loyalty));
+                            deserted[i] = troops[i] - (uint)(troops[i] * (1-loyalty/10));
+                            troops[i] = troops[i] - deserted[i];
                         }
                         this.loyalty = this.loyalty - leftToPay / getMaintenanceCost();
                         GetOwner().GetHomeFief().AdjustTreasury(-GetOwner().GetHomeFief().GetAvailableTreasury());
                     }
                     else
                     {
-                        this.loyalty = 0;
+                        this.loyalty = 10;
                     }
                 }
             } else if (leftToPay > 0 && !autoPillage)
@@ -1212,10 +1215,13 @@ namespace hist_mmorpg
                 // troops lost due to desertion
                 for (int i = 0; i < troops.Length; i++)
                 {
-                    deserted[i] = troops[i] - (uint)(troops[i] * (1+loyalty));
-                    troops[i] = (uint)(troops[i] * (1+loyalty));
+                    deserted[i] = troops[i] - (uint)(troops[i] * (1-loyalty/10));
+                    troops[i] = troops[i] - deserted[i];
                 }
-                this.loyalty = this.loyalty - leftToPay / getMaintenanceCost();
+                if (getMaintenanceCost() > 0)
+                {
+                    this.loyalty = this.loyalty - leftToPay / getMaintenanceCost();
+                }
                 GetOwner().GetHomeFief().AdjustTreasury(-GetOwner().GetHomeFief().GetAvailableTreasury());
             }
             else

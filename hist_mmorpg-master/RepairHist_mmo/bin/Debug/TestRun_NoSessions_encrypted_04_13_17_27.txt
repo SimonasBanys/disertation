@@ -1,0 +1,154 @@
+Server started- host: 88.98.246.220, port: 8000, appID: test, max connections: 2000
+Accepted connection from test
+test logs in from 192.168.1.1:60099
+From hist_mmorpg.Client: request = ViewMyFiefs, reply = None
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Char_92 dies; Char_478 inherits
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Char_265 dies; Char_907 inherits
+Update test: newEvent
+Char_267 dies; Char_745 inherits
+Update test: newEvent
+Char_278 dies; Char_873 inherits
+Update test: newEvent
+From hist_mmorpg.Client: request = SeasonUpdate, reply = Success
+Update test: newEvent
+Char_32 dies; Char_384 inherits
+Update test: newEvent
+Update test: newEvent
+Char_186 dies; Char_827 inherits
+Update test: newEvent
+Update test: newEvent
+Char_196 dies; Char_1220 inherits
+Debug: role is  : Son
+Update test: YouDied
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Char_255 dies; Char_875 inherits
+Update test: newEvent
+Update test: newEvent
+Char_256 dies; Char_889 inherits
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: ArmyDisband
+From hist_mmorpg.Client: request = SeasonUpdate, reply = Success
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Char_226 dies; Char_715 inherits
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Char_873 dies; Char_925 inherits
+Update test: newEvent
+Update test: newEvent
+From hist_mmorpg.Client: request = SeasonUpdate, reply = Success
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Char_159 dies; Char_1199 inherits
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Char_478 dies; Char_487 inherits
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+From hist_mmorpg.Client: request = SeasonUpdate, reply = Success
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+From hist_mmorpg.Client: request = SeasonUpdate, reply = Success
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Char_102 dies; Char_564 inherits
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Char_40 dies; Char_1187 inherits
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+From hist_mmorpg.Client: request = SeasonUpdate, reply = Success
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Update test: newEvent
+Char_166 dies; Char_964 inherits
+Update test: newEvent
+Update test: newEvent
+Char_168 dies; Char_896 inherits
+Update 

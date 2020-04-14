@@ -44,3 +44,4 @@ C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\RepairHist_mmo.Tests1\
 C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\RepairHist_mmo.Tests1\obj\Debug\RepairHist_mmo.Tests1.csproj.CopyComplete
 C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\RepairHist_mmo.Tests1\obj\Debug\RepairHist_mmo.Tests1.dll
 C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\RepairHist_mmo.Tests1\obj\Debug\RepairHist_mmo.Tests1.pdb
+C:\Users\simon\Documents\GitHub\disert\hist_mmorpg-master\RepairHist_mmo.Tests1\obj\Debug\RepairHist_mmo.Tests1.csproj.CoreCompileInputs.cache
