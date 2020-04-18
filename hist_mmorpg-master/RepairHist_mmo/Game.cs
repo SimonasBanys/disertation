@@ -2567,6 +2567,10 @@ namespace hist_mmorpg
                     return new ProtoMessage(DisplayMessages.ErrorGenericUnauthorised);
                 }
             }
+            if (assassin.isAlly(target) || assassin.GetHeadOfFamily().isAlly(target) || assassin.GetHeadOfFamily().isAlly(target.GetHeadOfFamily()))
+            {
+                return new ProtoMessage(DisplayMessages.ErrorTargetIsAlly);
+            }
             var madePlans = false;
             madePlans = assassin.planAssassination(target);
             var success = new ProtoMessage();

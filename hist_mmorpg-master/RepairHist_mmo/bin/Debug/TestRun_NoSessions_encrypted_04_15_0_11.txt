@@ -1,0 +1,130 @@
+Server started- host: 25.255.255.255, port: 8000, appID: test, max connections: 2000
+Accepted connection from test0
+test0 logs in from 127.0.0.1:55357
+From hist_mmorpg.Client: request = ViewMyFiefs, reply = None
+Accepted connection from test1
+test1 logs in from 127.0.0.1:55363
+From hist_mmorpg.Client: request = ViewMyFiefs, reply = None
+Accepted connection from test2
+test2 logs in from 127.0.0.1:50392
+From hist_mmorpg.Client: request = ViewMyFiefs, reply = None
+Accepted connection from test3
+test3 logs in from 127.0.0.1:50400
+From hist_mmorpg.Client: request = ViewMyFiefs, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ListArmies, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+From hist_mmorpg.Client: request = ViewChar, reply = Success
+From hist_mmorpg.Client: request = ViewFief, reply = None
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Update test1: newEvent
+Update test3: newEvent
+Update test2: newEvent
+Char_32 dies; Char_384 inherits
+Debug: role is  : Son
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Char_226 dies; Char_661 inherits
+Debug: role is  : Son
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Char_258 dies; Char_1168 inherits
+Debug: role is  : Son
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Update test0: ArmyDisband
+From hist_mmorpg.Client: request = SeasonUpdate, reply = Success
+From hist_mmorpg.Client: request = ViewJournalEntries, reply = JournalEntries
+From hist_mmorpg.Client: request = GetPlayers, reply = Success
+Char_102 dies; Char_564 inherits
+Debug: role is  : Son
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Char_158 dies; Char_971 inherits
+Debug: role is  : Son & Heir
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Char_168 dies; Char_896 inherits
+Debug: role is  : Son
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Char_284 dies; Char_1165 inherits
+Debug: role is  : Son
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEvent
+Update test3: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test2: newEv

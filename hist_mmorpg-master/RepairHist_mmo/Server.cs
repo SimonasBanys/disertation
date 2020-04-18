@@ -94,6 +94,10 @@ namespace hist_mmorpg
             Client client3 = new Client("simon", "Char_283");
             Globals_Server.Clients.Add("simon", client3);
             String dir = Directory.GetCurrentDirectory();
+            List<string> pcs = Globals_Game.pcKeys;                 // to potentially add a "create user function" 
+            pcs.Remove("Char_158");
+            pcs.Remove("Char_195");
+            pcs.Remove("Char_283");
             //dir = dir.Remove(dir.IndexOf("RepairHist_mmo"));
             String path;
             if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)

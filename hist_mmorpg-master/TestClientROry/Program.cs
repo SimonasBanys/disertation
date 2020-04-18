@@ -16,18 +16,17 @@ namespace TestClientRory
         private static void Main(string[] args)
         {
             var encryptString = "_encrypted_";
-            string datePatern = "MM_dd_H_mm";
+            string datePatern = "dd_MM_H_mm_ss";
             Client c;
             TextTestClient client = new TextTestClient();
             _displayResults = new DisplayResults();
-            var logFilePath = "TestRun_NoSessions" + encryptString + DateTime.Now.ToString(datePatern) + "_" +".txt";
+            var logFilePath = "TestRun_NoSessions" + encryptString + DateTime.Now.ToString(datePatern) +".txt";
 
             //Globals_Game.pcMasterList.Add("rory", new PlayerCharacter());
             using (Globals_Server.LogFile = new System.IO.StreamWriter(logFilePath))
             {
                 _wordRecogniser = new WordRecogniser();
                 _testClient = new TextTestClient();
-
                 Console.Clear();
                 LogInPrompt();
                 while (_testClient.IsConnectedAndLoggedIn() == false)
@@ -40,10 +39,9 @@ namespace TestClientRory
                 while (_wordRecogniser.CheckWord(command[0]) != WordRecogniser.Tasks.Exit)
                 {
                     command = TokenizeConsoleEntry();
-
                     ProcessCommand(_wordRecogniser.CheckWord(command[0]), command);
+                    Globals_Server.LogFile.WriteLine(command[0]); // to log all the tasks attempted by the user before exit or server/client crash
                 }
-
                 Shutdown();
             }
         }
@@ -63,7 +61,6 @@ namespace TestClientRory
             }
             catch
             {
-
             }
             _testClient.LogInAndConnect(usernameForReturn, passwordForReturn, ipForReturn);
             Console.Clear();

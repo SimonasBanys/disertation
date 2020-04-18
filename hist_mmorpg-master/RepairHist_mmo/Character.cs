@@ -179,7 +179,7 @@ namespace hist_mmorpg
         /// <param name="ails">Dictionary<string, Ailment> holding ailments effecting character's health</param>
         public Character(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, Nationality nat, bool alive, Double mxHea, Double vir,
             Queue<Fief> go, Language lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<Trait, int>[] trt, bool inK, bool preg,
-            String famID, String sp, String fath, String moth, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, List<String> allies = null, List<String> atWar = null)
+            String famID, String sp, String fath, String moth, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, List<String> allies = null, List<String> atWar = null, List<Character> plans = null)
         {
             // VALIDATION
 
@@ -423,6 +423,14 @@ namespace hist_mmorpg
             {
                 this.allies = allies;
             }
+            if (plans == null)
+            {
+                this.assassinationPlans = new List<Character>();
+            }
+            else
+            {
+                this.assassinationPlans = plans;
+            }
 #if DEBUG
             // Default = trait-influenced success chance
             fixedSuccessChance = -1;
@@ -628,6 +636,14 @@ namespace hist_mmorpg
                     else
                     {
                         this.atWar = npc.atWar;
+                    }
+                    if (npc.assassinationPlans == null)
+                    {
+                        this.assassinationPlans = new List<Character>();
+                    }
+                    else
+                    {
+                        this.assassinationPlans = npc.assassinationPlans;
                     }
                     if (this.location != null)
                     {
@@ -3911,6 +3927,7 @@ namespace hist_mmorpg
 
         public bool planAssassination(Character target)
         {
+            
             bool success = false;
             uint planID = Globals_Game.GetNextJournalEntryID();
 
@@ -5420,8 +5437,8 @@ namespace hist_mmorpg
         public PlayerCharacter(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, Nationality nat, bool alive, Double mxHea, Double vir,
             Queue<Fief> go, Language lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<Trait, int>[] trt, bool inK, bool preg, String famID,
             String sp, String fath, String moth, bool outl, uint pur, List<NonPlayerCharacter> npcs, List<Fief> ownedF, List<Province> ownedP, String home, String ancHome, List<String> myTi, List<Army> myA,
-            List<string> myS, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, String pID = null, List<String> allies = null, List<String> atWar = null)
-            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID, allies, atWar)
+            List<string> myS, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, String pID = null, List<String> allies = null, List<String> atWar = null, List<Character> plans = null)
+            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID, allies, atWar, plans)
         {
             // VALIDATION
             //TODO exception handling
@@ -5483,6 +5500,14 @@ namespace hist_mmorpg
             {
                 this.atWar = atWar;
             }
+            if (plans == null)
+            {
+                this.assassinationPlans = new List<Character>();
+            }
+            else
+            {
+                this.assassinationPlans = plans;
+            }
         }
 
         /// <summary>
@@ -5531,6 +5556,14 @@ namespace hist_mmorpg
             else
             {
                 this.atWar = pcs.atWar;
+            }
+            if (pcs.assassinationPlans == null)
+            {
+                this.assassinationPlans = new List<Character>();
+            }
+            else
+            {
+                this.assassinationPlans = pcs.assassinationPlans;
             }
         }
 
@@ -7942,6 +7975,8 @@ namespace hist_mmorpg
 
         public List<String> atWar { get; set; }
 
+        public List<Character> assassinationPlans { get; set; }
+
         /// <summary>
         /// Constructor for Character_Serialised
         /// </summary>
@@ -8018,6 +8053,14 @@ namespace hist_mmorpg
                 {
                     this.atWar = charToUse.atWar;
                 }
+                if (charToUse.assassinationPlans == null)
+                {
+                    this.assassinationPlans = new List<Character>();
+                }
+                else
+                {
+                    this.assassinationPlans = charToUse.assassinationPlans;
+                }
             }
 		}
 
@@ -8054,8 +8097,8 @@ namespace hist_mmorpg
         /// <param name="ails">Dictionary (string, Ailment) holding ailments effecting character's health</param>
         public Character_Serialised(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, string nat, bool alive, Double mxHea, Double vir,
             List<string> go, string lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<string, int>[] trt, bool inK, bool preg,
-            String famID, String sp, String fath, String moth, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, 
-            List<String> allies = null, List<String> atWar = null)
+            String famID, String sp, String fath, String moth, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null,
+            List<String> allies = null, List<String> atWar = null, List<Character> plans = null)
         {
             // VALIDATION
 
@@ -8334,6 +8377,14 @@ namespace hist_mmorpg
             {
                 this.atWar = atWar;
             }
+            if (plans == null)
+            {
+                this.assassinationPlans = new List<Character>();
+            }
+            else
+            {
+                this.assassinationPlans = plans;
+            }
             if (ails != null)
             {
                 this.ailments = ails;
@@ -8448,7 +8499,15 @@ namespace hist_mmorpg
             {
                 this.atWar = pc.atWar;
             }
-		}
+            if (pc.assassinationPlans == null)
+            {
+                this.assassinationPlans = new List<Character>();
+            }
+            else
+            {
+                this.assassinationPlans = pc.assassinationPlans;
+            }
+        }
 
         /// <summary>
         /// Constructor for PlayerCharacter_Serialised taking seperate values.
@@ -8467,8 +8526,8 @@ namespace hist_mmorpg
         public PlayerCharacter_Serialised(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, string nat, bool alive, Double mxHea, Double vir,
             List<string> go, string lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<string, int>[] trt, bool inK, bool preg, String famID,
             String sp, String fath, String moth, List<String> myTi, string fia, bool outl, uint pur, List<string> npcs, List<string> ownedF, List<string> ownedP, String home, String ancHome, List<string> myA,
-            List<string> myS, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, String pID = null, List<String> allies = null, List<String> atWar = null)
-            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID, allies, atWar)
+            List<string> myS, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, String pID = null, List<String> allies = null, List<String> atWar = null, List<Character> plans = null)
+            : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID, allies, atWar, plans)
         {
             // VALIDATION
 
@@ -8591,6 +8650,14 @@ namespace hist_mmorpg
             {
                 this.atWar = atWar;
             }
+            if (plans == null)
+            {
+                this.assassinationPlans = new List<Character>();
+            }
+            else
+            {
+                this.assassinationPlans = plans;
+            }
         }
 
         //TODO change serialised class to serialise method
@@ -8649,6 +8716,7 @@ namespace hist_mmorpg
             this.isHeir = npc.isHeir;
             this.allies = npc.allies;
             this.atWar = npc.atWar;
+            this.assassinationPlans = npc.assassinationPlans;
 		}
 
         /// <summary>
@@ -8662,7 +8730,7 @@ namespace hist_mmorpg
         public NonPlayerCharacter_Serialised(String id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, string nat, bool alive, Double mxHea, Double vir,
             List<string> go, string lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<string, int>[] trt, bool inK, bool preg, String famID,
             String sp, String fath, String moth, List<String> myTi, string fia, uint sal, bool inEnt, bool isH, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, String empl = null, 
-            List<String> allies = null, List<String> atWar = null)
+            List<String> allies = null, List<String> atWar = null, List<Character> plans = null)
             : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID)
         {
             // VALIDATION
@@ -8703,6 +8771,14 @@ namespace hist_mmorpg
             } else
             {
                 this.atWar = atWar;
+            }
+            if (plans == null)
+            {
+                this.assassinationPlans = new List<Character>();
+            }
+            else
+            {
+                this.assassinationPlans = plans;
             }
         }
 

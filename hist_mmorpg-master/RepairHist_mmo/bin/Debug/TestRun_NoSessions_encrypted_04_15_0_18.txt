@@ -1,0 +1,147 @@
+Server started- host: 25.255.255.255, port: 8000, appID: test, max connections: 2000
+Accepted connection from test0
+test0 logs in from 127.0.0.1:55968
+From hist_mmorpg.Client: request = ViewMyFiefs, reply = None
+Accepted connection from test
+test logs in from 127.0.0.1:59098
+From hist_mmorpg.Client: request = ViewMyFiefs, reply = None
+Accepted connection from test1
+test1 logs in from 127.0.0.1:59105
+From hist_mmorpg.Client: request = ViewMyFiefs, reply = None
+Update test0: newEvent
+Update test1: newEvent
+Char_166 dies; Char_964 inherits
+Debug: role is  : Son
+Update test0: newEvent
+Update test1: newEvent
+Char_211 dies; Char_1145 inherits
+Debug: role is  : Son
+Update test0: newEvent
+Update test1: newEvent
+Char_224 dies; Char_433 inherits
+Debug: role is  : Son
+Update test0: newEvent
+Update test1: newEvent
+Char_228 dies; Char_995 inherits
+Debug: role is  : Son
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: ArmyDisband
+From hist_mmorpg.Client: request = SeasonUpdate, reply = Success
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Char_284 dies; Char_1165 inherits
+Debug: role is  : Son
+Update test0: newEvent
+Update test1: newEvent
+From hist_mmorpg.Client: request = SeasonUpdate, reply = Success
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Char_161 dies; Char_1196 inherits
+Debug: role is  : Son
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Char_1165 dies; Char_985 inherits
+Debug: role is  : Brother
+Update test0: newEvent
+Update test1: newEvent
+From hist_mmorpg.Client: request = SeasonUpdate, reply = Success
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Char_256 dies; Char_889 inherits
+Debug: role is  : Son
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Char_40 dies; Char_1187 inherits
+Debug: role is  : Son
+Update test0: newEvent
+Update test1: newEvent
+Char_964 dies; Char_983 inherits
+Debug: role is  : Brother
+Update test0: newEvent
+Update test1: newEvent
+From hist_mmorpg.Client: request = SeasonUpdate, reply = Success
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Char_19 dies; Char_1209 inherits
+Debug: role is  : Son
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Char_192 dies; Char_906 inherits
+Debug: role is  : Son
+Update test0: newEvent
+Update test1: newEvent
+Char_196 dies; Char_1220 inherits
+Debug: role is  : Son
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Char_278 dies; Char_925 inherits
+Debug: role is  : Son
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+From hist_mmorpg.Client: request = SeasonUpdate, reply = Success
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test0: newEvent
+Update test1: newEvent
+Update test1: newEvent
+Update

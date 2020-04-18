@@ -259,9 +259,9 @@ namespace ProtoMessage
         public void moraleChange(double change)
         {
             this.morale += change;
-            if (this.morale > 1.0d)
+            if (this.morale > 3.0d)
             {
-                this.morale = 1.0d;
+                this.morale = 3.0d;
             }
             else if (this.morale < -1.0d)
             {
