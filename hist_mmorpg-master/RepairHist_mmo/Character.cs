@@ -3931,8 +3931,15 @@ namespace hist_mmorpg
             bool success = false;
             uint planID = Globals_Game.GetNextJournalEntryID();
 
-            uint year = Globals_Game.clock.currentYear;
-            byte season = Globals_Game.clock.currentSeason;
+            if (Globals_Game.clock.currentSeason != 3)
+            {
+                uint year = Globals_Game.clock.currentYear;
+                byte season = Globals_Game.clock.currentSeason++;
+            } else
+            {
+                uint year = Globals_Game.clock.currentYear;
+                byte season = 0;
+            }
 
             string assassinEntry = this.charID + "|assassin";
             string targetEntry = target.charID + "|target";
