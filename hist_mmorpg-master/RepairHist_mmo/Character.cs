@@ -3937,7 +3937,7 @@ namespace hist_mmorpg
                 byte season = Globals_Game.clock.currentSeason++;
             } else
             {
-                uint year = Globals_Game.clock.currentYear;
+                uint year = Globals_Game.clock.currentYear++;
                 byte season = 0;
             }
 
