@@ -42,14 +42,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="hist_mmorpg.exe" size="454144">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="hist_mmorpg.exe" size="453632">
       <assemblyIdentity name="hist_mmorpg" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>SjNRYKBSN1fiY09WHtc/D/XsrylYRCVNN6Z+RL0ZhOw=</dsig:DigestValue>
+        <dsig:DigestValue>4Zrf3Jwzx+wcZ0i6WTeqXijjsN2baEARgf0YFYUS8Os=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

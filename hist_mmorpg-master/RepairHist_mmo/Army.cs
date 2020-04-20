@@ -262,12 +262,12 @@ namespace hist_mmorpg
         public void moraleChange(double change)
         {
             this.morale += change;
-            if (this.morale > 3.0d)
+            if (this.morale > 2.0d)
             {
-                this.morale = 3.0d;
-            } else if (this.morale < -1.0d)
+                this.morale = 2.0d;
+            } else if (this.morale < 0.0d)
             {
-                this.morale = -1.0d;
+                this.morale = 0.0d;
             }
         }
 
@@ -826,7 +826,7 @@ namespace hist_mmorpg
             // get CV for each troop type
             for (int i = 0; i < this.troops.Length; i++)
             {
-                cv += this.troops[i] * thisCombatValues[i] * (1 + this.morale) * this.GetLocation().terrain.combatMods[i] ;
+                cv += this.troops[i] * thisCombatValues[i] * this.morale * this.GetLocation().terrain.combatMods[i] ;
             }
 
             // if calculating defender during keep storm, account for keep level

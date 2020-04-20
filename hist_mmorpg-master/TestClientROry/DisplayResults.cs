@@ -77,8 +77,8 @@ namespace TestClientROry
                     Console.WriteLine("Auto Support when ally attacks in same Fief: " + army.autoSupportAttack);
                     Console.WriteLine("Auto Support when ally defends in same Fief: " + army.autoSupportDefence);
                     Console.WriteLine("Auto Pillage to maintain army: " + army.autoPillage);
-                    Console.WriteLine("Army loyalty: " + army.loyalty);
-                    Console.WriteLine("Army morale: " + (army.morale+1)*50);
+                    Console.WriteLine("Army loyalty: " + army.loyalty*10);
+                    Console.WriteLine("Army morale: " + army.morale*100);
                     Console.WriteLine("-----------------------------");
                 }
             }
