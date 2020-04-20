@@ -1205,10 +1205,14 @@ namespace hist_mmorpg
                 }
             }
             
-            if (target.location != assassin.location) // if assassin is located in a different fief than target, attempt to move to the same fief
+            if (target.location.id != assassin.location.id) // if assassin is located in a different fief than target, attempt to move to the same fief
             {
                 assassin.MoveTo(target.location.id, out ProtoMessage ignore);
                 assassin.CharacterMultiMove(out ignore);
+            }
+            if (assassin.location.id != target.location.id)
+            {
+                return false;
             }
             uint assassinationID = Globals_Game.GetNextJournalEntryID();
 
