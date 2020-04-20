@@ -1176,6 +1176,8 @@ namespace hist_mmorpg
         /// </summary>
         public ProtoCharacterOverview[] gaol { get; set; }
 
+        public string terrain { get; set; }
+
         public ProtoFief()
             : base()
         {
@@ -1233,6 +1235,7 @@ namespace hist_mmorpg
                 i++;
             }
             i = 0;
+            this.terrain = f.terrain.description;
         }
 
         /// KeyStats ( key data for season )

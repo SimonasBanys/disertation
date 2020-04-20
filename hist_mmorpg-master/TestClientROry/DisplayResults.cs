@@ -223,6 +223,7 @@ namespace TestClientROry
             Console.WriteLine("Owner: " + fiefProtoBuf.owner);
             Console.WriteLine("Owner ID: " + fiefProtoBuf.ownerID);
             Console.WriteLine("Industry Level: " + fiefProtoBuf.industry);
+            Console.WriteLine("Terrain type: " + fiefProtoBuf.terrain);
             var characters = fiefProtoBuf.charactersInFief;
             Console.WriteLine("Characters in Fief: ");
             foreach (var character in characters)
@@ -301,7 +302,7 @@ namespace TestClientROry
             {
                 for (int i = 0; i < characterProtoBuf.allies.Count; i++)
                 {
-                    Console.Write(characterProtoBuf.allies[i]);
+                    Console.Write(characterProtoBuf.allies.ElementAt(i));
                     if (i != characterProtoBuf.allies.Count - 1)
                     {
                         Console.Write(" , ");
@@ -314,7 +315,7 @@ namespace TestClientROry
             {
                 for (int i = 0; i < characterProtoBuf.atWar.Count; i++)
                 {
-                    Console.Write(characterProtoBuf.atWar[i]);
+                    Console.Write(characterProtoBuf.atWar.ElementAt(i));
                     if (i != characterProtoBuf.atWar.Count - 1)
                     {
                         Console.Write(", ");

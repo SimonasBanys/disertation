@@ -357,9 +357,9 @@ namespace hist_mmorpg
             // create terrain objects
             var plains = new Terrain("terr_P", "Plains", 1, new double[] { 1.5, 1.5, 1.5, 1.0,1.0,1.15,1.15});
             Globals_Game.terrainMasterList.Add(plains.id, plains);
-            var hills = new Terrain("terr_H", "Hills", 1.5, new double[] { 1.15,1.25,1.25,1.35,1.35,0.85,0.85});
+            var hills = new Terrain("terr_H", "Hills", 1.5, new double[] { 1.15, 1.25, 1.25, 1.15, 1.15, 0.85, 0.85});
             Globals_Game.terrainMasterList.Add(hills.id, hills);
-            var forrest = new Terrain("terr_F", "Forrest", 1.5, new double[] { 0.85, 0.85, 0.85, 1.45, 1.45, 1.15, 1.15 });
+            var forrest = new Terrain("terr_F", "Forrest", 1.5, new double[] { 0.85, 0.85, 0.85, 1.25, 1.25, 1.45, 1.45 });
             Globals_Game.terrainMasterList.Add(forrest.id, forrest);
             var mountains = new Terrain("terr_M", "Mountains", 15, new double[] { 1.15, 1.25, 1.25, 1.35, 1.35, 0.85, 0.85 });
             Globals_Game.terrainMasterList.Add(mountains.id, mountains);
