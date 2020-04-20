@@ -3465,14 +3465,16 @@ namespace hist_mmorpg
                     {
                         if (alliedArmy.autoSupportAttack)
                         {
-                            if (armyAttacker.GetOwner().isAlly(alliedArmy.GetOwner()) && !armyDefender.GetOwner().isAlly(alliedArmy.GetOwner()))
+                            if ((armyAttacker.GetOwner().isAlly(alliedArmy.GetOwner()) && !armyDefender.GetOwner().isAlly(alliedArmy.GetOwner())) 
+                                || (alliedArmy.GetOwner().charID.Equals(armyAttacker.GetOwner().charID) && !alliedArmy.armyID.Equals(armyAttacker.armyID)))
                             {
                                 attackerAllies.Add(alliedArmy);
                             }
                         }
                         if (alliedArmy.autoSupportDefence)
                         {
-                            if (!armyAttacker.GetOwner().isAlly(alliedArmy.GetOwner()) && armyDefender.GetOwner().isAlly(alliedArmy.GetOwner()))
+                            if ((!armyAttacker.GetOwner().isAlly(alliedArmy.GetOwner()) && armyDefender.GetOwner().isAlly(alliedArmy.GetOwner())) 
+                                || (alliedArmy.GetOwner().charID.Equals(armyDefender.GetOwner().charID) && !alliedArmy.armyID.Equals(armyDefender.armyID)))
                             {
                                 defenderAllies.Add(alliedArmy);
                             }
