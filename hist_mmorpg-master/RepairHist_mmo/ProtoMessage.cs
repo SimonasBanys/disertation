@@ -556,8 +556,8 @@ namespace hist_mmorpg
         /// Holds name of captor (if is null character is not captive)
         /// </summary>
         public string captor { get; set; }
-        public List<String> allies { get; set; }
-        public List<String> atWar { get; set; }
+        public HashSet<String> allies { get; set; }
+        public HashSet<String> atWar { get; set; }
         // Holds information as to whether character is involved in a siege
         public enum SiegeRole { None=0, Besieger, Defender, DefenderAdd };
         public SiegeRole siegeRole;
@@ -587,7 +587,7 @@ namespace hist_mmorpg
             this.armyID = c.armyID;
             if (c.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -595,7 +595,7 @@ namespace hist_mmorpg
             }
             if (c.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -636,7 +636,7 @@ namespace hist_mmorpg
             this.combat = c.combat;
             if (c.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -644,7 +644,7 @@ namespace hist_mmorpg
             }
             if (c.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -774,7 +774,7 @@ namespace hist_mmorpg
             this.outlawed = pc.outlawed;
             if (pc.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             } else
             {
                 this.allies = pc.allies;
@@ -784,7 +784,7 @@ namespace hist_mmorpg
             // need to investigate further
             if (pc.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             } else
             {
                 this.atWar = pc.atWar;
@@ -803,7 +803,7 @@ namespace hist_mmorpg
             this.purse = pc.purse;
             if (character.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -813,7 +813,7 @@ namespace hist_mmorpg
             // need to investigate further
             if (character.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -874,7 +874,7 @@ namespace hist_mmorpg
             }
             if (character.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -885,7 +885,7 @@ namespace hist_mmorpg
             // need to investigate further
             if (character.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -942,7 +942,7 @@ namespace hist_mmorpg
             this.isHeir = npc.isHeir;
             if (npc.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -953,7 +953,7 @@ namespace hist_mmorpg
             // need to investigate further
             if (npc.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -973,7 +973,7 @@ namespace hist_mmorpg
             this.isHeir = npc.isHeir;
             if (npc.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -984,7 +984,7 @@ namespace hist_mmorpg
             // need to investigate further
             if (npc.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -999,7 +999,7 @@ namespace hist_mmorpg
             this.lastOfferAmount = lastoffer;
             if (character.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -1010,7 +1010,7 @@ namespace hist_mmorpg
             // need to investigate further
             if (character.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {

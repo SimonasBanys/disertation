@@ -130,11 +130,11 @@ namespace ProtoMessage
         /// <summary>
         /// Dictionary holding the allies of character
         /// </summary>
-        public List<String> allies { get; set; }
+        public HashSet<String> allies { get; set; }
         /// <summary>
         /// list holding the families the character is currently at war
         /// </summary>
-        public List<String> atWar { get; set; }
+        public HashSet<String> atWar { get; set; }
 
         public List<Character> assassinationPlans { get; set; }
 
@@ -178,7 +178,7 @@ namespace ProtoMessage
         /// <param name="ails">Dictionary<string, Ailment> holding ailments effecting character's health</param>
         public Character(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, Nationality nat, bool alive, Double mxHea, Double vir,
             Queue<Fief> go, Language lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<Trait, int>[] trt, bool inK, bool preg,
-            String famID, String sp, String fath, String moth, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, List<String> allies = null, List<String> atWar = null)
+            String famID, String sp, String fath, String moth, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, HashSet<String> allies = null, HashSet<String> atWar = null)
         {
             // VALIDATION
 
@@ -409,7 +409,7 @@ namespace ProtoMessage
             this.fiancee = fia;
             if (atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -417,7 +417,7 @@ namespace ProtoMessage
             }
             if (allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -493,7 +493,7 @@ namespace ProtoMessage
                 this.ransomDemand = charToUse.ransom;
                 if (charToUse.allies == null)
                 {
-                    this.allies = new List<String>();
+                    this.allies = new HashSet<String>();
                 }
                 else
                 {
@@ -501,7 +501,7 @@ namespace ProtoMessage
                 }
                 if (charToUse.atWar == null)
                 {
-                    this.atWar = new List<String>();
+                    this.atWar = new HashSet<String>();
                 }
                 else
                 {
@@ -618,7 +618,7 @@ namespace ProtoMessage
                     this.location = npc.location;
                     if (npc.allies == null)
                     {
-                        this.allies = new List<String>();
+                        this.allies = new HashSet<String>();
                     }
                     else
                     {
@@ -626,7 +626,7 @@ namespace ProtoMessage
                     }
                     if (npc.atWar == null)
                     {
-                        this.atWar = new List<String>();
+                        this.atWar = new HashSet<String>();
                     }
                     else
                     {
@@ -5383,7 +5383,7 @@ namespace ProtoMessage
         public PlayerCharacter(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, Nationality nat, bool alive, Double mxHea, Double vir,
             Queue<Fief> go, Language lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<Trait, int>[] trt, bool inK, bool preg, String famID,
             String sp, String fath, String moth, bool outl, uint pur, List<NonPlayerCharacter> npcs, List<Fief> ownedF, List<Province> ownedP, String home, String ancHome, List<String> myTi, List<Army> myA,
-            List<string> myS, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, String pID = null, List<String> allies = null, List<String> atWar = null)
+            List<string> myS, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, String pID = null, HashSet<String> allies = null, HashSet<String> atWar = null)
             : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID, allies, atWar)
         {
             // VALIDATION
@@ -5433,7 +5433,7 @@ namespace ProtoMessage
             this.mySieges = myS;
             if (allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -5441,7 +5441,7 @@ namespace ProtoMessage
             }
             if (atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -5482,7 +5482,7 @@ namespace ProtoMessage
             this.mySieges = pcs.mySieges;
             if (pcs.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -5490,7 +5490,7 @@ namespace ProtoMessage
             }
             if (pcs.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -5513,7 +5513,7 @@ namespace ProtoMessage
             this.ownedFiefs = pc.ownedFiefs;
             if (pc.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -5521,7 +5521,7 @@ namespace ProtoMessage
             }
             if (pc.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -7005,7 +7005,7 @@ namespace ProtoMessage
         public NonPlayerCharacter(String id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, Nationality nat, bool alive, Double mxHea, Double vir,
             Queue<Fief> go, Language lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<Trait, int>[] trt, bool inK, bool preg, String famID,
             String sp, String fath, String moth, uint sal, bool inEnt, bool isH, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, Fief loc = null, String aID = null, String empl = null,
-            List<String> allies = null, List<String> atWar = null)
+            HashSet<String> allies = null, HashSet<String> atWar = null)
             : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID, allies, atWar)
         {
             // VALIDATION
@@ -7034,7 +7034,7 @@ namespace ProtoMessage
             this.isHeir = isH;
             if (allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -7042,7 +7042,7 @@ namespace ProtoMessage
             }
             if (atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -7077,7 +7077,7 @@ namespace ProtoMessage
             this.isHeir = npcs.isHeir;
             if (npcs.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -7085,7 +7085,7 @@ namespace ProtoMessage
             }
             if (npcs.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -7108,7 +7108,7 @@ namespace ProtoMessage
             this.isHeir = false;
             if (npc.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -7116,7 +7116,7 @@ namespace ProtoMessage
             }
             if (npc.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -7900,9 +7900,9 @@ namespace ProtoMessage
         /// </summary>
         public string ransom { get; set; }
 
-        public List<String> allies { get; set; }
+        public HashSet<String> allies { get; set; }
 
-        public List<String> atWar { get; set; }
+        public HashSet<String> atWar { get; set; }
 
         /// <summary>
         /// Constructor for Character_Serialised
@@ -7966,7 +7966,7 @@ namespace ProtoMessage
                 this.ransom = charToUse.ransomDemand;
                 if (charToUse.allies == null)
                 {
-                    this.allies = new List<String>();
+                    this.allies = new HashSet<String>();
                 }
                 else
                 {
@@ -7974,7 +7974,7 @@ namespace ProtoMessage
                 }
                 if (charToUse.atWar == null)
                 {
-                    this.atWar = new List<String>();
+                    this.atWar = new HashSet<String>();
                 }
                 else
                 {
@@ -8017,7 +8017,7 @@ namespace ProtoMessage
         public Character_Serialised(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, string nat, bool alive, Double mxHea, Double vir,
             List<string> go, string lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<string, int>[] trt, bool inK, bool preg,
             String famID, String sp, String fath, String moth, List<String> myTi, string fia, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null,
-            List<String> allies = null, List<String> atWar = null)
+            HashSet<String> allies = null, HashSet<String> atWar = null)
         {
             // VALIDATION
 
@@ -8283,7 +8283,7 @@ namespace ProtoMessage
             this.armyID = aID;
             if (allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -8291,7 +8291,7 @@ namespace ProtoMessage
             }
             if (atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -8397,7 +8397,7 @@ namespace ProtoMessage
             this.mySieges = pc.mySieges;
             if (pc.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -8405,7 +8405,7 @@ namespace ProtoMessage
             }
             if (pc.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -8430,7 +8430,7 @@ namespace ProtoMessage
         public PlayerCharacter_Serialised(string id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, string nat, bool alive, Double mxHea, Double vir,
             List<string> go, string lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<string, int>[] trt, bool inK, bool preg, String famID,
             String sp, String fath, String moth, List<String> myTi, string fia, bool outl, uint pur, List<string> npcs, List<string> ownedF, List<string> ownedP, String home, String ancHome, List<string> myA,
-            List<string> myS, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, String pID = null, List<String> allies = null, List<String> atWar = null)
+            List<string> myS, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, String pID = null, HashSet<String> allies = null, HashSet<String> atWar = null)
             : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID, allies, atWar)
         {
             // VALIDATION
@@ -8540,7 +8540,7 @@ namespace ProtoMessage
             this.mySieges = myS;
             if (allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -8548,7 +8548,7 @@ namespace ProtoMessage
             }
             if (atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -8625,7 +8625,7 @@ namespace ProtoMessage
         public NonPlayerCharacter_Serialised(String id, String firstNam, String famNam, Tuple<uint, byte> dob, bool isM, string nat, bool alive, Double mxHea, Double vir,
             List<string> go, string lang, double day, Double stat, Double mngmnt, Double cbt, Tuple<string, int>[] trt, bool inK, bool preg, String famID,
             String sp, String fath, String moth, List<String> myTi, string fia, uint sal, bool inEnt, bool isH, Dictionary<string, Ailment> ails = null, string loc = null, String aID = null, String empl = null,
-            List<String> allies = null, List<String> atWar = null)
+            HashSet<String> allies = null, HashSet<String> atWar = null)
             : base(id, firstNam, famNam, dob, isM, nat, alive, mxHea, vir, go, lang, day, stat, mngmnt, cbt, trt, inK, preg, famID, sp, fath, moth, myTi, fia, ails, loc, aID)
         {
             // VALIDATION
@@ -8654,7 +8654,7 @@ namespace ProtoMessage
             this.isHeir = isH;
             if (allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -8662,7 +8662,7 @@ namespace ProtoMessage
             }
             if (atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {

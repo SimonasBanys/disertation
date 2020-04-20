@@ -557,8 +557,8 @@ namespace ProtoMessage
         /// Holds name of captor (if is null character is not captive)
         /// </summary>
         public string captor { get; set; }
-        public List<String> allies { get; set; }
-        public List<String> atWar { get; set; }
+        public HashSet<String> allies { get; set; }
+        public HashSet<String> atWar { get; set; }
         // Holds information as to whether character is involved in a siege
         public enum SiegeRole { None = 0, Besieger, Defender, DefenderAdd };
         public SiegeRole siegeRole;
@@ -588,7 +588,7 @@ namespace ProtoMessage
             this.armyID = c.armyID;
             if (c.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -596,7 +596,7 @@ namespace ProtoMessage
             }
             if (c.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -638,7 +638,7 @@ namespace ProtoMessage
             this.combat = c.combat;
             if (c.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -646,7 +646,7 @@ namespace ProtoMessage
             }
             if (c.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -780,7 +780,7 @@ namespace ProtoMessage
 
             if (pc.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -791,7 +791,7 @@ namespace ProtoMessage
             // need to investigate further
             if (pc.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -811,7 +811,7 @@ namespace ProtoMessage
             this.purse = pc.purse;
             if (character.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -821,7 +821,7 @@ namespace ProtoMessage
             // need to investigate further
             if (character.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -882,7 +882,7 @@ namespace ProtoMessage
             }
             if (character.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -893,7 +893,7 @@ namespace ProtoMessage
             // need to investigate further
             if (character.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -950,7 +950,7 @@ namespace ProtoMessage
             this.isHeir = npc.isHeir;
             if (npc.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -961,7 +961,7 @@ namespace ProtoMessage
             // need to investigate further
             if (npc.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -981,7 +981,7 @@ namespace ProtoMessage
             this.isHeir = npc.isHeir;
             if (npc.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -992,7 +992,7 @@ namespace ProtoMessage
             // need to investigate further
             if (npc.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
@@ -1007,7 +1007,7 @@ namespace ProtoMessage
             this.lastOfferAmount = lastoffer;
             if (character.allies == null)
             {
-                this.allies = new List<String>();
+                this.allies = new HashSet<String>();
             }
             else
             {
@@ -1018,7 +1018,7 @@ namespace ProtoMessage
             // need to investigate further
             if (character.atWar == null)
             {
-                this.atWar = new List<String>();
+                this.atWar = new HashSet<String>();
             }
             else
             {
