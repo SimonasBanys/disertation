@@ -1,6 +1,7 @@
 # Extensions to Functionality of a Historical MMORPG by Simonas Banys
 
 1. Functions added:
+
   1.1 Alliances - Alliances have been added to the game. Certain functions are modified to players who are in an alliance with someone else. For example players are not allowed to attack their allies.
   1.2 At war status - while there is currently no punishment for attacking those who players are not at war with, for ease of information and potential further extensions to functionality players have a list of families they have attacked and haven't made peace with.
   1.3 Supporting allies in battle - Players are able to set their armies to automatically support allies in their battles when defending or attacking in the same Fief. It is only possible for attacking an army or besieging a keep.
