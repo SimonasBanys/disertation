@@ -13,9 +13,11 @@
   
 ## HOW TO ##
 The server and text client can both be run on the same machine at the same time. To run the server go to ../RepairHist_mmo/bin/Debug/ and run hist_mmorpg.exe. To run text client go to ../TestClientROry/bin/Debug/ and launch TestClientROry.exe. There are currently 3 accounts created for the server:
+
       1. login: test; password: tomato
       2. login: helen; pasword: potato
       3. login: simon; password: farshas
+      
   The IP address when running on the same machine is localhost.
   
   To run the server on a different machine, ../RepairHist_mmo/server.cs should be modified. The person running the server would need to uncomment line 76 and the machine's where server would be running external IP adress placed as a string input for NetUtility.Resolve() method. Furthermore line 77 should be commmented out to prevent overwriting of the adress used for connection to the server.
