@@ -18,6 +18,8 @@ The server and text client can both be run on the same machine at the same time.
       3. login: simon; password: farshas
   The IP address when running on the same machine is localhost.
   
+  To run the server on a different machine, ../RepairHist_mmo/server.cs should be modified. The person running the server would need to uncomment line 76 and the machine's where server would be running external IP adress placed as a string input for NetUtility.Resolve() method. Furthermore line 77 should be commmented out to prevent overwriting of the adress used for connection to the server.
+  
   Once the player is logged in, they should prest "enter" on their keyboard. This will allow the text client to get their character information from the server. Then typing "help" will give all the possible actions for the players to perform. For actions such as attack/changeAtt/changeDef the text client requires exact army ID, which is also case sensitive.
 
 # To find out full actions list on Text Client type "help" after character information has been fetched #
