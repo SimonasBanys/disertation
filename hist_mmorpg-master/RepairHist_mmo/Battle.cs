@@ -479,6 +479,7 @@ namespace hist_mmorpg
             uint defenderCasualties = 0;
             if (attackerAllies != null)
             {
+                if (attackerAllies.Count > 0)
                 for (int i = 0; i < attackerAllies.Count; i++)
                 {
                     attackerStartTroops += attackerAllies[i].CalcArmySize();
@@ -487,6 +488,7 @@ namespace hist_mmorpg
             }
             if (defenderAllies != null)
             {
+                if (defenderAllies.Count > 0)
                 for (int i = 0; i < defenderAllies.Count; i++)
                 {
                     defenderStartTroops += defenderAllies[i].CalcArmySize();
@@ -610,8 +612,9 @@ namespace hist_mmorpg
                     battleResults.statureChangeAttacker = statureChange;
                     attacker.GetOwner().AdjustStatureModifier(statureChange);
                     attacker.moraleChange(statureChange);
-                    if (attackerAllies.Count > 0 && attackerAllies != null)
+                    if (attackerAllies != null)
                     {
+                        if (attackerAllies.Count > 0)
                         for (int i = 0; i < attackerAllies.Count; i++)
                         {
                             attackerAllies[i].GetOwner().AdjustStatureModifier(statureChange);
@@ -622,8 +625,9 @@ namespace hist_mmorpg
                     battleResults.statureChangeDefender = statureChange;
                     defender.GetOwner().AdjustStatureModifier(statureChange);
                     defender.moraleChange(statureChange);
-                    if (defenderAllies.Count > 0 && defenderAllies != null)
+                    if (defenderAllies != null)
                     {
+                        if (defenderAllies.Count > 0)
                         for (int i = 0; i < defenderAllies.Count; i++)
                         {
                             defenderAllies[i].GetOwner().AdjustStatureModifier(statureChange);
@@ -637,8 +641,9 @@ namespace hist_mmorpg
                     battleResults.statureChangeDefender = statureChange;
                     defender.GetOwner().AdjustStatureModifier(statureChange);
                     defender.moraleChange(statureChange);
-                    if (defenderAllies.Count > 0 && defenderAllies != null)
+                    if (defenderAllies != null)
                     {
+                        if (defenderAllies.Count > 0)
                         for (int i = 0; i < defenderAllies.Count; i++)
                         {
                             defenderAllies[i].GetOwner().AdjustStatureModifier(statureChange);
@@ -649,8 +654,9 @@ namespace hist_mmorpg
                     battleResults.statureChangeAttacker = statureChange;
                     attacker.GetOwner().AdjustStatureModifier(statureChange);
                     attacker.moraleChange(statureChange);
-                    if (attackerAllies.Count > 0 && attackerAllies != null)
+                    if (attackerAllies != null)
                     {
+                        if (attackerAllies.Count > 0)
                         for (int i = 0; i < attackerAllies.Count; i++)
                         {
                             attackerAllies[i].GetOwner().AdjustStatureModifier(statureChange);
@@ -676,8 +682,9 @@ namespace hist_mmorpg
                         defenderDisbanded = true;
                         disbandedArmies.Add(defender.owner);
                         totalDefendTroopsLost = defender.CalcArmySize();
-                        if (defenderAllies != null && defenderAllies.Count > 0)
+                        if (defenderAllies != null)
                         {
+                            if (defenderAllies.Count > 0)
                             for (int i = 0; i < defenderAllies.Count; i++)
                             {
                                 disbandedArmies.Add(defenderAllies[i].owner);
@@ -689,8 +696,9 @@ namespace hist_mmorpg
                     else
                     {
                         totalDefendTroopsLost = defender.ApplyTroopLosses(casualtyModifiers[1]);
-                        if (defenderAllies != null && defenderAllies.Count > 0)
+                        if (defenderAllies != null)
                         {
+                            if (defenderAllies.Count > 0)
                             for (int i = 0; i < defenderAllies.Count; i++)
                             {
                                 totalDefendTroopsLost += defenderAllies[i].ApplyTroopLosses(casualtyModifiers[1]);
@@ -700,8 +708,9 @@ namespace hist_mmorpg
 
                     // apply troop casualties to winning army
                     totalAttackTroopsLost = attacker.ApplyTroopLosses(casualtyModifiers[0]);
-                    if (attackerAllies != null && attackerAllies.Count > 0)
+                    if (attackerAllies != null)
                     {
+                        if (attackerAllies.Count > 0)
                         for (int i = 0; i < attackerAllies.Count; i++)
                         {
                             totalAttackTroopsLost += attackerAllies[i].ApplyTroopLosses(casualtyModifiers[0]);
@@ -715,8 +724,9 @@ namespace hist_mmorpg
                         attackerDisbanded = true;
                         disbandedArmies.Add(attacker.owner);
                         totalAttackTroopsLost = attacker.CalcArmySize();
-                        if (attackerAllies != null && attackerAllies.Count > 0)
+                        if (attackerAllies != null)
                         {
+                            if (attackerAllies.Count > 0)
                             for (int i = 0; i < attackerAllies.Count; i++)
                             {
                                 disbandedArmies.Add(attackerAllies[i].owner);
@@ -727,8 +737,9 @@ namespace hist_mmorpg
                     else
                     {
                         totalAttackTroopsLost = attacker.ApplyTroopLosses(casualtyModifiers[0]);
-                        if (attackerAllies != null && attackerAllies.Count > 0)
+                        if (attackerAllies != null)
                         {
+                            if (attackerAllies.Count > 0)
                             for (int i = 0; i < attackerAllies.Count; i++)
                             {
                                 totalAttackTroopsLost += attackerAllies[i].ApplyTroopLosses(casualtyModifiers[0]);
@@ -737,8 +748,9 @@ namespace hist_mmorpg
                     }
 
                     totalDefendTroopsLost = defender.ApplyTroopLosses(casualtyModifiers[1]);
-                    if (defenderAllies != null && defenderAllies.Count > 0)
+                    if (defenderAllies != null)
                     {
+                        if (defenderAllies.Count > 0)
                         for (int i = 0; i < defenderAllies.Count; i++)
                         {
                             totalDefendTroopsLost += defenderAllies[i].ApplyTroopLosses(casualtyModifiers[1]);
@@ -824,16 +836,18 @@ namespace hist_mmorpg
                     }
                 }
 
-                if (attackerAllies.Count > 0 && attackerAllies != null)
+                if (attackerAllies != null)
                 {
+                    if (attackerAllies.Count > 0)
                     for (int i = 0; i < attackerAllies.Count; i++)
                     {
                         attackerAllies[i].ProcessRetreat(retreatDistances[0]);
                     }
                 }
 
-                if (defenderAllies.Count > 0 && defenderAllies != null)
+                if (defenderAllies != null)
                 {
+                    if (defenderAllies.Count > 0)
                     for (int i = 0; i < defenderAllies.Count; i++) 
                     { 
                         defenderAllies[i].ProcessRetreat(retreatDistances[1]); 

@@ -1715,7 +1715,8 @@ namespace hist_mmorpg
         public ProtoBattle()
             : base()
         {
-
+            defenderAllies = new List<string>();
+            attackerAllies = new List<string>();
         }
 
     }

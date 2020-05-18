@@ -484,6 +484,9 @@ namespace ProtoMessage
                     attackerStartTroops += attackerAllies[i].CalcArmySize();
                     battleResults.attackerAllies.Add(attackerAllies[i].GetOwner().familyID);
                 }
+            } else
+            {
+                attackerAllies = new List<Army>();
             }
             if (defenderAllies != null)
             {
@@ -492,6 +495,9 @@ namespace ProtoMessage
                     defenderStartTroops += defenderAllies[i].CalcArmySize();
                     battleResults.defenderAllies.Add(defenderAllies[i].GetOwner().familyID);
                 }
+            } else
+            {
+                defenderAllies = new List<Army>();
             }
             // get leaders
             Character attackerLeader = attacker.GetLeader();
@@ -639,7 +645,7 @@ namespace ProtoMessage
                     battleResults.statureChangeDefender = statureChange;
                     defender.GetOwner().AdjustStatureModifier(statureChange);
                     defender.moraleChange(statureChange);
-                    if (defenderAllies.Count > 0 && defenderAllies != null)
+                    if (defenderAllies != null && defenderAllies.Count > 0)
                     {
                         for (int i = 0; i < defenderAllies.Count; i++)
                         {

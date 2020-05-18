@@ -56,6 +56,8 @@
                     return Tasks.AttackArmy;
                 case "SENDASSASSIN":
                     return Tasks.SendAssassin;
+                case "CHANGEPILLAGE":
+                    return Tasks.ChangeAutoPillage;
                 default:
                     return Tasks.SyntaxError;
             }

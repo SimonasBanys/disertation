@@ -162,7 +162,8 @@ namespace TestClientROry
             Console.WriteLine("Command List: \n siege\n army \n check \n profile \n fief \n move [direction parameter ne,nw,e,w,se,sw] \n hire [amount] \n hirenew [amount] \n fiefs" +
                 " \n changeAtt [Army ID] (changes auto support for allied armies when attacking, should heavy losses be incured the army could potentially be disbanded)" +
                 " \n changeDef [Army ID] (changes auto support for allied armies when defending, should heavy loses be incurred the army could potentially be disbanded)" +
-                " \n sendAssassin [assassinID] [targetID] (assassin may die during the attempt)");
+                " \n attackArmy [Army ID] \n changePillage [Army ID]" + 
+                " \n sendAssassin [assassinID] [targetID] (assassin may die during the attempt) ");
         }
 
         public void DisplaySiege(ProtoSiegeDisplay siegeDisplayProtoBuf)
@@ -369,6 +370,7 @@ namespace TestClientROry
                     {
                         Console.Write(", ");
                     }
+                    else Console.WriteLine();
                 }
             }
             if (battleResults.defenderAllies.Count > 0 && battleResults.defenderAllies != null)
@@ -381,6 +383,7 @@ namespace TestClientROry
                     {
                         Console.Write(", ");
                     }
+                    else Console.WriteLine();
                 }
             }
             Console.WriteLine("-----------------------------");
